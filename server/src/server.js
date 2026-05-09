@@ -11,6 +11,9 @@ app.use(express.json({ limit: '10mb' }));
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
+const articlesRoutes = require('./routes/articles');
+app.use('/api/articles', articlesRoutes);
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'juju-api' });
 });
