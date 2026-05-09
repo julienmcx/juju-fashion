@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import logoOr from '../assets/juju-logo-or.svg';
+
 
 export default function Login() {
   const { login } = useAuth();
@@ -28,7 +30,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-juju-noir text-juju-texte px-6">
       <div className="w-full max-w-sm">
-        <h1 className="juju-wordmark text-6xl text-juju-dore text-center mb-2">Juju</h1>
+        <img src={logoOr} alt="Juju" className="mx-auto mb-4" />
         <p className="text-juju-texte-mute text-center mb-10">Heureux de te revoir.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

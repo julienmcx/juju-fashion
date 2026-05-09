@@ -1,0 +1,70 @@
+import { NavLink } from 'react-router-dom';
+import { Shirt, Camera, UserSquare, User, LogOut } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import logoOr from '../assets/juju-logo-or.svg';
+
+
+const navItems = [
+  { to: '/garde-robe', icon: Shirt, label: 'Garde-robe' },
+  { to: '/ajout', icon: Camera, label: 'Ajouter', mobileOnly: true },
+  { to: '/mannequin', icon: UserSquare, label: 'Mannequin' },
+  { to: '/profil', icon: User, label: 'Profil' },
+];
+
+export default function Sidebar() {
+  const { logout, user } = useAuth();
+
+  return (
+    <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-60 flex-col bg-juju-bleu/40 border-r border-juju-bordure px-5 py-8 z-10">
+      <div className="mb-10">
+        <img src={logoOr} alt="Juju" className="mx-auto mb-4" />
+      </div>
+
+      <nav className="flex flex-col gap-1 flex-1">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          if (item.mobileOnly) {
+            return (
+              <div
+                key={item.to}
+                title="Disponible sur mobile uniquement"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-juju-texte-mute opacity-40 cursor-not-allowed text-sm"
+              >
+                <Icon size={20} />
+                <span>{item.label}</span>
+                <span className="ml-auto text-[10px] uppercase tracking-wider">Mobile</span>
+              </div>
+            );
+          }
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
+                  isActive
+                    ? 'bg-juju-bleu-clair text-juju-dore'
+                    : 'text-juju-texte-mute hover:text-juju-texte hover:bg-juju-bleu-clair/50'
+                }`
+              }
+            >
+              <Icon size={20} />
+              <span>{item.label}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      <div className="border-t border-juju-bordure pt-4 mt-4">
+        <p className="text-xs text-juju-texte-mute mb-2 truncate">{user?.email}</p>
+        <button
+          onClick={logout}
+          className="flex items-center gap-2 text-sm text-juju-texte-mute hover:text-juju-dore transition-colors"
+        >
+          <LogOut size={16} />
+          Déconnexion
+        </button>
+      </div>
+    </aside>
+  );
+}
