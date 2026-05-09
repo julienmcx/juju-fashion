@@ -4,7 +4,7 @@ function App() {
       <div className="text-center max-w-md">
         <h1 className="juju-wordmark text-7xl text-juju-dore mb-4">Juju</h1>
         <p className="text-juju-texte-mute text-lg mb-12">
-          Ta garde-robe, sur toi, sans bouger de ton lit.
+          Ta garde-robe, sur toi, oui.
         </p>
 
         <div className="space-y-4">
@@ -17,7 +17,7 @@ function App() {
         </div>
 
         <p className="text-juju-texte-mute text-xs mt-12">
-          Setup OK · Tailwind chargé · DA appliquée
+          Appli en cours de création...
         </p>
       </div>
     </div>
