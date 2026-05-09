@@ -18,6 +18,16 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'juju-api' });
 });
 
+const categoriesRoutes = require('./routes/categories');
+const couleursRoutes = require('./routes/couleurs');
+const matieresRoutes = require('./routes/matieres');
+const marquesRoutes = require('./routes/marques');
+
+app.use('/api/categories', categoriesRoutes);
+app.use('/api/couleurs', couleursRoutes);
+app.use('/api/matieres', matieresRoutes);
+app.use('/api/marques', marquesRoutes);
+
 app.listen(PORT, () => {
   console.log(`Juju API running on http://localhost:${PORT}`);
 });

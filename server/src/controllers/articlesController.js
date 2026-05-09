@@ -162,4 +162,171 @@ async function listArticles(req, res) {
   }
 }
 
-module.exports = { createArticle, listArticles };
+/**
+ * GET /api/articles/:id
+ * Détail complet d'un article (couleurs + matières + marque + catégorie)
+ */
+async function getArticle(req, res) {
+  try {
+    const sql = `
+      SELECT
+        a.*,
+        c.nom AS categorie_nom,
+        c.type AS categorie_type,
+        m.nom_marque AS marque_nom,
+        COALESCE(
+          (SELECT json_agg(json_build_object(
+             'id_couleur', co.id_couleur, 'nom', co.nom, 'code_hex', co.code_hex))
+           FROM articles_couleurs ac
+           JOIN couleurs co ON co.id_couleur = ac.id_couleur
+           WHERE ac.id_article = a.id_article),
+          '[]'::json
+        ) AS couleurs,
+        COALESCE(
+          (SELECT json_agg(json_build_object(
+             'id_matiere', mt.id_matiere, 'nom', mt.nom, 'pourcentage', am.pourcentage))
+           FROM articles_matieres am
+           JOIN matieres mt ON mt.id_matiere = am.id_matiere
+           WHERE am.id_article = a.id_article),
+          '[]'::json
+        ) AS matieres
+      FROM articles a
+      LEFT JOIN categories c ON c.id_categorie = a.id_categorie
+      LEFT JOIN marques m ON m.id_marque = a.id_marque
+      WHERE a.id_article = $1 AND a.id_utilisateur = $2
+    `;
+    const result = await db.query(sql, [req.params.id, req.user.id_utilisateur]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Article introuvable' });
+    }
+    return res.json({ article: result.rows[0] });
+  } catch (err) {
+    console.error('getArticle error:', err);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+}
+
+/**
+ * PUT /api/articles/:id
+ * Mise à jour partielle. Seuls les champs envoyés sont modifiés.
+ * Si "couleurs" ou "matieres" sont présents, on remplace intégralement.
+ */
+async function updateArticle(req, res) {
+  const client = await db.getClient();
+  try {
+    const updatableFields = [
+      'id_categorie', 'id_marque', 'nom', 'image_url', 'lien_achat',
+      'prix', 'devise', 'origine', 'taille', 'pointure', 'longueur_cm',
+      'matiere_bijou', 'lunettes_teintees', 'mensurations', 'notes'
+    ];
+
+    const sets = [];
+    const values = [];
+    let i = 1;
+
+    for (const field of updatableFields) {
+      if (req.body[field] !== undefined) {
+        sets.push(`${field} = $${i}`);
+        values.push(req.body[field]);
+        i++;
+      }
+    }
+
+    await client.query('BEGIN');
+
+    let article;
+    if (sets.length > 0) {
+      values.push(req.params.id, req.user.id_utilisateur);
+      const sql = `
+        UPDATE articles
+        SET ${sets.join(', ')}
+        WHERE id_article = $${i} AND id_utilisateur = $${i + 1}
+        RETURNING *
+      `;
+      const result = await client.query(sql, values);
+      if (result.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Article introuvable' });
+      }
+      article = result.rows[0];
+    } else {
+      // Aucun champ principal à modifier : on vérifie juste l'existence
+      const check = await client.query(
+        `SELECT * FROM articles WHERE id_article = $1 AND id_utilisateur = $2`,
+        [req.params.id, req.user.id_utilisateur]
+      );
+      if (check.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Article introuvable' });
+      }
+      article = check.rows[0];
+    }
+
+    // Remplacement des couleurs si fourni
+    if (Array.isArray(req.body.couleurs)) {
+      await client.query(
+        `DELETE FROM articles_couleurs WHERE id_article = $1`,
+        [article.id_article]
+      );
+      for (const id_couleur of req.body.couleurs) {
+        await client.query(
+          `INSERT INTO articles_couleurs (id_article, id_couleur) VALUES ($1, $2)`,
+          [article.id_article, id_couleur]
+        );
+      }
+    }
+
+    // Remplacement des matières si fourni
+    if (Array.isArray(req.body.matieres)) {
+      await client.query(
+        `DELETE FROM articles_matieres WHERE id_article = $1`,
+        [article.id_article]
+      );
+      for (const m of req.body.matieres) {
+        await client.query(
+          `INSERT INTO articles_matieres (id_article, id_matiere, pourcentage)
+           VALUES ($1, $2, $3)`,
+          [article.id_article, m.id_matiere, m.pourcentage ?? null]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+    return res.json({ article });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    if (err.code === '23503') {
+      return res.status(400).json({
+        error: 'Référence invalide (catégorie, marque, couleur ou matière inexistante)'
+      });
+    }
+    console.error('updateArticle error:', err);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * DELETE /api/articles/:id
+ * Les jointures (articles_couleurs, articles_matieres) sont nettoyées en cascade.
+ */
+async function deleteArticle(req, res) {
+  try {
+    const result = await db.query(
+      `DELETE FROM articles WHERE id_article = $1 AND id_utilisateur = $2`,
+      [req.params.id, req.user.id_utilisateur]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Article introuvable' });
+    }
+    return res.status(204).send();
+  } catch (err) {
+    console.error('deleteArticle error:', err);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+}
+
+
+module.exports = { createArticle, listArticles, getArticle, updateArticle, deleteArticle };
