@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Camera, Image as ImageIcon, Check, X, Smartphone, Loader2, RefreshCw } from 'lucide-react';
+import {
+  Camera, Image as ImageIcon, Check, X, Smartphone,
+  Loader2, ChevronLeft, ChevronRight, Edit3,
+} from 'lucide-react';
 import {
   fetchAvatarPhotos,
   uploadAvatarPhoto,
@@ -14,11 +17,10 @@ const ANGLES = [
 ];
 
 export default function Mannequin() {
-  const [photos, setPhotos] = useState({});         // { face: {...}, dos: {...} }
+  const [photos, setPhotos] = useState({});
   const [loading, setLoading] = useState(true);
-  const [uploadingAngle, setUploadingAngle] = useState(null);
-  const [activeAngle, setActiveAngle] = useState('face');
   const [error, setError] = useState('');
+  const [editMode, setEditMode] = useState(false);
 
   const loadPhotos = async () => {
     try {
@@ -26,9 +28,6 @@ export default function Mannequin() {
       const map = {};
       data.photos.forEach((p) => { map[p.angle] = p; });
       setPhotos(map);
-      // Auto-jump sur le premier angle pas encore capturé
-      const next = ANGLES.find((a) => !map[a.key]);
-      if (next) setActiveAngle(next.key);
     } catch {
       setError('Impossible de charger les photos.');
     } finally {
@@ -38,15 +37,180 @@ export default function Mannequin() {
 
   useEffect(() => { loadPhotos(); }, []);
 
+  const completed = ANGLES.filter((a) => photos[a.key]).length;
+  const allDone = completed === ANGLES.length;
+
+  if (loading) {
+    return <div className="px-4 py-20 text-center text-juju-texte-mute">Chargement…</div>;
+  }
+
+  // Mannequin complet → vue VIEWER (mobile ET desktop)
+  if (allDone && !editMode) {
+    return (
+      <MannequinViewer
+        photos={photos}
+        onEdit={() => setEditMode(true)}
+      />
+    );
+  }
+
+  // Sinon → vue CAPTURE (mobile uniquement, desktop voit le message)
+  return (
+    <CaptureView
+      photos={photos}
+      completed={completed}
+      error={error}
+      setError={setError}
+      onUploaded={loadPhotos}
+      onDeleted={loadPhotos}
+      onCancel={() => setEditMode(false)}
+      isEditing={editMode}
+    />
+  );
+}
+
+/* ============================================================
+   VIEWER — visible mobile + desktop, mannequin avec swiper 360°
+   ============================================================ */
+function MannequinViewer({ photos, onEdit }) {
+  const [index, setIndex] = useState(0);
+
+  const next = () => setIndex((i) => (i + 1) % ANGLES.length);
+  const prev = () => setIndex((i) => (i - 1 + ANGLES.length) % ANGLES.length);
+
+  const currentAngle = ANGLES[index];
+  const currentPhoto = photos[currentAngle.key];
+
+  // Touch swipe support
+  const [touchStart, setTouchStart] = useState(null);
+  const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX);
+  const handleTouchEnd = (e) => {
+    if (touchStart === null) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) (diff > 0 ? next : prev)();
+    setTouchStart(null);
+  };
+
+  return (
+    <div className="px-4 py-6 md:px-8 md:py-10 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-medium">Mon mannequin</h2>
+          <p className="text-sm text-juju-texte-mute mt-1">Fais défiler pour tourner autour</p>
+        </div>
+        <button
+          onClick={onEdit}
+          className="flex items-center gap-2 text-sm text-juju-texte-mute hover:text-juju-dore transition-colors md:hidden"
+        >
+          <Edit3 size={16} />
+          Modifier
+        </button>
+      </div>
+
+      {/* Image principale */}
+      <div
+        className="relative aspect-[3/4] max-w-md mx-auto bg-juju-bleu rounded-2xl overflow-hidden border border-juju-bordure mb-4"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <img
+          src={currentPhoto.image_url}
+          alt={currentAngle.label}
+          className="w-full h-full object-cover transition-opacity duration-200"
+          key={currentAngle.key}
+        />
+
+        {/* Boutons de navigation desktop */}
+        <button
+          onClick={prev}
+          aria-label="Angle précédent"
+          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-noir/70 backdrop-blur-sm border border-juju-bordure items-center justify-center text-juju-texte hover:text-juju-dore transition-colors"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <button
+          onClick={next}
+          aria-label="Angle suivant"
+          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-noir/70 backdrop-blur-sm border border-juju-bordure items-center justify-center text-juju-texte hover:text-juju-dore transition-colors"
+        >
+          <ChevronRight size={20} />
+        </button>
+
+        {/* Label de l'angle en bas */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+          <p className="text-center text-sm font-medium uppercase tracking-widest">
+            {currentAngle.label}
+          </p>
+        </div>
+      </div>
+
+      {/* Indicateurs ronds (dots) */}
+      <div className="flex justify-center gap-2 mb-6">
+        {ANGLES.map((a, i) => (
+          <button
+            key={a.key}
+            onClick={() => setIndex(i)}
+            aria-label={`Voir ${a.label}`}
+            className={`h-2 rounded-full transition-all ${
+              i === index
+                ? 'w-8 bg-juju-dore'
+                : 'w-2 bg-juju-bordure hover:bg-juju-texte-mute'
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Miniatures (desktop seulement) */}
+      <div className="hidden md:grid grid-cols-4 gap-3 max-w-md mx-auto mb-6">
+        {ANGLES.map((a, i) => (
+          <button
+            key={a.key}
+            onClick={() => setIndex(i)}
+            className={`aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${
+              i === index ? 'border-juju-dore' : 'border-juju-bordure opacity-60 hover:opacity-100'
+            }`}
+          >
+            <img src={photos[a.key].image_url} alt={a.label} className="w-full h-full object-cover" />
+          </button>
+        ))}
+      </div>
+
+      {/* Bouton modifier (desktop : moins proéminent) */}
+      <div className="hidden md:flex justify-center">
+        <button
+          onClick={onEdit}
+          className="flex items-center gap-2 text-sm text-juju-texte-mute hover:text-juju-dore transition-colors"
+          title="La modification est disponible sur mobile uniquement"
+        >
+          <Edit3 size={16} />
+          Modifier les photos (mobile)
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   CAPTURE — mobile uniquement, capture/édition des 4 angles
+   ============================================================ */
+function CaptureView({
+  photos, completed, error, setError, onUploaded, onDeleted, onCancel, isEditing,
+}) {
+  const [activeAngle, setActiveAngle] = useState(() => {
+    // Auto-sélectionne le premier angle non capturé
+    const next = ANGLES.find((a) => !photos[a.key]);
+    return next ? next.key : 'face';
+  });
+  const [uploadingAngle, setUploadingAngle] = useState(null);
+
   const handleFileChange = async (e, angle) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setError('');
     setUploadingAngle(angle);
     try {
-      const photo = await uploadAvatarPhoto(file, angle);
-      setPhotos((prev) => ({ ...prev, [angle]: photo }));
-      // Passe au prochain angle non capturé
+      await uploadAvatarPhoto(file, angle);
+      await onUploaded();
       const next = ANGLES.find((a) => a.key !== angle && !photos[a.key]);
       if (next) setActiveAngle(next.key);
     } catch (err) {
@@ -60,44 +224,49 @@ export default function Mannequin() {
   const handleDelete = async (angle) => {
     try {
       await deleteAvatarPhoto(angle);
-      setPhotos((prev) => {
-        const copy = { ...prev };
-        delete copy[angle];
-        return copy;
-      });
+      await onDeleted();
       setActiveAngle(angle);
     } catch {
       setError('Suppression impossible.');
     }
   };
 
-  const completed = ANGLES.filter((a) => photos[a.key]).length;
-  const allDone = completed === ANGLES.length;
-
-  if (loading) {
-    return <div className="px-4 py-20 text-center text-juju-texte-mute">Chargement…</div>;
-  }
-
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
       {/* Desktop : message dédié */}
       <div className="hidden md:block text-center py-16 border border-juju-bordure rounded-xl">
         <Smartphone size={40} className="mx-auto mb-4 text-juju-dore" />
-        <p className="font-medium mb-2">Disponible sur mobile uniquement</p>
+        <p className="font-medium mb-2">Capture disponible sur mobile uniquement</p>
         <p className="text-sm text-juju-texte-mute max-w-md mx-auto">
-          La capture du mannequin nécessite l'appareil photo de ton téléphone.
-          Connecte-toi depuis ton mobile pour configurer ton avatar.
+          La création et la modification du mannequin nécessitent l'appareil photo de ton téléphone.
+          Connecte-toi depuis ton mobile pour {completed === 0 ? 'configurer' : 'modifier'} ton avatar.
         </p>
+        {isEditing && (
+          <button
+            onClick={onCancel}
+            className="mt-6 text-sm text-juju-dore hover:underline"
+          >
+            ← Revenir au mannequin
+          </button>
+        )}
       </div>
 
-      {/* Mobile : capture des 4 angles */}
+      {/* Mobile : capture des angles */}
       <div className="md:hidden">
-        <h2 className="text-2xl font-medium mb-2">Mon mannequin</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-2xl font-medium">Mon mannequin</h2>
+          {isEditing && (
+            <button onClick={onCancel} className="text-sm text-juju-texte-mute hover:text-juju-dore">
+              Terminer
+            </button>
+          )}
+        </div>
         <p className="text-juju-texte-mute mb-6">
-          Capture-toi sous 4 angles pour créer ton avatar virtuel. Tu ne le feras qu'une fois.
+          {isEditing
+            ? 'Modifie tes 4 photos d\'angle.'
+            : 'Capture-toi sous 4 angles pour créer ton avatar virtuel. Tu ne le feras qu\'une fois.'}
         </p>
 
-        {/* Barre de progression */}
         <div className="mb-6">
           <div className="flex items-center justify-between text-xs text-juju-texte-mute mb-2">
             <span>Progression</span>
@@ -111,25 +280,19 @@ export default function Mannequin() {
           </div>
         </div>
 
-        {/* Grille des 4 angles */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          {ANGLES.map((angle) => {
-            const photo = photos[angle.key];
-            const isActive = activeAngle === angle.key && !photo;
-            return (
-              <AngleCard
-                key={angle.key}
-                angle={angle}
-                photo={photo}
-                isActive={isActive}
-                onSelect={() => setActiveAngle(angle.key)}
-                onDelete={() => handleDelete(angle.key)}
-              />
-            );
-          })}
+          {ANGLES.map((angle) => (
+            <AngleCard
+              key={angle.key}
+              angle={angle}
+              photo={photos[angle.key]}
+              isActive={activeAngle === angle.key && !photos[angle.key]}
+              onSelect={() => setActiveAngle(angle.key)}
+              onDelete={() => handleDelete(angle.key)}
+            />
+          ))}
         </div>
 
-        {/* Bloc capture pour l'angle actif (si pas déjà capturé) */}
         {!photos[activeAngle] && (
           <div className="p-5 border border-juju-dore/40 bg-juju-dore/5 rounded-xl mb-4">
             <p className="text-xs uppercase tracking-wider text-juju-dore mb-2">
@@ -169,16 +332,6 @@ export default function Mannequin() {
           </div>
         )}
 
-        {allDone && (
-          <div className="p-5 border border-green-500/30 bg-green-500/5 rounded-xl text-center">
-            <Check size={32} className="mx-auto mb-2 text-green-400" />
-            <p className="font-medium mb-1">Mannequin prêt</p>
-            <p className="text-sm text-juju-texte-mute">
-              Tu peux maintenant essayer virtuellement les vêtements de ta garde-robe.
-            </p>
-          </div>
-        )}
-
         {error && (
           <p className="text-red-400 text-sm mt-4">{error}</p>
         )}
@@ -187,6 +340,9 @@ export default function Mannequin() {
   );
 }
 
+/* ============================================================
+   Composants utilitaires
+   ============================================================ */
 function AngleCard({ angle, photo, isActive, onSelect, onDelete }) {
   return (
     <button
