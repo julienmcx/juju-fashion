@@ -8,6 +8,8 @@ import GardeRobe from './pages/GardeRobe';
 import AjoutArticle from './pages/AjoutArticle';
 import Mannequin from './pages/Mannequin';
 import Profil from './pages/Profil';
+import ArticleDetail from './pages/ArticleDetail';
+import ArticleEdit from './pages/ArticleEdit';
 
 function ProtectedLayout() {
   return (
@@ -32,6 +34,8 @@ function App() {
             <Route path="/ajout" element={<AjoutArticle />} />
             <Route path="/mannequin" element={<Mannequin />} />
             <Route path="/profil" element={<Profil />} />
+            <Route path="/articles/:id" element={<ArticleDetail />} />
+            <Route path="/articles/:id/edit" element={<ArticleEdit />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/garde-robe" replace />} />
