@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import logoOr from '../assets/juju-logo-or.svg';
+import JujuLogo from '../components/JujuLogo';
 
 
 export default function Login() {
@@ -30,7 +31,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-juju-noir text-juju-texte px-6">
       <div className="w-full max-w-sm">
-        <img src={logoOr} alt="Juju" className="mx-auto mb-4" />
+        <JujuLogo className="h-24 mx-auto mb-2" />
         <p className="text-juju-texte-mute text-center mb-10">Heureux de te revoir.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

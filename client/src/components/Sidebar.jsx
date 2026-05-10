@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { Shirt, Camera, UserSquare, User, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import logoOr from '../assets/juju-logo-or.svg';
+import JujuLogo from './JujuLogo';
 
 
 const navItems = [
@@ -17,7 +18,7 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-60 flex-col bg-juju-bleu/40 border-r border-juju-bordure px-5 py-8 z-10">
       <div className="mb-10">
-        <img src={logoOr} alt="Juju" className="mx-auto mb-4" />
+        <JujuLogo className="h-14 w-auto" />
       </div>
 
       <nav className="flex flex-col gap-1 flex-1">
