@@ -3,12 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { UPLOAD_DIR } = require('../middlewares/upload');
 
-const VALID_ANGLES = [
-  'face', 'dos',
-  'profil_gauche', 'profil_droit',
-  '3_4_avant_gauche', '3_4_avant_droit',
-  '3_4_arriere_gauche', '3_4_arriere_droit',
-];
+const VALID_ANGLES = ['face', 'dos', 'profil_gauche', 'profil_droit'];
 
 async function listPhotos(req, res) {
   try {
