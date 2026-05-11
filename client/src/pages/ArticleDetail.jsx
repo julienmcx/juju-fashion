@@ -144,13 +144,13 @@ export default function ArticleDetail() {
           )}
 
           <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-juju-bordure">
-            <button
-              onClick={() => alert('Essayage virtuel : à venir')}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors"
-            >
-              <Sparkles size={18} />
-              Essayer
-            </button>
+            <Link
+  to={`/articles/${id}/essai`}
+  className="flex items-center justify-center gap-2 px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors"
+>
+  <Sparkles size={18} />
+  Essayer
+</Link>
             <Link
               to={`/articles/${id}/edit`}
               className="flex items-center justify-center gap-2 px-6 py-3 border border-juju-bordure text-juju-texte rounded-lg hover:border-juju-dore hover:text-juju-dore transition-colors"

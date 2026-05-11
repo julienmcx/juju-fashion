@@ -16,6 +16,9 @@ app.use('/api/auth', authRoutes);
 const articlesRoutes = require('./routes/articles');
 app.use('/api/articles', articlesRoutes);
 
+const tryonRoutes = require('./routes/tryon');
+app.use('/api/tryon', tryonRoutes);
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'juju-api' });
 });
@@ -33,6 +36,7 @@ app.use('/api/categories', categoriesRoutes);
 app.use('/api/couleurs', couleursRoutes);
 app.use('/api/matieres', matieresRoutes);
 app.use('/api/marques', marquesRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`Juju API running on http://localhost:${PORT}`);

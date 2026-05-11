@@ -10,6 +10,7 @@ import Mannequin from './pages/Mannequin';
 import Profil from './pages/Profil';
 import ArticleDetail from './pages/ArticleDetail';
 import ArticleEdit from './pages/ArticleEdit';
+import ArticleEssai from './pages/ArticleEssai';
 
 function ProtectedLayout() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           <Route element={<ProtectedLayout />}>
+            <Route path="/articles/:id/essai" element={<ArticleEssai />} />
             <Route path="/garde-robe" element={<GardeRobe />} />
             <Route path="/ajout" element={<AjoutArticle />} />
             <Route path="/mannequin" element={<Mannequin />} />
