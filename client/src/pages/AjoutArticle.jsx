@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, Image as ImageIcon, Smartphone, Loader2 } from 'lucide-react';
-import { uploadImage } from '../api/upload';
-import { createArticle } from '../api/articles';
+import { uploadImage, removeBackground } from '../api/upload';import { createArticle } from '../api/articles';
 import {
   fetchCategories, fetchCouleurs, fetchMatieres, fetchMarques,
 } from '../api/referentiels';

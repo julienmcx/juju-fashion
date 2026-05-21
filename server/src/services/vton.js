@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { UPLOAD_DIR } = require('../middlewares/upload');
 
 const FASHN_BASE_URL = 'https://api.fashn.ai/v1';
@@ -33,13 +34,18 @@ function isLocalUrl(url) {
   return localPatterns.some((p) => url.includes(p));
 }
 
-async function runTryOn({ humanImageUrl, garmentImageUrl, category }) {
+function maybeBase64(url) {
+  return isLocalUrl(url) ? localUrlToBase64(url) : url;
+}
+
+/**
+ * Soumet une prédiction à n'importe quel model FASHN et poll jusqu'à la complétion.
+ * @returns {Promise<string>} URL de la première image de sortie
+ */
+async function submitAndPoll({ modelName, inputs }) {
   if (!process.env.FASHN_API_KEY) {
     throw new Error('FASHN_API_KEY manquante dans .env');
   }
-
-  const model_image = isLocalUrl(humanImageUrl) ? localUrlToBase64(humanImageUrl) : humanImageUrl;
-  const garment_image = isLocalUrl(garmentImageUrl) ? localUrlToBase64(garmentImageUrl) : garmentImageUrl;
 
   const submitRes = await fetch(`${FASHN_BASE_URL}/run`, {
     method: 'POST',
@@ -47,14 +53,7 @@ async function runTryOn({ humanImageUrl, garmentImageUrl, category }) {
       'Authorization': `Bearer ${process.env.FASHN_API_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model_name: 'tryon-v1.6',
-      inputs: {
-        model_image,
-        garment_image,
-        category: category || 'auto',
-      },
-    }),
+    body: JSON.stringify({ model_name: modelName, inputs }),
   });
 
   if (!submitRes.ok) {
@@ -97,4 +96,43 @@ async function runTryOn({ humanImageUrl, garmentImageUrl, category }) {
   throw new Error(`FASHN timeout après ${MAX_POLL_ATTEMPTS * POLL_INTERVAL_MS / 1000}s`);
 }
 
-module.exports = { runTryOn };
+async function runTryOn({ humanImageUrl, garmentImageUrl, category }) {
+  return submitAndPoll({
+    modelName: 'tryon-v1.6',
+    inputs: {
+      model_image: maybeBase64(humanImageUrl),
+      garment_image: maybeBase64(garmentImageUrl),
+      category: category || 'auto',
+    },
+  });
+}
+
+/**
+ * Supprime l'arrière-plan d'une image via FASHN, télécharge le résultat
+ * et le sauvegarde localement. Renvoie l'URL locale du PNG transparent.
+ */
+async function removeBackgroundAndStore(imageUrl) {
+  // 1. Appel FASHN background-remove
+  const fashnUrl = await submitAndPoll({
+    modelName: 'background-remove',
+    inputs: { image: maybeBase64(imageUrl) },
+  });
+
+  // 2. Téléchargement de l'image FASHN (PNG transparent)
+  const imgRes = await fetch(fashnUrl);
+  if (!imgRes.ok) {
+    throw new Error(`Téléchargement FASHN échoué (${imgRes.status})`);
+  }
+  const arrayBuffer = await imgRes.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  // 3. Stockage local avec UUID + extension PNG (output FASHN toujours PNG)
+  const filename = `${crypto.randomUUID()}.png`;
+  const filepath = path.join(UPLOAD_DIR, filename);
+  fs.writeFileSync(filepath, buffer);
+
+  const baseUrl = process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3001}`;
+  return `${baseUrl}/uploads/${filename}`;
+}
+
+module.exports = { runTryOn, removeBackgroundAndStore };

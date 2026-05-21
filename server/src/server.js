@@ -19,6 +19,9 @@ app.use('/api/articles', articlesRoutes);
 const tryonRoutes = require('./routes/tryon');
 app.use('/api/tryon', tryonRoutes);
 
+const backgroundRemoveRoutes = require('./routes/backgroundRemove');
+app.use('/api/background-remove', backgroundRemoveRoutes);
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'juju-api' });
 });
