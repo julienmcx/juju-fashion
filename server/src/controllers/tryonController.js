@@ -1,5 +1,5 @@
 const db = require('../db');
-const { runTryOn } = require('../services/replicate');
+const { runTryOn } = require('../services/vton');
 const { mapCategoryForVTON, isVTONSupported } = require('../services/categoryMapping');
 const DAILY_LIMIT = 5;
 const REQUIRED_ANGLES = ['face', 'profil_droit', 'dos', 'profil_gauche'];
