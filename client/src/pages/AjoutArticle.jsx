@@ -18,6 +18,7 @@ export default function AjoutArticle() {
   const [couleurs, setCouleurs] = useState([]);
   const [matieres, setMatieres] = useState([]);
   const [marques, setMarques] = useState([]);
+  const [uploadStage, setUploadStage] = useState(''); // 'upload' | 'detour' | ''
 
   useEffect(() => {
     Promise.all([fetchCategories(), fetchCouleurs(), fetchMatieres(), fetchMarques()])
@@ -30,22 +31,38 @@ export default function AjoutArticle() {
       .catch(() => {});
   }, []);
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadError('');
-    setUploading(true);
+
+const handleFileChange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  setUploadError('');
+  setUploading(true);
+
+  try {
+    // Étape 1 : upload de l'image originale
+    setUploadStage('upload');
+    const { url: originalUrl } = await uploadImage(file);
+
+    // Étape 2 : détourage automatique (peut échouer, on dégrade gracieusement)
+    setUploadStage('detour');
+    let finalUrl = originalUrl;
     try {
-      const { url } = await uploadImage(file);
-      setImageUrl(url);
-      setStep('form');
-    } catch (err) {
-      setUploadError(err.response?.data?.error || "Échec de l'upload.");
-    } finally {
-      setUploading(false);
-      e.target.value = '';
+      const { url: cleanUrl } = await removeBackground(originalUrl);
+      finalUrl = cleanUrl;
+    } catch (bgErr) {
+      console.warn('Détourage échoué, on garde l\'image originale:', bgErr);
     }
-  };
+
+    setImageUrl(finalUrl);
+    setStep('form');
+  } catch (err) {
+    setUploadError(err.response?.data?.error || "Échec de l'upload.");
+  } finally {
+    setUploading(false);
+    setUploadStage('');
+    e.target.value = '';
+  }
+};
 
   const handleSubmit = async (payload) => {
     const { article } = await createArticle(payload);
@@ -95,7 +112,8 @@ export default function AjoutArticle() {
             {uploading && (
               <div className="flex items-center gap-2 mt-6 text-sm text-juju-texte-mute">
                 <Loader2 size={16} className="animate-spin" />
-                Upload en cours…
+                {uploadStage === 'upload' && 'Upload de la photo…'}
+                {uploadStage === 'detour' && 'Suppression de l\'arrière-plan…'}
               </div>
             )}
 

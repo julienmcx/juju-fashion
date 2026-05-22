@@ -12,11 +12,16 @@ html, body, #root {
 }
 
 body {
-  background-color: #0A0A0F;
-  color: #F5F0E8;
+  background-color: #FAF8F3;
+  color: #1A1A2E;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark body {
+  background-color: #0A0A0F;
+  color: #F5F0E8;
 }
 
 .juju-wordmark {
@@ -24,3 +29,17 @@ body {
   font-weight: 600;
   letter-spacing: 0.02em;
 }
+
+html[data-density="compact"] {
+  --juju-spacing-scale: 0.85;
+}
+
+html[data-density="compact"] main {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+html[data-density="compact"] .gap-4 { gap: 0.75rem; }
+html[data-density="compact"] .py-6 { padding-top: 1rem; padding-bottom: 1rem; }
+html[data-density="compact"] .py-10 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+html[data-density="compact"] .mb-8 { margin-bottom: 1.25rem; }
