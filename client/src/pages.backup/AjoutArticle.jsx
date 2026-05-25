@@ -128,7 +128,7 @@ const handleFileChange = async (e) => {
             <h2 className="text-2xl font-medium mb-2">Décris l'article</h2>
             <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">Remplis les champs principaux.</p>
 
-            <div className="aspect-square w-32 mb-6 rounded-lg overflow-hidden bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure">
+            <div className="aspect-square w-32 mb-6 rounded-lg overflow-hidden bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure">
               <img src={imageUrl} alt="" className="w-full h-full object-cover" />
             </div>
 
@@ -154,7 +154,7 @@ function CaptureButton({ icon: Icon, label, hint, accept, capture, onChange, dis
         disabled ? 'opacity-50 pointer-events-none' : 'hover:border-juju-dore'
       }`}
     >
-      <div className="w-12 h-12 rounded-full bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center text-juju-dore">
+      <div className="w-12 h-12 rounded-full bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center text-juju-dore">
         <Icon size={22} />
       </div>
       <div className="flex-1">

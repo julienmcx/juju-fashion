@@ -55,7 +55,7 @@ export default function ArticleDetail() {
       </button>
 
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure">
+        <div className="aspect-square bg-juju-bleu rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure">
           {article.image_url ? (
             <img src={article.image_url} alt={article.nom} className="w-full h-full object-cover" />
           ) : (
@@ -84,7 +84,7 @@ export default function ArticleDetail() {
                 {article.couleurs.map((c) => (
                   <div
                     key={c.id_couleur}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-full"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-full"
                   >
                     <div
                       className="w-3 h-3 rounded-full border border-juju-light-bordure dark:border-juju-bordure"
@@ -104,7 +104,7 @@ export default function ArticleDetail() {
                 {article.matieres.map((m) => (
                   <span
                     key={m.id_matiere}
-                    className="text-xs px-3 py-1.5 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-full"
+                    className="text-xs px-3 py-1.5 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-full"
                   >
                     {m.nom}
                     {m.pourcentage ? ` · ${m.pourcentage}%` : ''}
@@ -126,7 +126,7 @@ export default function ArticleDetail() {
           </div>
 
           {article.notes && (
-            <div className="mb-5 p-4 bg-juju-light-card dark:bg-juju-bleu/50 border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
+            <div className="mb-5 p-4 bg-juju-bleu/50 border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
               <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute uppercase tracking-wider mb-1">Notes</p>
               <p className="text-sm whitespace-pre-line">{article.notes}</p>
             </div>
@@ -153,7 +153,7 @@ export default function ArticleDetail() {
 </Link>
             <Link
               to={`/articles/${id}/edit`}
-              className="flex items-center justify-center gap-2 px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte rounded-lg hover:border-juju-dore hover:text-juju-dore transition-colors"
+              className="flex items-center justify-center gap-2 px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-texte rounded-lg hover:border-juju-dore hover:text-juju-dore transition-colors"
             >
               <Edit size={18} />
               Modifier
@@ -205,13 +205,13 @@ function DetailSkeleton() {
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-5xl mx-auto">
       <div className="grid md:grid-cols-2 gap-8 animate-pulse">
-        <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu/60 rounded-2xl" />
+        <div className="aspect-square bg-juju-bleu/60 rounded-2xl" />
         <div className="space-y-4">
-          <div className="h-3 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-1/4" />
-          <div className="h-8 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-3/4" />
-          <div className="h-4 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-1/2" />
-          <div className="h-6 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-1/3 mt-4" />
-          <div className="h-20 bg-juju-light-card dark:bg-juju-bleu/60 rounded mt-4" />
+          <div className="h-3 bg-juju-bleu/60 rounded w-1/4" />
+          <div className="h-8 bg-juju-bleu/60 rounded w-3/4" />
+          <div className="h-4 bg-juju-bleu/60 rounded w-1/2" />
+          <div className="h-6 bg-juju-bleu/60 rounded w-1/3 mt-4" />
+          <div className="h-20 bg-juju-bleu/60 rounded mt-4" />
         </div>
       </div>
     </div>

@@ -1,7 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import { Shirt, Camera, UserSquare, User, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import logoOr from '../assets/juju-logo-or.svg';
 import JujuLogo from './JujuLogo';
+
 
 const navItems = [
   { to: '/garde-robe', icon: Shirt, label: 'Garde-robe' },
@@ -14,7 +16,7 @@ export default function Sidebar() {
   const { logout, user } = useAuth();
 
   return (
-    <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-60 flex-col bg-juju-light-bg dark:bg-juju-bleu/40 border-r border-juju-light-bordure dark:border-juju-bordure px-5 py-8 z-10">
+    <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-60 flex-col bg-juju-bleu/40 border-r border-juju-light-bordure dark:border-juju-bordure px-5 py-8 z-10">
       <div className="mb-10">
         <JujuLogo className="h-14 w-auto" />
       </div>
@@ -42,8 +44,8 @@ export default function Sidebar() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
                   isActive
-                    ? 'bg-juju-light-bordure/50 dark:bg-juju-bleu-clair text-juju-dore'
-                    : 'text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-light-texte dark:hover:text-juju-texte hover:bg-juju-light-bordure/30 dark:hover:bg-juju-bleu-clair/50'
+                    ? 'bg-juju-light-card dark:bg-juju-bleu-clair text-juju-dore'
+                    : 'text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-texte hover:bg-juju-light-card dark:bg-juju-bleu-clair/50'
                 }`
               }
             >

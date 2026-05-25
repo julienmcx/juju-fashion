@@ -80,7 +80,7 @@ export default function Profil() {
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingAvatar}
             aria-label="Changer la photo de profil"
-            className="block w-20 h-20 rounded-full overflow-hidden border-2 border-juju-dore bg-juju-light-card dark:bg-juju-bleu dark:bg-juju-bleu hover:opacity-80 transition-opacity"
+            className="block w-20 h-20 rounded-full overflow-hidden border-2 border-juju-dore bg-juju-bleu dark:bg-juju-bleu hover:opacity-80 transition-opacity"
           >
             {uploadingAvatar ? (
               <div className="w-full h-full flex items-center justify-center">
@@ -110,7 +110,7 @@ export default function Profil() {
             <button
               type="button"
               onClick={handleRemoveAvatar}
-              className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-juju-light-bg dark:bg-juju-noir/70 hover:bg-red-500 text-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+              className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-juju-noir/70 hover:bg-red-500 text-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
               title="Retirer la photo"
             >
               <X size={12} />
@@ -198,7 +198,7 @@ export default function Profil() {
 
         <div className="space-y-3">
           {/* Thème */}
-          <div className="p-4 bg-juju-light-card dark:bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
+          <div className="p-4 bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
             <p className="text-sm font-medium mb-3">Apparence</p>
             <div className="grid grid-cols-2 gap-2">
               <ToggleOption
@@ -219,7 +219,7 @@ export default function Profil() {
           </div>
 
           {/* Densité */}
-          <div className="p-4 bg-juju-light-card dark:bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
+          <div className="p-4 bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
             <p className="text-sm font-medium mb-3">Densité d'affichage</p>
             <div className="grid grid-cols-2 gap-2">
               <ToggleOption
@@ -256,7 +256,7 @@ export default function Profil() {
 
 function StatCard({ icon: Icon, value, label, sublabel, valueClass }) {
   return (
-    <div className="p-4 bg-juju-light-card dark:bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-center">
+    <div className="p-4 bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-center">
       <Icon size={18} className="mx-auto mb-2 text-juju-dore" />
       <p className={`font-medium ${valueClass || 'text-2xl md:text-3xl'}`}>{value}</p>
       <p className="text-[10px] uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute mt-1">{label}</p>
@@ -285,7 +285,7 @@ function CategoryBar({ nom, count, total }) {
 
 function InfoRow({ icon: Icon, label, value }) {
   return (
-    <div className="flex items-center gap-3 p-4 bg-juju-light-card dark:bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
+    <div className="flex items-center gap-3 p-4 bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
       <Icon size={18} className="text-juju-dore" />
       <div className="flex-1 min-w-0">
         <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute">{label}</p>
@@ -304,7 +304,7 @@ function ToggleOption({ icon: Icon, label, value, current, onChange }) {
       className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
         isActive
           ? 'bg-juju-dore text-juju-noir border-juju-dore'
-          : 'bg-transparent text-juju-light-texte dark:text-juju-texte border-juju-light-bordure dark:border-juju-bordure hover:border-juju-texte-mute'
+          : 'bg-transparent text-juju-texte border-juju-light-bordure dark:border-juju-bordure hover:border-juju-texte-mute'
       }`}
     >
       {Icon && <Icon size={14} />}
@@ -317,7 +317,7 @@ function SkeletonStats() {
   return (
     <div className="grid grid-cols-3 gap-3 mb-8 animate-pulse">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="aspect-square bg-juju-light-card dark:bg-juju-bleu/30 dark:bg-juju-bleu/60 rounded-lg" />
+        <div key={i} className="aspect-square bg-juju-bleu/30 dark:bg-juju-bleu/60 rounded-lg" />
       ))}
     </div>
   );

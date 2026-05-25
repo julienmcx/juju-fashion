@@ -29,7 +29,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-juju-light-bg dark:bg-juju-noir text-juju-light-texte dark:text-juju-texte px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-juju-noir text-juju-texte px-6">
       <div className="w-full max-w-sm">
         <JujuLogo className="h-24 mx-auto mb-2" />
         <p className="text-juju-light-texte-mute dark:text-juju-texte-mute text-center mb-10">Heureux de te revoir.</p>
@@ -42,7 +42,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              className="w-full px-4 py-3 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
             />
           </div>
 
@@ -53,7 +53,7 @@ export default function Login() {
               value={motDePasse}
               onChange={(e) => setMotDePasse(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              className="w-full px-4 py-3 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
             />
           </div>
 

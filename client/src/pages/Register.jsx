@@ -30,44 +30,44 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-juju-noir text-juju-texte px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-juju-light-bg dark:bg-juju-noir text-juju-light-texte dark:text-juju-texte px-6">
       <div className="w-full max-w-sm">
         <JujuLogo className="h-24 mx-auto mb-2" />
-        <p className="text-juju-texte-mute text-center mb-10">Crée ton dressing virtuel.</p>
+        <p className="text-juju-light-texte-mute dark:text-juju-texte-mute text-center mb-10">Crée ton dressing virtuel.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-juju-texte-mute mb-1">Pseudo</label>
+            <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Pseudo</label>
             <input
               type="text"
               value={nom}
               onChange={(e) => setNom(e.target.value)}
-              className="w-full px-4 py-3 bg-juju-bleu border border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-juju-texte-mute mb-1">Email</label>
+            <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-juju-bleu border border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-juju-texte-mute mb-1">Mot de passe</label>
+            <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Mot de passe</label>
             <input
               type="password"
               value={motDePasse}
               onChange={(e) => setMotDePasse(e.target.value)}
               required
               minLength={8}
-              className="w-full px-4 py-3 bg-juju-bleu border border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
             />
-            <p className="text-xs text-juju-texte-mute mt-1">8 caractères minimum</p>
+            <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mt-1">8 caractères minimum</p>
           </div>
 
           {error && (
@@ -83,7 +83,7 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="text-center text-juju-texte-mute text-sm mt-8">
+        <p className="text-center text-juju-light-texte-mute dark:text-juju-texte-mute text-sm mt-8">
           Déjà un compte ?{' '}
           <Link to="/login" className="text-juju-dore hover:underline">
             Se connecter

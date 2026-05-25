@@ -5,12 +5,13 @@ import logoOr from '../assets/juju-logo-or.svg';
 import JujuLogo from '../components/JujuLogo';
 
 
-export default function Login() {
-  const { login } = useAuth();
+export default function Register() {
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
+  const [nom, setNom] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -19,22 +20,32 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      await login(email, motDePasse);
+      await register(email, motDePasse, nom);
       navigate('/garde-robe');
     } catch (err) {
-      setError(err.response?.data?.error || 'Erreur de connexion');
+      setError(err.response?.data?.error || 'Erreur lors de la création du compte');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-juju-light-bg dark:bg-juju-noir text-juju-light-texte dark:text-juju-texte px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-juju-noir text-juju-texte px-6">
       <div className="w-full max-w-sm">
         <JujuLogo className="h-24 mx-auto mb-2" />
-        <p className="text-juju-light-texte-mute dark:text-juju-texte-mute text-center mb-10">Heureux de te revoir.</p>
+        <p className="text-juju-light-texte-mute dark:text-juju-texte-mute text-center mb-10">Crée ton dressing virtuel.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Pseudo</label>
+            <input
+              type="text"
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+              className="w-full px-4 py-3 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+            />
+          </div>
+
           <div>
             <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Email</label>
             <input
@@ -42,7 +53,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              className="w-full px-4 py-3 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
             />
           </div>
 
@@ -53,8 +64,10 @@ export default function Login() {
               value={motDePasse}
               onChange={(e) => setMotDePasse(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              minLength={8}
+              className="w-full px-4 py-3 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
             />
+            <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mt-1">8 caractères minimum</p>
           </div>
 
           {error && (
@@ -66,14 +79,14 @@ export default function Login() {
             disabled={loading}
             className="w-full py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors disabled:opacity-50"
           >
-            {loading ? 'Connexion…' : 'Se connecter'}
+            {loading ? 'Création…' : 'Créer mon compte'}
           </button>
         </form>
 
         <p className="text-center text-juju-light-texte-mute dark:text-juju-texte-mute text-sm mt-8">
-          Pas encore de compte ?{' '}
-          <Link to="/register" className="text-juju-dore hover:underline">
-            Créer un compte
+          Déjà un compte ?{' '}
+          <Link to="/login" className="text-juju-dore hover:underline">
+            Se connecter
           </Link>
         </p>
       </div>

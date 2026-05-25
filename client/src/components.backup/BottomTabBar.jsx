@@ -10,7 +10,7 @@ const tabs = [
 
 export default function BottomTabBar() {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-juju-light-bg/95 dark:bg-juju-bleu/95 backdrop-blur-md border-t border-juju-light-bordure dark:border-juju-bordure z-10">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-juju-bleu/95 backdrop-blur-md border-t border-juju-light-bordure dark:border-juju-bordure z-10">
       <div className="grid grid-cols-4 pt-2 pb-5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -24,7 +24,7 @@ export default function BottomTabBar() {
                 }`
               }
             >
-              <Icon size={22} strokeWidth={1.75} />
+              <Icon size={22} strokeWidth={isActive => isActive ? 2 : 1.5} />
               <span className="text-[10px] font-medium">{tab.label}</span>
             </NavLink>
           );

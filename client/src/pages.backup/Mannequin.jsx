@@ -109,7 +109,7 @@ function MannequinViewer({ photos, onEdit }) {
 
       {/* Image principale */}
       <div
-        className="relative aspect-[3/4] max-w-md mx-auto bg-juju-light-card dark:bg-juju-bleu rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure mb-4"
+        className="relative aspect-[3/4] max-w-md mx-auto bg-juju-bleu rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure mb-4"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -124,14 +124,14 @@ function MannequinViewer({ photos, onEdit }) {
         <button
           onClick={prev}
           aria-label="Angle précédent"
-          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-bg dark:bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-dore transition-colors"
+          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-texte hover:text-juju-dore transition-colors"
         >
           <ChevronLeft size={20} />
         </button>
         <button
           onClick={next}
           aria-label="Angle suivant"
-          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-bg dark:bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-dore transition-colors"
+          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-texte hover:text-juju-dore transition-colors"
         >
           <ChevronRight size={20} />
         </button>
@@ -272,7 +272,7 @@ function CaptureView({
             <span>Progression</span>
             <span>{completed} / {ANGLES.length}</span>
           </div>
-          <div className="h-2 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-full overflow-hidden">
+          <div className="h-2 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-full overflow-hidden">
             <div
               className="h-full bg-juju-dore transition-all duration-300"
               style={{ width: `${(completed / ANGLES.length) * 100}%` }}
@@ -366,7 +366,7 @@ function AngleCard({ angle, photo, isActive, onSelect, onDelete }) {
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="absolute top-2 left-2 w-6 h-6 rounded-full bg-juju-light-bg dark:bg-juju-noir/70 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
+            className="absolute top-2 left-2 w-6 h-6 rounded-full bg-juju-noir/70 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
             aria-label={`Supprimer ${angle.label}`}
           >
             <X size={14} />
@@ -376,7 +376,7 @@ function AngleCard({ angle, photo, isActive, onSelect, onDelete }) {
           </p>
         </>
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-juju-light-card dark:bg-juju-bleu/40 p-3">
+        <div className="w-full h-full flex flex-col items-center justify-center bg-juju-bleu/40 p-3">
           <Camera size={28} className={`mb-2 ${isActive ? 'text-juju-dore' : 'text-juju-light-texte-mute dark:text-juju-texte-mute'}`} />
           <p className="text-xs text-center font-medium">{angle.label}</p>
           {isActive && (
@@ -391,7 +391,7 @@ function AngleCard({ angle, photo, isActive, onSelect, onDelete }) {
 function CaptureButton({ icon: Icon, label, accept, capture, onChange, disabled }) {
   return (
     <label
-      className={`flex items-center gap-3 p-3 border border-juju-light-bordure dark:border-juju-bordure rounded-lg bg-juju-light-bg dark:bg-juju-noir cursor-pointer transition-colors ${
+      className={`flex items-center gap-3 p-3 border border-juju-light-bordure dark:border-juju-bordure rounded-lg bg-juju-noir cursor-pointer transition-colors ${
         disabled ? 'opacity-50 pointer-events-none' : 'hover:border-juju-dore'
       }`}
     >

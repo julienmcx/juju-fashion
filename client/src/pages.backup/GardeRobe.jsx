@@ -65,7 +65,7 @@ function ArticleCard({ article }) {
       to={`/articles/${article.id_article}`}
       className="group block"
     >
-      <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu rounded-lg overflow-hidden border border-juju-light-bordure dark:border-juju-bordure group-hover:border-juju-dore transition-colors">
+      <div className="aspect-square bg-juju-bleu rounded-lg overflow-hidden border border-juju-light-bordure dark:border-juju-bordure group-hover:border-juju-dore transition-colors">
         {article.image_url ? (
           <img
             src={article.image_url}
@@ -99,10 +99,10 @@ function SkeletonGrid() {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {[...Array(8)].map((_, i) => (
         <div key={i}>
-          <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu/60 rounded-lg animate-pulse" />
+          <div className="aspect-square bg-juju-bleu/60 rounded-lg animate-pulse" />
           <div className="mt-2 space-y-2">
-            <div className="h-3 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-3/4 animate-pulse" />
-            <div className="h-2.5 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-1/2 animate-pulse" />
+            <div className="h-3 bg-juju-bleu/60 rounded w-3/4 animate-pulse" />
+            <div className="h-2.5 bg-juju-bleu/60 rounded w-1/2 animate-pulse" />
           </div>
         </div>
       ))}
@@ -113,7 +113,7 @@ function SkeletonGrid() {
 function EmptyState() {
   return (
     <div className="text-center py-20 max-w-sm mx-auto">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center">
+      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center">
         <Shirt size={28} className="text-juju-dore" />
       </div>
       <h3 className="text-lg font-medium mb-2">Ta garde-robe est vide</h3>

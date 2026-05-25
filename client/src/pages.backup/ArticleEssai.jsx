@@ -159,7 +159,7 @@ function ReadyView({ article, quota, onLaunch }) {
           <p className="text-xs uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute mb-2 text-center">
             Article
           </p>
-          <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu rounded-xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure">
+          <div className="aspect-square bg-juju-bleu rounded-xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure">
             <img src={article.image_url} alt={article.nom} className="w-full h-full object-cover" />
           </div>
           <p className="text-sm font-medium mt-2 text-center truncate">{article.nom}</p>
@@ -169,7 +169,7 @@ function ReadyView({ article, quota, onLaunch }) {
           <p className="text-xs uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute mb-2 text-center">
             Sur toi
           </p>
-          <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu rounded-xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center">
+          <div className="aspect-square bg-juju-bleu rounded-xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center">
             <Sparkles size={36} className="text-juju-dore" />
           </div>
           <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mt-2 text-center">4 angles · ~25 s</p>
@@ -255,7 +255,7 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
       )}
 
       <div
-        className="relative aspect-[3/4] max-w-md mx-auto bg-juju-light-card dark:bg-juju-bleu rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure mb-4"
+        className="relative aspect-[3/4] max-w-md mx-auto bg-juju-bleu rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure mb-4"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -268,14 +268,14 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
         <button
           onClick={prev}
           aria-label="Angle précédent"
-          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-bg dark:bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-dore transition-colors"
+          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-texte hover:text-juju-dore transition-colors"
         >
           <ChevronLeft size={20} />
         </button>
         <button
           onClick={next}
           aria-label="Angle suivant"
-          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-bg dark:bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-dore transition-colors"
+          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-texte hover:text-juju-dore transition-colors"
         >
           <ChevronRight size={20} />
         </button>
@@ -333,7 +333,7 @@ function ErrorView({ message, onRetry, articleId }) {
         </button>
         <Link
           to={`/articles/${articleId}`}
-          className="px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte rounded-lg hover:bg-juju-light-card dark:bg-juju-bleu-clair transition-colors"
+          className="px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-texte rounded-lg hover:bg-juju-light-card dark:bg-juju-bleu-clair transition-colors"
         >
           Retour au détail
         </Link>

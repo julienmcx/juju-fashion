@@ -150,7 +150,7 @@ export default function ArticleForm({
               onChange={(e) =>
                 setField('id_marque', e.target.value ? Number(e.target.value) : '')
               }
-              className="flex-1 px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore"
+              className="flex-1 px-4 py-3 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore"
             >
               <option value="">— Aucune —</option>
               {referentiels.marques.map((m) => (
@@ -175,7 +175,7 @@ export default function ArticleForm({
                 value={newBrandName}
                 onChange={(e) => setNewBrandName(e.target.value)}
                 placeholder="Nom de la nouvelle marque"
-                className="flex-1 px-4 py-2 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-sm focus:outline-none focus:border-juju-dore"
+                className="flex-1 px-4 py-2 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-sm focus:outline-none focus:border-juju-dore"
               />
               <button
                 type="button"
@@ -238,7 +238,7 @@ export default function ArticleForm({
                 className={`flex items-center gap-2 px-3 py-2 rounded-full border text-sm transition-colors ${
                   isSelected
                     ? 'border-juju-dore bg-juju-dore/10 text-juju-dore'
-                    : 'border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte hover:border-juju-texte-mute'
+                    : 'border-juju-light-bordure dark:border-juju-bordure text-juju-texte hover:border-juju-texte-mute'
                 }`}
               >
                 <div
@@ -289,7 +289,7 @@ export default function ArticleForm({
                         setMatierePourcentage(mat.id_matiere, e.target.value)
                       }
                       placeholder="%"
-                      className="w-20 px-2 py-1 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded text-sm text-right focus:outline-none focus:border-juju-dore"
+                      className="w-20 px-2 py-1 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded text-sm text-right focus:outline-none focus:border-juju-dore"
                     />
                     <span className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">%</span>
                   </div>
@@ -356,7 +356,7 @@ export default function ArticleForm({
             value={form.notes}
             onChange={(e) => setField('notes', e.target.value)}
             rows={4}
-            className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore resize-none"
+            className="w-full px-4 py-3 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore resize-none"
             placeholder="Anecdote, taille qui taille petit, conseils d'entretien…"
           />
         </div>
@@ -369,7 +369,7 @@ export default function ArticleForm({
           <button
             type="button"
             onClick={onCancel}
-            className="text-center px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte rounded-lg hover:bg-juju-light-card dark:bg-juju-bleu-clair transition-colors"
+            className="text-center px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-texte rounded-lg hover:bg-juju-light-card dark:bg-juju-bleu-clair transition-colors"
           >
             Annuler
           </button>
@@ -414,7 +414,7 @@ function Input({ label, value, onChange, type = 'text', required, placeholder, s
         required={required}
         placeholder={placeholder}
         step={step}
-        className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+        className="w-full px-4 py-3 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
       />
     </div>
   );
@@ -431,7 +431,7 @@ function Select({ label, value, onChange, options, required }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore"
+        className="w-full px-4 py-3 bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-texte focus:outline-none focus:border-juju-dore"
       >
         <option value="">— Choisir —</option>
         {options.map((opt) => (
