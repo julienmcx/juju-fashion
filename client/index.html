@@ -1,19 +1,1054 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>client</title>
-    <script>
-  (function () {
-    var t = localStorage.getItem('juju_theme') || 'dark';
-    if (t === 'dark') document.documentElement.classList.add('dark');
-  })();
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juju · Numérise ta garde-robe, essaye virtuellement</title>
+  <meta name="description" content="Numérise ta garde-robe et essaye n'importe quel look en 30 secondes. Juju utilise l'IA pour transformer tes vêtements en essayages virtuels réalistes.">
+  <meta property="og:title" content="Juju · Ta garde-robe virtuelle">
+  <meta property="og:description" content="Essaye n'importe quel look en 30 secondes grâce à l'IA.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#FAFAFE">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============ RESET + BASE ============ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      background: #FAFAFE;
+      color: #0F0820;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+    /* ============ TOKENS ============ */
+    :root {
+      /* Light (hero, sections claires) */
+      --light-bg: #FAFAFE;
+      --light-card: #FFFFFF;
+      --light-bordure: #E8E5F0;
+      --light-texte: #0F0820;
+      --light-texte-mute: #6B5B8A;
+
+      /* Dark (sections produit) */
+      --noir: #0A0A0F;
+      --bleu: #0F1538;
+      --bleu-clair: #1A2155;
+      --bordure-dark: #2A2F5C;
+      --texte-dark: #F5F0E8;
+      --texte-dark-mute: #A19FB0;
+
+      /* Couleurs accents (universelles) */
+      --violet: #7C3AED;
+      --violet-soft: rgba(124, 58, 237, 0.18);
+      --dore: #D4AF37;
+      --dore-clair: #E5C158;
+
+      --max: 1200px;
+    }
+
+    /* ============ TYPO ============ */
+    h1, h2, h3 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      font-variation-settings: "SOFT" 50, "WONK" 0;
+    }
+    h1 { font-size: clamp(2.75rem, 6.5vw, 5rem); }
+    h2 { font-size: clamp(2rem, 4.5vw, 3.25rem); }
+    h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
+    .eyebrow {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.18em;
+      color: var(--violet); font-weight: 700;
+      margin-bottom: 1.25rem; display: inline-block;
+    }
+    section.dark-section .eyebrow { color: var(--dore); }
+
+    /* ============ LAYOUT ============ */
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 1.5rem; }
+    section { padding: clamp(4rem, 8vw, 7rem) 0; position: relative; }
+
+    /* Section sombre = inverser les couleurs */
+    section.dark-section {
+      background: var(--noir);
+      color: var(--texte-dark);
+    }
+    section.dark-section h1, section.dark-section h2, section.dark-section h3 {
+      color: var(--texte-dark);
+    }
+
+    /* ============ NAV ============ */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      background: rgba(250, 250, 254, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s, background 0.3s, color 0.3s;
+    }
+    .nav.scrolled { border-bottom-color: var(--light-bordure); }
+    .nav.over-dark {
+      background: rgba(10, 10, 15, 0.85);
+      color: var(--texte-dark);
+      border-bottom-color: var(--bordure-dark);
+    }
+    .nav.over-dark .nav-links a { color: var(--texte-dark-mute); }
+    .nav.over-dark .nav-links a:hover { color: var(--texte-dark); }
+    .nav-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'Fraunces', serif; font-style: italic;
+      font-size: 1.85rem; font-weight: 600; color: var(--violet);
+      font-variation-settings: "SOFT" 100;
+    }
+    .nav-logo .star { color: var(--dore); }
+    .nav.over-dark .nav-logo { color: var(--dore); }
+    .nav.over-dark .nav-logo .star { color: var(--violet); }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { font-size: 0.875rem; color: var(--light-texte-mute); transition: color 0.2s; font-weight: 500; }
+    .nav-links a:hover { color: var(--light-texte); }
+    .nav-cta {
+      padding: 0.55rem 1.25rem;
+      background: var(--violet);
+      color: white !important;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+    .nav-cta:hover { background: #6D28D9; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3); }
+    @media (max-width: 640px) { .nav-links a:not(.nav-cta) { display: none; } }
+
+    /* ============ BUTTONS ============ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.95rem 1.85rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--violet) 0%, #9333EA 100%);
+      color: white;
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.25);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 36px rgba(124, 58, 237, 0.4);
+    }
+    .btn-secondary {
+      border: 1.5px solid var(--light-bordure);
+      color: var(--light-texte);
+      background: var(--light-card);
+    }
+    .btn-secondary:hover { border-color: var(--violet); color: var(--violet); transform: translateY(-2px); }
+    section.dark-section .btn-secondary {
+      border-color: var(--bordure-dark);
+      color: var(--texte-dark);
+      background: transparent;
+    }
+    section.dark-section .btn-secondary:hover { border-color: var(--dore); color: var(--dore); }
+
+    /* ============ HERO ============ */
+    .hero {
+      padding-top: clamp(8rem, 15vw, 12rem);
+      padding-bottom: clamp(4rem, 8vw, 6rem);
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at top right, rgba(212, 175, 55, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom left, rgba(124, 58, 237, 0.10) 0%, transparent 50%),
+        var(--light-bg);
+    }
+    /* Decorative blobs */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      animation: drift 18s ease-in-out infinite;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -100px; left: -100px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      animation: drift 22s ease-in-out infinite reverse;
+    }
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(40px, -30px) scale(1.1); }
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4rem;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    @media (min-width: 1024px) {
+      .hero-grid { grid-template-columns: 1.1fr 1fr; gap: 6rem; }
+    }
+    .hero-content { text-align: center; }
+    @media (min-width: 1024px) { .hero-content { text-align: left; } }
+
+    /* Titre mot par mot */
+    .hero h1 .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: wordIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .hero h1 .word.accent {
+      background: linear-gradient(135deg, var(--dore) 0%, var(--violet) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-style: italic;
+      font-variation-settings: "SOFT" 100, "WONK" 1;
+    }
+    @keyframes wordIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero p {
+      font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+      color: var(--light-texte-mute);
+      margin: 1.5rem 0 2.5rem;
+      max-width: 540px;
+      opacity: 0;
+      animation: wordIn 0.8s 0.6s forwards;
+    }
+    @media (max-width: 1023px) { .hero p { margin-left: auto; margin-right: auto; } }
+    .hero-cta {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: wordIn 0.8s 0.9s forwards;
+    }
+    @media (min-width: 1024px) { .hero-cta { justify-content: flex-start; } }
+
+    /* Hero visual : mockups téléphones */
+    .hero-visual {
+      position: relative;
+      height: 580px;
+      max-height: 70vh;
+      opacity: 0;
+      animation: wordIn 0.9s 1.1s forwards;
+    }
+    .phone {
+      position: absolute;
+      width: 260px; height: 540px;
+      background: var(--noir);
+      border: 8px solid #1A1A2E;
+      border-radius: 36px;
+      box-shadow: 0 30px 80px rgba(124, 58, 237, 0.25), 0 0 0 1px rgba(255,255,255,0.05) inset;
+      overflow: hidden;
+    }
+    .phone-content {
+      width: 100%; height: 100%;
+      padding: 24px 16px;
+      display: flex; flex-direction: column;
+      background: linear-gradient(180deg, var(--noir) 0%, var(--bleu) 100%);
+      color: var(--texte-dark);
+    }
+    .phone-1 {
+      top: 20px; left: 50%;
+      transform: translateX(-65%) rotate(-6deg);
+      z-index: 1;
+      animation: float-1 6s ease-in-out infinite 1.5s;
+    }
+    .phone-2 {
+      top: 0; left: 50%;
+      transform: translateX(-35%) rotate(4deg);
+      z-index: 2;
+      box-shadow: 0 40px 100px rgba(124, 58, 237, 0.4), 0 0 0 1px rgba(255,255,255,0.08) inset;
+      animation: float-2 6s ease-in-out infinite 2s;
+    }
+    @keyframes float-1 {
+      0%, 100% { transform: translateX(-65%) rotate(-6deg) translateY(0); }
+      50% { transform: translateX(-65%) rotate(-6deg) translateY(-12px); }
+    }
+    @keyframes float-2 {
+      0%, 100% { transform: translateX(-35%) rotate(4deg) translateY(0); }
+      50% { transform: translateX(-35%) rotate(4deg) translateY(-18px); }
+    }
+    @media (max-width: 1023px) {
+      .hero-visual { height: 500px; }
+      .phone { width: 220px; height: 460px; }
+    }
+
+    /* Mockup contents */
+    .mp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--bordure-dark);
+      margin-bottom: 16px;
+    }
+    .mp-title { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 500; }
+    .mp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .mp-card {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, var(--bleu-clair) 0%, var(--bleu) 100%);
+      border-radius: 8px;
+      border: 1px solid var(--bordure-dark);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .mp-shirt::before { content: '👕'; font-size: 2.5rem; opacity: 0.5; }
+    .mp-pants::before { content: '👖'; font-size: 2.5rem; opacity: 0.5; }
+    .mp-shoe::before { content: '👟'; font-size: 2.5rem; opacity: 0.5; }
+    .mp-dress::before { content: '👗'; font-size: 2.5rem; opacity: 0.5; }
+
+    .mp-mannequin {
+      flex: 1;
+      background: linear-gradient(180deg, var(--bleu-clair) 0%, var(--bleu) 100%);
+      border-radius: 12px;
+      border: 1px solid var(--bordure-dark);
+      position: relative;
+      overflow: hidden;
+      display: flex; align-items: flex-end; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .mp-silhouette {
+      width: 60%; height: 80%;
+      background: radial-gradient(ellipse at top, var(--violet) 0%, transparent 70%);
+      filter: blur(1px);
+    }
+    .mp-silhouette::before {
+      content: '';
+      position: absolute;
+      top: 20%; left: 50%;
+      width: 30%; height: 18%;
+      background: var(--texte-dark-mute);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      opacity: 0.6;
+    }
+    .mp-silhouette::after {
+      content: '';
+      position: absolute;
+      top: 38%; left: 50%;
+      width: 50%; height: 50%;
+      background: linear-gradient(180deg, var(--dore-clair) 0%, var(--dore) 100%);
+      transform: translateX(-50%);
+      border-radius: 8px 8px 4px 4px;
+      opacity: 0.7;
+    }
+    .mp-dots {
+      display: flex; gap: 6px; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .mp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bordure-dark); }
+    .mp-dot.active { width: 20px; background: var(--dore); border-radius: 3px; }
+    .mp-tabbar {
+      display: flex; justify-content: space-around;
+      padding-top: 12px;
+      border-top: 1px solid var(--bordure-dark);
+    }
+    .mp-tab { width: 6px; height: 6px; border-radius: 50%; background: var(--texte-dark-mute); opacity: 0.4; }
+    .mp-tab.active { background: var(--dore); opacity: 1; }
+
+    /* ============ STATS BAR ============ */
+    .stats {
+      background: var(--light-card);
+      padding: 3rem 0;
+      border-top: 1px solid var(--light-bordure);
+      border-bottom: 1px solid var(--light-bordure);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      text-align: center;
+    }
+    @media (min-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    .stat-num {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.25rem, 4vw, 3rem);
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--violet) 0%, var(--dore) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--light-texte-mute);
+      margin-top: 0.25rem;
+      font-weight: 500;
+    }
+
+    /* ============ HOW IT WORKS ============ */
+    .how-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    @media (min-width: 768px) {
+      .how-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .step {
+      position: relative;
+      padding: 2.25rem 1.75rem;
+      background: rgba(15, 21, 56, 0.4);
+      border: 1px solid var(--bordure-dark);
+      border-radius: 20px;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    .step:hover {
+      transform: translateY(-6px);
+      border-color: var(--dore);
+      box-shadow: 0 20px 40px rgba(124, 58, 237, 0.2);
+    }
+    .step-num {
+      position: absolute;
+      top: -18px; left: 24px;
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--dore) 0%, var(--dore-clair) 100%);
+      color: var(--noir);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      font-family: 'Fraunces', serif;
+    }
+    .step h3 { margin: 0.5rem 0 0.75rem; color: var(--texte-dark); }
+    .step p { color: var(--texte-dark-mute); font-size: 0.95rem; }
+.step-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: var(--violet-soft);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1rem;
+  color: var(--dore);
+}
+
+    /* ============ FEATURES ============ */
+    .features {
+      background: linear-gradient(180deg, var(--noir) 0%, #0d0c2e 100%);
+      position: relative;
+    }
+    .features::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      width: 600px; height: 600px;
+      max-width: 100vw;
+      background: radial-gradient(circle, var(--violet-soft) 0%, transparent 60%);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .feat-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 3rem;
+      position: relative;
+    }
+    @media (min-width: 768px) {
+      .feat-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .feat {
+      padding: 2.5rem 2rem;
+      background: linear-gradient(180deg, rgba(15, 21, 56, 0.6) 0%, rgba(15, 21, 56, 0.3) 100%);
+      border: 1px solid var(--bordure-dark);
+      border-radius: 24px;
+      transition: all 0.3s;
+    }
+    .feat:hover {
+      border-color: var(--dore);
+      transform: translateY(-4px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+    }
+.feat-icon {
+  width: 60px; height: 60px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--violet) 0%, var(--violet-soft) 100%);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1.5rem;
+  color: var(--dore-clair);
+}
+    .feat h3 { margin-bottom: 0.75rem; color: var(--texte-dark); }
+    .feat p { color: var(--texte-dark-mute); font-size: 0.95rem; }
+
+    /* ============ TESTIMONIALS ============ */
+    .testimonials {
+      background: var(--light-bg);
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    @media (min-width: 768px) {
+      .testimonials-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .testi {
+      padding: 2rem;
+      background: var(--light-card);
+      border: 1px solid var(--light-bordure);
+      border-radius: 20px;
+      position: relative;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .testi:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(124, 58, 237, 0.1);
+    }
+    .testi-quote {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--light-texte);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+      font-variation-settings: "SOFT" 50;
+    }
+    .testi-stars {
+      color: var(--dore);
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      margin-bottom: 0.75rem;
+    }
+    .testi-author {
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .testi-avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--violet) 0%, var(--dore) 100%);
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .testi-name { font-weight: 600; font-size: 0.9rem; color: var(--light-texte); }
+    .testi-role { font-size: 0.8rem; color: var(--light-texte-mute); }
+    .testi-beta {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--light-texte-mute);
+      opacity: 0.6;
+      font-weight: 600;
+    }
+
+    /* ============ FAQ ============ */
+    .faq-list { margin-top: 3rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+    .faq-item {
+      border-bottom: 1px solid var(--bordure-dark);
+      padding: 1.5rem 0;
+    }
+    .faq-q {
+      width: 100%;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+      text-align: left;
+      font-family: 'Fraunces', serif;
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--texte-dark);
+      transition: color 0.2s;
+    }
+    .faq-q:hover { color: var(--dore); }
+    .faq-q .chevron {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--dore);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-q .chevron { transform: rotate(180deg); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      color: var(--texte-dark-mute);
+      transition: max-height 0.4s, padding 0.3s;
+    }
+    .faq-item.open .faq-a {
+      max-height: 400px;
+      padding-top: 1rem;
+    }
+
+    /* ============ FINAL CTA ============ */
+    .cta-final {
+      text-align: center;
+      padding: clamp(5rem, 10vw, 8rem) 1.5rem;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0F0820 0%, var(--noir) 50%, #0F0820 100%);
+    }
+    .cta-final::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 50%, var(--violet-soft) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 50%, rgba(212, 175, 55, 0.12) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .cta-final .container { position: relative; }
+    .cta-final h2 { margin-bottom: 1rem; color: var(--texte-dark); }
+    .cta-final p { color: var(--texte-dark-mute); max-width: 600px; margin: 0 auto 2.5rem; font-size: 1.1rem; }
+
+    /* ============ FOOTER ============ */
+    footer {
+      border-top: 1px solid var(--bordure-dark);
+      padding: 3rem 0 2rem;
+      background: var(--noir);
+      color: var(--texte-dark);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    @media (min-width: 768px) {
+      .footer-grid { grid-template-columns: 2fr 1fr 1fr; }
+    }
+    .footer-brand .nav-logo { color: var(--dore); margin-bottom: 0.75rem; display: inline-block; }
+    .footer-brand .nav-logo .star { color: var(--violet); }
+    .footer-brand p { color: var(--texte-dark-mute); font-size: 0.9rem; max-width: 320px; }
+    .footer-col h4 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--texte-dark-mute);
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    .footer-col a {
+      display: block;
+      padding: 0.4rem 0;
+      color: var(--texte-dark-mute);
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .footer-col a:hover { color: var(--dore); }
+    .footer-bottom {
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--bordure-dark);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--texte-dark-mute);
+    }
+
+    /* ============ FADE-IN ANIMATION ============ */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">Juju<span class="star">✦</span></a>
+      <div class="nav-links">
+        <a href="#how">Comment ça marche</a>
+        <a href="#features">Fonctionnalités</a>
+        <a href="#faq">FAQ</a>
+        <a href="/login" class="nav-cta">Se connecter</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <span class="eyebrow">✦ Garde-robe virtuelle propulsée par l'IA</span>
+          <h1 id="hero-title">
+            <span class="word" style="animation-delay: 0.0s">Numérise</span>
+            <span class="word" style="animation-delay: 0.1s">ta</span>
+            <span class="word" style="animation-delay: 0.2s">garde-robe.</span>
+            <br>
+            <span class="word accent" style="animation-delay: 0.35s">Essaye</span>
+            <span class="word accent" style="animation-delay: 0.45s">tous</span>
+            <span class="word accent" style="animation-delay: 0.55s">les</span>
+            <span class="word accent" style="animation-delay: 0.65s">looks</span>
+            <span class="word" style="animation-delay: 0.8s">en</span>
+            <span class="word" style="animation-delay: 0.9s">30</span>
+            <span class="word" style="animation-delay: 1.0s">secondes.</span>
+          </h1>
+          <p>Photographie tes vêtements, capture ton avatar 360°, et visualise n'importe quelle tenue sur toi avant même de l'enfiler. Plus jamais de "j'ai rien à me mettre".</p>
+          <div class="hero-cta">
+            <a href="#features" class="btn btn-primary">Découvrir Juju →</a>
+            <a href="/register" class="btn btn-secondary">Créer un compte</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="phone phone-1">
+            <div class="phone-content">
+              <div class="mp-header">
+                <div class="mp-title">Ma garde-robe</div>
+                <div style="color: var(--texte-dark-mute); font-size: 0.7rem;">9 articles</div>
+              </div>
+              <div class="mp-grid">
+                <div class="mp-card mp-shirt"></div>
+                <div class="mp-card mp-pants"></div>
+                <div class="mp-card mp-dress"></div>
+                <div class="mp-card mp-shoe"></div>
+                <div class="mp-card mp-shirt"></div>
+                <div class="mp-card mp-pants"></div>
+              </div>
+            </div>
+          </div>
+          <div class="phone phone-2">
+            <div class="phone-content">
+              <div class="mp-header">
+                <div class="mp-title">Essayage 360°</div>
+                <div style="color: var(--dore); font-size: 0.7rem;">✦</div>
+              </div>
+              <div class="mp-mannequin">
+                <div class="mp-silhouette"></div>
+              </div>
+              <div class="mp-dots">
+                <div class="mp-dot"></div>
+                <div class="mp-dot active"></div>
+                <div class="mp-dot"></div>
+                <div class="mp-dot"></div>
+              </div>
+              <div class="mp-tabbar">
+                <div class="mp-tab"></div>
+                <div class="mp-tab active"></div>
+                <div class="mp-tab"></div>
+                <div class="mp-tab"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <div class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div><span class="stat-num">30s</span><span class="stat-label">par essayage</span></div>
+        <div><span class="stat-num">4</span><span class="stat-label">angles 360°</span></div>
+        <div><span class="stat-num">∞</span><span class="stat-label">looks possibles</span></div>
+        <div><span class="stat-num">100%</span><span class="stat-label">depuis ton canapé</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ HOW IT WORKS (dark) ============ -->
+  <section id="how" class="dark-section">
+    <div class="container">
+      <div style="text-align: center;" class="fade-in">
+        <span class="eyebrow">Comment ça marche</span>
+        <h2>Trois étapes pour libérer ton dressing</h2>
+      </div>
+      <div class="how-grid">
+        <div class="step fade-in">
+          <div class="step-num">1</div>
+          <div class="step-icon">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+    <circle cx="12" cy="13" r="3.5"/>
+  </svg>
+</div>
+          <h3>Capture ton mannequin</h3>
+          <p>Prends-toi en photo sous 4 angles (face, dos, profils). Tu ne le fais qu'une fois — ton avatar est là pour toujours.</p>
+        </div>
+        <div class="step fade-in" style="transition-delay: 0.15s">
+          <div class="step-num">2</div>
+          <div class="step-icon">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
+  </svg>
+</div>
+          <h3>Numérise tes vêtements</h3>
+          <p>Photographie chaque pièce. Notre IA détoure automatiquement le fond et stocke l'article dans ta garde-robe.</p>
+        </div>
+        <div class="step fade-in" style="transition-delay: 0.3s">
+          <div class="step-num">3</div>
+          <div class="step-icon">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+    <circle cx="12" cy="12" r="3" fill="currentColor" opacity="0.3"/>
+  </svg>
+</div>
+          <h3>Essaye en un clic</h3>
+          <p>Sélectionne un article, lance l'essayage. En 30 secondes, vois-le sur toi sous tous les angles, comme dans un miroir magique.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES (dark) ============ -->
+  <section id="features" class="dark-section features">
+    <div class="container">
+      <div style="text-align: center;" class="fade-in">
+        <span class="eyebrow">Fonctionnalités</span>
+        <h2>Tout ce dont tu as besoin pour ton esprit fashion</h2>
+      </div>
+      <div class="feat-grid">
+        <div class="feat fade-in">
+          <div class="feat-icon">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="7" r="4"/>
+    <path d="M5.5 21v-1.5a6.5 6.5 0 0 1 13 0V21"/>
+  </svg>
+</div>
+          <h3>Mannequin 360°</h3>
+          <p>Un avatar à toi, capturé sous 4 angles. Vois-toi tourner sur toi-même avec chaque tenue. Plus précis qu'un miroir d'essayage.</p>
+        </div>
+        <div class="feat fade-in" style="transition-delay: 0.15s">
+          <div class="feat-icon">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9.94 8.06 3 15v3.5A2.5 2.5 0 0 0 5.5 21H9l6.94-6.94"/>
+    <path d="m14 4 6 6"/>
+    <path d="M17.5 6.5 19 5l-3-3-1.5 1.5"/>
+    <circle cx="6" cy="18" r="0.5" fill="currentColor"/>
+    <path d="M19 14v3M21 15.5h-3"/>
+  </svg>
+</div>
+          <h3>Essayage virtuel IA</h3>
+          <p>Notre IA habille ton mannequin avec n'importe quel vêtement de ta garde-robe. Rendu photo-réaliste en 30 secondes.</p>
+        </div>
+        <div class="feat fade-in" style="transition-delay: 0.3s">
+          <div class="feat-icon">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="6" y1="20" x2="6" y2="13"/>
+    <line x1="12" y1="20" x2="12" y2="4"/>
+    <line x1="18" y1="20" x2="18" y2="10"/>
+  </svg>
+</div>
+          <h3>Garde-robe organisée</h3>
+          <p>Filtres avancés (catégorie, couleur, marque, origine), statistiques détaillées, valeur totale. Ton dressing comme jamais.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS (light) ============ -->
+  <section class="testimonials">
+    <div class="container">
+      <div style="text-align: center;" class="fade-in">
+        <span class="eyebrow">Témoignages</span>
+        <h2>Ils ont adopté Juju</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testi fade-in">
+          <span class="testi-beta">Bêta</span>
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">"Je n'achète plus une pièce sans la tester sur mon mannequin Juju d'abord. Économie de temps et d'argent."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">CL</div>
+            <div>
+              <div class="testi-name">Camille L.</div>
+              <div class="testi-role">Étudiante, 22 ans</div>
+            </div>
+          </div>
+        </div>
+        <div class="testi fade-in" style="transition-delay: 0.15s">
+          <span class="testi-beta">Bêta</span>
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">"Le rendu IA est bluffant. J'ai essayé 20 looks en 10 minutes pour préparer ma semaine."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">TM</div>
+            <div>
+              <div class="testi-name">Thomas M.</div>
+              <div class="testi-role">Designer UX, 28 ans</div>
+            </div>
+          </div>
+        </div>
+        <div class="testi fade-in" style="transition-delay: 0.3s">
+          <span class="testi-beta">Bêta</span>
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">"Enfin une app qui valorise vraiment ma garde-robe. Le mode 360° est addictif."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">SD</div>
+            <div>
+              <div class="testi-name">Sarah D.</div>
+              <div class="testi-role">Créatrice de contenu</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 2rem; color: var(--light-texte-mute); font-size: 0.85rem; font-style: italic;">
+        ✦ Témoignages issus de notre bêta-test. Vous serez peut-être le prochain.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ FAQ (dark) ============ -->
+  <section id="faq" class="dark-section">
+    <div class="container">
+      <div style="text-align: center;" class="fade-in">
+        <span class="eyebrow">FAQ</span>
+        <h2>Vos questions, nos réponses</h2>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item fade-in">
+          <button class="faq-q">
+            <span>Comment fonctionne l'essayage virtuel ?</span>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="faq-a"><p>Nous utilisons un modèle d'IA de pointe (FASHN AI) qui combine ton mannequin 360° avec la photo du vêtement choisi. En 30 secondes, l'IA génère 4 images de toi portant ce vêtement, vu sous tous les angles. Aucune retouche manuelle nécessaire.</p></div>
+        </div>
+        <div class="faq-item fade-in">
+          <button class="faq-q">
+            <span>Mes données sont-elles en sécurité ?</span>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="faq-a"><p>Tes photos personnelles (mannequin) et tes vêtements ne sont jamais partagés. Seul toi y as accès via ton compte sécurisé. Tu peux supprimer tout ton contenu à tout moment.</p></div>
+        </div>
+        <div class="faq-item fade-in">
+          <button class="faq-q">
+            <span>Est-ce que ça marche pour tous les vêtements ?</span>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="faq-a"><p>Juju supporte hauts, bas, robes, chaussures et la plupart des accessoires. Les bijoux et lunettes sont en cours d'intégration. Pour un rendu optimal, photographie tes vêtements à plat sur fond neutre — notre IA s'occupe du détourage.</p></div>
+        </div>
+        <div class="faq-item fade-in">
+          <button class="faq-q">
+            <span>Combien d'essayages puis-je faire par jour ?</span>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="faq-a"><p>Pendant la phase bêta, 5 essayages complets par jour sont inclus gratuitement. Un compte Premium (à venir) permettra des essayages illimités et débloquera des fonctionnalités exclusives.</p></div>
+        </div>
+        <div class="faq-item fade-in">
+          <button class="faq-q">
+            <span>Sur quels appareils Juju est-il disponible ?</span>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="faq-a"><p>Juju fonctionne dans n'importe quel navigateur, sur mobile, tablette et ordinateur. La capture photo (mannequin et vêtements) se fait depuis ton mobile pour profiter de la caméra ; le reste est consultable partout.</p></div>
+        </div>
+        <div class="faq-item fade-in">
+          <button class="faq-q">
+            <span>Combien ça coûte ?</span>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="faq-a"><p>Pendant la bêta, Juju est entièrement gratuit avec une limite de 5 essayages quotidiens. À terme, un plan Premium à 9,99 €/mois proposera des essayages illimités et d'autres fonctionnalités avancées (filtres avancés, suggestions de tenues, partage social).</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA FINAL ============ -->
+  <section class="cta-final">
+    <div class="container">
+      <div class="fade-in">
+        <span class="eyebrow">✦ Rejoins la bêta</span>
+        <h2>Ton dressing magique t'attend.</h2>
+        <p>Crée ton compte gratuitement et essaye ta première tenue en moins de 5 minutes.</p>
+        <a href="/register" class="btn btn-primary" style="font-size: 1.1rem; padding: 1.15rem 2.5rem;">Créer mon compte gratuit →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">Juju<span class="star">✦</span></a>
+          <p>Numérise ta garde-robe et essaye n'importe quel look en 30 secondes grâce à l'IA.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Produit</h4>
+          <a href="#how">Comment ça marche</a>
+          <a href="#features">Fonctionnalités</a>
+          <a href="#faq">FAQ</a>
+          <a href="/login">Se connecter</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <a href="mailto:julienmichaux2006@gmail.com">julienmichaux2006@gmail.com</a>
+          <a href="https://www.linkedin.com/in/julien-michaux-5036b0330/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>© 2026 Juju · Projet d'études · Julien Michaux</div>
+        <div style="display: flex; gap: 1.5rem;">
+          <a href="#" onclick="alert('Mentions légales en cours de rédaction'); return false;">Mentions légales</a>
+          <a href="#" onclick="alert('Politique de confidentialité en cours de rédaction'); return false;">Confidentialité</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll + detect over-dark sections
+    const nav = document.getElementById('nav');
+    const darkSections = document.querySelectorAll('section.dark-section, footer, .cta-final');
+
+    function updateNav() {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+
+      // Detect if nav is over a dark section
+      const navRect = nav.getBoundingClientRect();
+      const navMid = navRect.bottom - 10;
+      let overDark = false;
+      darkSections.forEach((sec) => {
+        const r = sec.getBoundingClientRect();
+        if (r.top <= navMid && r.bottom >= navMid) overDark = true;
+      });
+      nav.classList.toggle('over-dark', overDark);
+    }
+    window.addEventListener('scroll', updateNav, { passive: true });
+    updateNav();
+
+    // FAQ accordion
+    document.querySelectorAll('.faq-item').forEach((item) => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+
+    // Fade-in on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+    document.querySelectorAll('.fade-in').forEach((el) => observer.observe(el));
+  </script>
+</body>
 </html>
