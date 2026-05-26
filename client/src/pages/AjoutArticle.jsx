@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Image as ImageIcon, Smartphone, Loader2 } from 'lucide-react';
-import { uploadImage, removeBackground } from '../api/upload';import { createArticle } from '../api/articles';
+import { Camera, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { uploadImage, removeBackground } from '../api/upload';
+import { createArticle } from '../api/articles';
 import {
   fetchCategories, fetchCouleurs, fetchMatieres, fetchMarques,
 } from '../api/referentiels';
@@ -18,7 +19,7 @@ export default function AjoutArticle() {
   const [couleurs, setCouleurs] = useState([]);
   const [matieres, setMatieres] = useState([]);
   const [marques, setMarques] = useState([]);
-  const [uploadStage, setUploadStage] = useState(''); // 'upload' | 'detour' | ''
+  const [uploadStage, setUploadStage] = useState('');
 
   useEffect(() => {
     Promise.all([fetchCategories(), fetchCouleurs(), fetchMatieres(), fetchMarques()])
@@ -28,41 +29,38 @@ export default function AjoutArticle() {
         setMatieres(mats);
         setMarques(mqs);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError('');
+    setUploading(true);
 
-const handleFileChange = async (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  setUploadError('');
-  setUploading(true);
-
-  try {
-    // Étape 1 : upload de l'image originale
-    setUploadStage('upload');
-    const { url: originalUrl } = await uploadImage(file);
-
-    // Étape 2 : détourage automatique (peut échouer, on dégrade gracieusement)
-    setUploadStage('detour');
-    let finalUrl = originalUrl;
     try {
-      const { url: cleanUrl } = await removeBackground(originalUrl);
-      finalUrl = cleanUrl;
-    } catch (bgErr) {
-      console.warn('Détourage échoué, on garde l\'image originale:', bgErr);
-    }
+      setUploadStage('upload');
+      const { url: originalUrl } = await uploadImage(file);
 
-    setImageUrl(finalUrl);
-    setStep('form');
-  } catch (err) {
-    setUploadError(err.response?.data?.error || "Échec de l'upload.");
-  } finally {
-    setUploading(false);
-    setUploadStage('');
-    e.target.value = '';
-  }
-};
+      setUploadStage('detour');
+      let finalUrl = originalUrl;
+      try {
+        const { url: cleanUrl } = await removeBackground(originalUrl);
+        finalUrl = cleanUrl;
+      } catch (bgErr) {
+        console.warn('Détourage échoué, on garde l\'image originale:', bgErr);
+      }
+
+      setImageUrl(finalUrl);
+      setStep('form');
+    } catch (err) {
+      setUploadError(err.response?.data?.error || "Échec de l'upload.");
+    } finally {
+      setUploading(false);
+      setUploadStage('');
+      e.target.value = '';
+    }
+  };
 
   const handleSubmit = async (payload) => {
     const { article } = await createArticle(payload);
@@ -71,25 +69,16 @@ const handleFileChange = async (e) => {
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
-      {/* Desktop : message dédié, fonctionnalité bloquée */}
-      <div className="hidden md:block text-center py-16 border border-juju-light-bordure dark:border-juju-bordure rounded-xl">
-        <Smartphone size={40} className="mx-auto mb-4 text-juju-dore" />
-        <p className="font-medium mb-2">Disponible sur mobile uniquement</p>
-        <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute max-w-md mx-auto">
-          L'ajout d'article passe par la prise de photo. Connecte-toi depuis ton téléphone pour numériser ta garde-robe.
-        </p>
-      </div>
+      {step === 'capture' && (
+        <div>
+          <h2 className="text-2xl md:text-3xl font-medium mb-2">Ajouter un article</h2>
+          <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-8">
+            Commence par une photo. Tu pourras ensuite décrire l'article.
+          </p>
 
-      {/* Mobile : flow capture + form */}
-      <div className="md:hidden">
-        {step === 'capture' && (
-          <div>
-            <h2 className="text-2xl font-medium mb-2">Ajouter un article</h2>
-            <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-8">
-              Commence par une photo. Tu pourras ensuite décrire l'article.
-            </p>
-
-            <div className="space-y-3">
+          <div className="space-y-3 max-w-md">
+            {/* Bouton caméra : mobile-only */}
+            <div className="md:hidden">
               <CaptureButton
                 icon={Camera}
                 label="Prendre une photo"
@@ -99,50 +88,51 @@ const handleFileChange = async (e) => {
                 onChange={handleFileChange}
                 disabled={uploading}
               />
-              <CaptureButton
-                icon={ImageIcon}
-                label="Choisir depuis ma galerie"
-                hint="Sélectionne une image existante"
-                accept="image/*"
-                onChange={handleFileChange}
-                disabled={uploading}
-              />
             </div>
-
-            {uploading && (
-              <div className="flex items-center gap-2 mt-6 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">
-                <Loader2 size={16} className="animate-spin" />
-                {uploadStage === 'upload' && 'Upload de la photo…'}
-                {uploadStage === 'detour' && 'Suppression de l\'arrière-plan…'}
-              </div>
-            )}
-
-            {uploadError && (
-              <p className="text-red-400 text-sm mt-4">{uploadError}</p>
-            )}
-          </div>
-        )}
-
-        {step === 'form' && (
-          <div>
-            <h2 className="text-2xl font-medium mb-2">Décris l'article</h2>
-            <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">Remplis les champs principaux.</p>
-
-            <div className="aspect-square w-32 mb-6 rounded-lg overflow-hidden bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure">
-              <img src={imageUrl} alt="" className="w-full h-full object-cover" />
-            </div>
-
-            <ArticleForm
-              initialValues={{ image_url: imageUrl }}
-              referentiels={{ categories, couleurs, matieres, marques }}
-              setMarques={setMarques}
-              onSubmit={handleSubmit}
-              submitLabel="Créer l'article"
-              onCancel={() => navigate('/garde-robe')}
+            {/* Bouton galerie / upload : partout */}
+            <CaptureButton
+              icon={ImageIcon}
+              label="Choisir un fichier"
+              hint="Sélectionne une image existante"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={uploading}
             />
           </div>
-        )}
-      </div>
+
+          {uploading && (
+            <div className="flex items-center gap-2 mt-6 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">
+              <Loader2 size={16} className="animate-spin" />
+              {uploadStage === 'upload' && 'Upload de la photo…'}
+              {uploadStage === 'detour' && 'Suppression de l\'arrière-plan…'}
+            </div>
+          )}
+
+          {uploadError && (
+            <p className="text-red-400 text-sm mt-4">{uploadError}</p>
+          )}
+        </div>
+      )}
+
+      {step === 'form' && (
+        <div>
+          <h2 className="text-2xl md:text-3xl font-medium mb-2">Décris l'article</h2>
+          <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">Remplis les champs principaux.</p>
+
+          <div className="aspect-square w-32 mb-6 rounded-lg overflow-hidden bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure">
+            <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+          </div>
+
+          <ArticleForm
+            initialValues={{ image_url: imageUrl }}
+            referentiels={{ categories, couleurs, matieres, marques }}
+            setMarques={setMarques}
+            onSubmit={handleSubmit}
+            submitLabel="Créer l'article"
+            onCancel={() => navigate('/garde-robe')}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -150,9 +140,8 @@ const handleFileChange = async (e) => {
 function CaptureButton({ icon: Icon, label, hint, accept, capture, onChange, disabled }) {
   return (
     <label
-      className={`flex items-center gap-4 p-5 border border-juju-light-bordure dark:border-juju-bordure rounded-xl cursor-pointer transition-colors ${
-        disabled ? 'opacity-50 pointer-events-none' : 'hover:border-juju-dore'
-      }`}
+      className={`flex items-center gap-4 p-5 border border-juju-light-bordure dark:border-juju-bordure rounded-xl cursor-pointer transition-colors ${disabled ? 'opacity-50 pointer-events-none' : 'hover:border-juju-dore'
+        }`}
     >
       <div className="w-12 h-12 rounded-full bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center text-juju-dore">
         <Icon size={22} />

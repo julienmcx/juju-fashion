@@ -145,12 +145,15 @@ export default function ArticleDetail() {
 
           <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-juju-light-bordure dark:border-juju-bordure">
             <Link
-  to={`/articles/${id}/essai`}
-  className="flex items-center justify-center gap-2 px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors"
->
-  <Sparkles size={18} />
-  Essayer
-</Link>
+              to={`/articles/${id}/essai`}
+              className="relative flex items-center justify-center gap-2 px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors"
+            >
+              <Sparkles size={18} />
+              Essayer
+              <span className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-juju-violet text-white text-[9px] font-bold uppercase tracking-wider rounded-full border-2 border-juju-light-bg dark:border-juju-noir">
+                Bêta
+              </span>
+            </Link>
             <Link
               to={`/articles/${id}/edit`}
               className="flex items-center justify-center gap-2 px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte rounded-lg hover:border-juju-dore hover:text-juju-dore transition-colors"

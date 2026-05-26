@@ -149,11 +149,18 @@ export default function ArticleEssai() {
 function ReadyView({ article, quota, onLaunch }) {
   return (
     <div>
-      <h2 className="text-2xl md:text-3xl font-medium mb-2">Essayage virtuel</h2>
-      <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-8">
+      <div className="flex items-center gap-3 mb-2">
+      <h2 className="text-2xl md:text-3xl font-medium">Essayage virtuel</h2>
+      <span className="px-2 py-0.5 bg-juju-violet text-white text-[10px] font-bold uppercase tracking-wider rounded-full">
+        Bêta
+      </span>
+      </div>
+      <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-2">
         Voyons à quoi tu ressembles avec cet article.
       </p>
-
+      <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mb-8 italic">
+        ⚠️ Fonctionnalité expérimentale. Le rendu IA peut être approximatif selon les angles et morphologies.
+      </p>
       <div className="grid grid-cols-2 gap-4 mb-8 max-w-md mx-auto">
         <div>
           <p className="text-xs uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute mb-2 text-center">
@@ -175,7 +182,6 @@ function ReadyView({ article, quota, onLaunch }) {
           <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mt-2 text-center">4 angles · ~25 s</p>
         </div>
       </div>
-
       <div className="text-center">
         <button
           onClick={onLaunch}
@@ -292,11 +298,10 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
             key={r.angle}
             onClick={() => setIndex(i)}
             aria-label={`Voir ${ANGLE_LABELS[r.angle]}`}
-            className={`h-2 rounded-full transition-all ${
-              i === index
+            className={`h-2 rounded-full transition-all ${i === index
                 ? 'w-8 bg-juju-dore'
                 : 'w-2 bg-juju-bordure hover:bg-juju-texte-mute'
-            }`}
+              }`}
           />
         ))}
       </div>
@@ -306,9 +311,8 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
           <button
             key={r.angle}
             onClick={() => setIndex(i)}
-            className={`aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${
-              i === index ? 'border-juju-dore' : 'border-juju-light-bordure dark:border-juju-bordure opacity-60 hover:opacity-100'
-            }`}
+            className={`aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${i === index ? 'border-juju-dore' : 'border-juju-light-bordure dark:border-juju-bordure opacity-60 hover:opacity-100'
+              }`}
           >
             <img src={r.image_url} alt={ANGLE_LABELS[r.angle]} className="w-full h-full object-cover" />
           </button>

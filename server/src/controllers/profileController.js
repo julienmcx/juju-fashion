@@ -65,7 +65,7 @@ async function getStats(req, res) {
       essayages: {
         total: essayages.total,
         today: essayages.today,
-        daily_limit: 5,
+        daily_limit: 2,
       },
     });
   } catch (err) {
