@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Juju · Ta garde-robe digitale, organisée comme jamais</title>
   <meta name="description"
-    content="Numérise ta garde-robe et essaye n'importe quel look en 30 secondes. Juju utilise l'IA pour transformer tes vêtements en essayages virtuels réalistes.">
+    content="Numérise et organise ta garde-robe avec l'IA. Filtres avancés, statistiques, mannequin virtuel et essayage en bêta. Ton dressing comme jamais.">
   <meta property="og:title" content="Juju · Ta garde-robe digitale, organisée comme jamais">
   <meta property="og:description"
-    content="Numérise ta garde-robe et essaye n'importe quel look en 30 secondes. Juju utilise l'IA pour transformer tes vêtements en essayages virtuels réalistes.">
+    content="Numérise et organise ta garde-robe avec l'IA. L'essayage IA est en bêta — la garde-robe, elle, est déjà au point.">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#FAFAFE">
 
@@ -22,7 +22,6 @@
     rel="stylesheet">
 
   <style>
-    /* ============ RESET + BASE ============ */
     * {
       margin: 0;
       padding: 0;
@@ -62,33 +61,25 @@
       color: inherit;
     }
 
-    /* ============ TOKENS ============ */
     :root {
-      /* Light (hero, sections claires) */
       --light-bg: #FAFAFE;
       --light-card: #FFFFFF;
       --light-bordure: #E8E5F0;
       --light-texte: #0F0820;
       --light-texte-mute: #6B5B8A;
-
-      /* Dark (sections produit) */
       --noir: #0A0A0F;
       --bleu: #0F1538;
       --bleu-clair: #1A2155;
       --bordure-dark: #2A2F5C;
       --texte-dark: #F5F0E8;
       --texte-dark-mute: #A19FB0;
-
-      /* Couleurs accents (universelles) */
       --violet: #7C3AED;
       --violet-soft: rgba(124, 58, 237, 0.18);
       --dore: #D4AF37;
       --dore-clair: #E5C158;
-
       --max: 1200px;
     }
 
-    /* ============ TYPO ============ */
     h1,
     h2,
     h3 {
@@ -125,7 +116,6 @@
       color: var(--dore);
     }
 
-    /* ============ LAYOUT ============ */
     .container {
       max-width: var(--max);
       margin: 0 auto;
@@ -137,7 +127,6 @@
       position: relative;
     }
 
-    /* Section sombre = inverser les couleurs */
     section.dark-section {
       background: var(--noir);
       color: var(--texte-dark);
@@ -149,7 +138,6 @@
       color: var(--texte-dark);
     }
 
-    /* ============ NAV ============ */
     .nav {
       position: fixed;
       top: 0;
@@ -250,10 +238,10 @@
       }
     }
 
-    /* ============ BUTTONS ============ */
     .btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
       padding: 0.95rem 1.85rem;
       border-radius: 999px;
@@ -297,19 +285,14 @@
       color: var(--dore);
     }
 
-    /* ============ HERO ============ */
     .hero {
       padding-top: clamp(8rem, 15vw, 12rem);
       padding-bottom: clamp(4rem, 8vw, 6rem);
       position: relative;
       overflow: hidden;
-      background:
-        radial-gradient(ellipse at top right, rgba(212, 175, 55, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at bottom left, rgba(124, 58, 237, 0.10) 0%, transparent 50%),
-        var(--light-bg);
+      background: radial-gradient(ellipse at top right, rgba(212, 175, 55, 0.12) 0%, transparent 50%), radial-gradient(ellipse at bottom left, rgba(124, 58, 237, 0.10) 0%, transparent 50%), var(--light-bg);
     }
 
-    /* Decorative blobs */
     .hero::before {
       content: '';
       position: absolute;
@@ -372,7 +355,6 @@
       }
     }
 
-    /* Titre mot par mot */
     .hero h1 .word {
       display: inline-block;
       opacity: 0;
@@ -427,7 +409,6 @@
       }
     }
 
-    /* Hero visual : mockups téléphones */
     .hero-visual {
       position: relative;
       height: 580px;
@@ -509,7 +490,6 @@
       }
     }
 
-    /* Mockup contents */
     .mp-header {
       display: flex;
       align-items: center;
@@ -653,7 +633,6 @@
       opacity: 1;
     }
 
-    /* ============ STATS BAR ============ */
     .stats {
       background: var(--light-card);
       padding: 3rem 0;
@@ -692,7 +671,6 @@
       font-weight: 500;
     }
 
-    /* ============ HOW IT WORKS ============ */
     .how-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -760,7 +738,6 @@
       color: var(--dore);
     }
 
-    /* ============ FEATURES ============ */
     .features {
       background: linear-gradient(180deg, var(--noir) 0%, #0d0c2e 100%);
       position: relative;
@@ -829,22 +806,8 @@
       font-size: 0.95rem;
     }
 
-    /* ============ TESTIMONIALS ============ */
     .testimonials {
       background: var(--light-bg);
-    }
-
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-      margin-top: 3rem;
-    }
-
-    @media (min-width: 768px) {
-      .testimonials-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
     }
 
     .testi {
@@ -920,7 +883,152 @@
       font-weight: 600;
     }
 
-    /* ============ FAQ ============ */
+    .testi-carousel {
+      position: relative;
+      margin-top: 3rem;
+      overflow: hidden;
+    }
+
+    .testi-track {
+      display: flex;
+      gap: 1.5rem;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .testi-track .testi {
+      flex: 0 0 calc(33.333% - 1rem);
+      min-width: 0;
+    }
+
+    @media (max-width: 1023px) {
+      .testi-track .testi {
+        flex: 0 0 calc(50% - 0.75rem);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .testi-track .testi {
+        flex: 0 0 100%;
+      }
+    }
+
+    .testi-nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .testi-nav-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--light-card);
+      border: 1px solid var(--light-bordure);
+      color: var(--light-texte-mute);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .testi-nav-btn:hover {
+      background: var(--violet);
+      color: white;
+      border-color: var(--violet);
+    }
+
+    .testi-nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .testi-nav-btn:disabled:hover {
+      background: var(--light-card);
+      color: var(--light-texte-mute);
+      border-color: var(--light-bordure);
+    }
+
+    .testi-dots {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .testi-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--light-bordure);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      padding: 0;
+    }
+
+    .testi-dot.active {
+      width: 24px;
+      background: var(--violet);
+      border-radius: 4px;
+    }
+
+    .testi-delete {
+      display: none;
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      color: rgb(220, 38, 38);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .testi-delete:hover {
+      background: rgb(220, 38, 38);
+      color: white;
+    }
+
+    body.admin-mode .testi-delete {
+      display: flex;
+    }
+
+    body.admin-mode .testi-beta {
+      display: none;
+    }
+
+    .admin-badge {
+      position: fixed;
+      top: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      padding: 0.5rem 1rem;
+      background: rgb(220, 38, 38);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
+      display: none;
+    }
+
+    body.admin-mode .admin-badge {
+      display: block;
+    }
+
     .faq-list {
       margin-top: 3rem;
       max-width: 800px;
@@ -978,7 +1086,6 @@
       padding-top: 1rem;
     }
 
-    /* ============ FINAL CTA ============ */
     .cta-final {
       text-align: center;
       padding: clamp(5rem, 10vw, 8rem) 1.5rem;
@@ -991,9 +1098,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(ellipse at 30% 50%, var(--violet-soft) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 50%, rgba(212, 175, 55, 0.12) 0%, transparent 50%);
+      background: radial-gradient(ellipse at 30% 50%, var(--violet-soft) 0%, transparent 50%), radial-gradient(ellipse at 70% 50%, rgba(212, 175, 55, 0.12) 0%, transparent 50%);
       pointer-events: none;
     }
 
@@ -1013,7 +1118,6 @@
       font-size: 1.1rem;
     }
 
-    /* ============ FOOTER ============ */
     footer {
       border-top: 1px solid var(--bordure-dark);
       padding: 3rem 0 2rem;
@@ -1084,7 +1188,6 @@
       color: var(--texte-dark-mute);
     }
 
-    /* ============ FADE-IN ANIMATION ============ */
     .fade-in {
       opacity: 0;
       transform: translateY(24px);
@@ -1096,7 +1199,6 @@
       transform: translateY(0);
     }
 
-    /* ============ DEV NAV (masquée en prod) ============ */
     #dev-nav {
       position: fixed;
       bottom: 1rem;
@@ -1157,8 +1259,8 @@
 </head>
 
 <body>
+  <div class="admin-badge">🔓 Mode admin · Ctrl+Shift+A pour désactiver</div>
 
-  <!-- ============ NAV ============ -->
   <nav class="nav" id="nav">
     <div class="nav-inner">
       <a href="#" class="nav-logo">Juju<span class="star">✦</span></a>
@@ -1171,7 +1273,6 @@
     </div>
   </nav>
 
-  <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="container">
       <div class="hero-grid">
@@ -1241,7 +1342,6 @@
     </div>
   </section>
 
-  <!-- ============ STATS ============ -->
   <div class="stats">
     <div class="container">
       <div class="stats-grid">
@@ -1253,7 +1353,6 @@
     </div>
   </div>
 
-  <!-- ============ HOW IT WORKS (dark) ============ -->
   <section id="how" class="dark-section">
     <div class="container">
       <div style="text-align: center;" class="fade-in">
@@ -1306,14 +1405,12 @@
     </div>
   </section>
 
-  <!-- ============ FEATURES (dark) ============ -->
   <section id="features" class="dark-section features">
     <div class="container">
       <div style="text-align: center;" class="fade-in">
         <span class="eyebrow">Fonctionnalités</span>
         <h2>Tout ce dont tu as besoin pour ton esprit fashion</h2>
       </div>
-
       <div class="feat-grid">
         <div class="feat fade-in">
           <div class="feat-icon">
@@ -1328,7 +1425,6 @@
           <p>Filtres avancés (catégorie, couleur, marque, origine), statistiques détaillées, valeur totale, répartition.
             Ton dressing comme jamais. <strong>Le cœur de Juju.</strong></p>
         </div>
-
         <div class="feat fade-in" style="transition-delay: 0.15s">
           <div class="feat-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -1341,7 +1437,6 @@
           <p>Un avatar à toi, capturé sous 4 angles. Vois tes tenues sur toi-même, plus précis qu'un miroir d'essayage
             classique.</p>
         </div>
-
         <div class="feat fade-in" style="transition-delay: 0.3s; position: relative;">
           <span
             style="position: absolute; top: 1rem; right: 1rem; padding: 0.25rem 0.5rem; background: var(--violet); color: white; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 999px;">Bêta</span>
@@ -1359,77 +1454,43 @@
           <p>Notre IA habille ton mannequin avec n'importe quel vêtement. Fonctionnalité expérimentale, en amélioration
             continue. 2 essayages gratuits par jour pendant la bêta.</p>
         </div>
-
       </div>
     </div>
   </section>
 
-  <!-- ============ TESTIMONIALS (light) ============ -->
   <section class="testimonials">
     <div class="container">
       <div style="text-align: center;" class="fade-in">
         <span class="eyebrow">Témoignages</span>
         <h2>Ils ont adopté Juju</h2>
       </div>
-      <div class="testimonials-grid">
-        <div class="testi fade-in">
-          <span class="testi-beta">Bêta</span>
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-quote">"Je n'achète plus une pièce sans la tester sur mon mannequin d'abord. Économie de
-            temps et d'argent."</p>
-          <div class="testi-author">
-            <div class="testi-avatar">AM</div>
-            <div>
-              <div class="testi-name">Alex M.</div>
-              <div class="testi-role">Moniteur d'auto-école, 19 ans</div>
-            </div>
-          </div>
-        </div>
-        <div class="testi fade-in" style="transition-delay: 0.15s">
-          <span class="testi-beta">Bêta</span>
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-quote">"Le rendu IA est bluffant. J'ai essayé 20 looks en 10 minutes pour préparer ma
-            semaine."</p>
-          <div class="testi-author">
-            <div class="testi-avatar">RC</div>
-            <div>
-              <div class="testi-name">Romain C.</div>
-              <div class="testi-role">Administrateur réseau, 19 ans</div>
-            </div>
-          </div>
-        </div>
-        <div class="testi fade-in" style="transition-delay: 0.3s">
-          <span class="testi-beta">Bêta</span>
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-quote">"Enfin une app qui valorise vraiment ma garde-robe. Le mode 360° est addictif."</p>
-          <div class="testi-author">
-            <div class="testi-avatar">ML</div>
-            <div>
-              <div class="testi-name">Mathilde L.</div>
-              <div class="testi-role">Créatrice de contenu, 67 ans</div>
-            </div>
-          </div>
-        </div>
+
+      <div class="testi-carousel">
+        <div class="testi-track" id="testi-track"></div>
+      </div>
+      <div class="testi-nav">
+        <button class="testi-nav-btn" id="testi-prev" aria-label="Témoignage précédent">‹</button>
+        <div class="testi-dots" id="testi-dots"></div>
+        <button class="testi-nav-btn" id="testi-next" aria-label="Témoignage suivant">›</button>
       </div>
       <p
         style="text-align: center; margin-top: 2rem; color: var(--light-texte-mute); font-size: 0.85rem; font-style: italic;">
-        ✦ Témoignages issus de notre bêta-test. Vous serez peut-être le prochain.
+        ✦ Témoignages issus de notre bêta-test. Tu seras peut-être le prochain.
       </p>
 
-      <!-- Formulaire avis -->
       <div class="add-review fade-in" style="margin-top: 3rem;">
-        <button id="show-review-form" class="btn btn-secondary" style="display: block; margin: 0 auto;">
-          + Partage ton avis
-        </button>
+        <div style="text-align: center;">
+          <button id="show-review-form" class="btn btn-secondary">+ Partage ton avis</button>
+        </div>
         <div id="review-form"
           style="display: none; max-width: 540px; margin: 2rem auto 0; padding: 2rem; background: var(--light-card); border: 1px solid var(--light-bordure); border-radius: 20px;">
-          <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--light-texte);">Ton expérience nous
-            intéresse</h3>
+          <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--light-texte);">Ton expérience nous intéresse
+          </h3>
           <div style="margin-bottom: 1rem;">
             <label
               style="font-size: 0.8rem; color: var(--light-texte-mute); display: block; margin-bottom: 0.25rem;">Ton
               prénom</label>
-            <input id="review-name" type="text" maxlength="40" placeholder="Camille"
+            <input id="review-name" type="text" maxlength="40" placeholder="Alexandre"
               style="width: 100%; padding: 0.75rem; border: 1px solid var(--light-bordure); border-radius: 10px; font-family: inherit; font-size: 0.95rem; background: var(--light-bg);" />
           </div>
           <div style="margin-bottom: 1rem;">
@@ -1458,34 +1519,33 @@
               style="flex: 1; padding: 0.75rem 1rem; font-size: 0.9rem;">Publier mon avis</button>
           </div>
           <p id="review-thanks"
-            style="display: none; text-align: center; color: var(--violet); font-weight: 600; margin-top: 1rem;">✦
-            Merci pour ton avis !</p>
+            style="display: none; text-align: center; color: var(--violet); font-weight: 600; margin-top: 1rem;">✦ Merci
+            pour ton avis !</p>
         </div>
       </div>
-
     </div>
   </section>
 
-  <!-- ============ FAQ (dark) ============ -->
   <section id="faq" class="dark-section">
     <div class="container">
       <div style="text-align: center;" class="fade-in">
         <span class="eyebrow">FAQ</span>
         <h2>Vos questions, nos réponses</h2>
       </div>
-
       <div class="faq-list">
-
         <div class="faq-item fade-in">
           <button class="faq-q">
             <span>L'essayage virtuel est-il parfait ?</span>
             <span class="chevron">▼</span>
           </button>
           <div class="faq-a">
-            <p>Non, et on l'assume. L'essayage IA est une fonctionnalité bêta [...]</p>
+            <p><strong>Non, et on l'assume.</strong> L'essayage IA est une fonctionnalité <strong>bêta</strong> qui
+              utilise des modèles à l'état de l'art (FASHN AI). Le rendu est satisfaisant pour des photos studio
+              frontales, mais peut être approximatif sur certains angles ou morphologies. C'est la limite actuelle des
+              modèles VTON 2D — nous l'améliorerons quand la technologie progressera. Le cœur de Juju reste la
+              garde-robe digitale, et celle-ci est totalement au point.</p>
           </div>
         </div>
-
         <div class="faq-item fade-in">
           <button class="faq-q">
             <span>Comment fonctionne l'essayage virtuel ?</span>
@@ -1524,8 +1584,10 @@
             <span class="chevron">▼</span>
           </button>
           <div class="faq-a">
-            <p>Pendant la phase bêta, 2 essayages complets par jour sont inclus gratuitement. Un compte Premium (à
-              venir) permettra des essayages illimités et débloquera des fonctionnalités exclusives.</p>
+            <p>Pendant la phase bêta, <strong>2 essayages complets par jour</strong> sont offerts à tous. Un compte
+              Premium (à venir) permettra des essayages illimités. La garde-robe, le mannequin et les filtres restent
+              <strong>100% gratuits et illimités</strong>.
+            </p>
           </div>
         </div>
         <div class="faq-item fade-in">
@@ -1554,26 +1616,26 @@
     </div>
   </section>
 
-  <!-- ============ CTA FINAL ============ -->
   <section class="cta-final">
     <div class="container">
       <div class="fade-in">
         <span class="eyebrow">✦ Rejoins la bêta</span>
-        <h2>Ton dressing magique t'attend.</h2>
-        <p>Crée ton compte gratuitement et essaye ta première tenue en moins de 5 minutes.</p>
+        <h2>Reprends le contrôle de ton dressing.</h2>
+        <p>Crée ton compte gratuit. Numérise ta première pièce en moins de 2 minutes. Et profite d'un dressing organisé
+          à vie.</p>
         <a href="/register" class="btn btn-primary" style="font-size: 1.1rem; padding: 1.15rem 2.5rem;">Créer mon compte
           gratuit →</a>
       </div>
     </div>
   </section>
 
-  <!-- ============ FOOTER ============ -->
   <footer>
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
           <a href="#" class="nav-logo">Juju<span class="star">✦</span></a>
-          <p>Numérise ta garde-robe et essaye n'importe quel look en 30 secondes grâce à l'IA.</p>
+          <p>Numérise et organise ta garde-robe avec l'IA. L'essayage IA est en bêta — la garde-robe, elle, est déjà au
+            point.</p>
         </div>
         <div class="footer-col">
           <h4>Produit</h4>
@@ -1599,8 +1661,6 @@
     </div>
   </footer>
 
-
-  <!-- ============ DEV NAV (masquée en prod) ============ -->
   <div id="dev-nav">
     <span class="dev-label">DEV</span>
     <a href="http://localhost:5173/login">Login</a>
@@ -1611,16 +1671,13 @@
     <button id="dev-nav-close" title="Masquer">×</button>
   </div>
 
-
   <script>
-    // Nav scroll + detect over-dark sections
+    // ============ NAV SCROLL + ADAPTATION COULEUR ============
     const nav = document.getElementById('nav');
     const darkSections = document.querySelectorAll('section.dark-section, footer, .cta-final');
 
     function updateNav() {
       nav.classList.toggle('scrolled', window.scrollY > 20);
-
-      // Detect if nav is over a dark section
       const navRect = nav.getBoundingClientRect();
       const navMid = navRect.bottom - 10;
       let overDark = false;
@@ -1633,27 +1690,24 @@
     window.addEventListener('scroll', updateNav, { passive: true });
     updateNav();
 
-    // FAQ accordion
+    // ============ FAQ ACCORDION ============
     document.querySelectorAll('.faq-item').forEach((item) => {
       item.querySelector('.faq-q').addEventListener('click', () => {
         item.classList.toggle('open');
       });
     });
 
-    // Fade-in on scroll
+    // ============ FADE-IN ON SCROLL ============
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
+        if (entry.isIntersecting) entry.target.classList.add('visible');
       });
     }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
     document.querySelectorAll('.fade-in').forEach((el) => observer.observe(el));
 
+    // ============ DEV NAV (local uniquement) ============
     const devNav = document.getElementById('dev-nav');
-    const isLocal = location.protocol === 'file:' ||
-      location.hostname === 'localhost' ||
-      location.hostname === '127.0.0.1';
+    const isLocal = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
     if (!isLocal) {
       devNav.classList.add('hidden');
     } else {
@@ -1662,8 +1716,179 @@
       });
     }
 
-    // Système d'avis
+    // ============ SYSTÈME D'AVIS + CAROUSEL + ADMIN ============
     (function () {
+      const DEFAULT_REVIEWS = [
+        { id: 'default-1', name: 'Alex M.', role: "Moniteur d'auto-école, 19 ans", text: "Je n'achète plus une pièce sans la tester sur mon mannequin d'abord. Économie de temps et d'argent.", rating: 5, default: true },
+        { id: 'default-2', name: 'Romain C.', role: 'Administrateur réseau, 19 ans', text: "Le rendu IA est bluffant. J'ai essayé 20 looks en 10 minutes pour préparer ma semaine.", rating: 5, default: true },
+        { id: 'default-3', name: 'Mathilde L.', role: 'Créatrice de contenu, 67 ans', text: "Enfin une app qui valorise vraiment ma garde-robe. Le mode 360° est addictif.", rating: 5, default: true },
+      ];
+
+      const track = document.getElementById('testi-track');
+      const dotsEl = document.getElementById('testi-dots');
+      const prevBtn = document.getElementById('testi-prev');
+      const nextBtn = document.getElementById('testi-next');
+
+      let allReviews = [];
+      let currentIndex = 0;
+
+      function getStoredReviews() {
+        const stored = JSON.parse(localStorage.getItem('juju_reviews') || '[]');
+        const deleted = JSON.parse(localStorage.getItem('juju_reviews_deleted') || '[]');
+        return stored.filter((r) => !deleted.includes(r.id));
+      }
+
+      function getActiveDefaults() {
+        const deleted = JSON.parse(localStorage.getItem('juju_reviews_deleted') || '[]');
+        return DEFAULT_REVIEWS.filter((r) => !deleted.includes(r.id));
+      }
+
+      function buildCard(review) {
+        const initials = review.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+        return `
+          <div class="testi" data-review-id="${review.id}">
+            <span class="testi-beta">${review.default ? 'Bêta' : 'Avis utilisateur'}</span>
+              <button class="testi-delete" aria-label="Supprimer cet avis" data-id="${review.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>            <div class="testi-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+            <p class="testi-quote">"${review.text.replace(/</g, '&lt;')}"</p>
+            <div class="testi-author">
+              <div class="testi-avatar">${initials}</div>
+              <div>
+                <div class="testi-name">${review.name}</div>
+                <div class="testi-role">${review.role || 'Avis utilisateur'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function getVisibleCount() {
+        const w = window.innerWidth;
+        if (w <= 640) return 1;
+        if (w <= 1023) return 2;
+        return 3;
+      }
+
+      function renderCarousel() {
+        const stored = getStoredReviews();
+        const defaults = getActiveDefaults();
+        allReviews = [...stored, ...defaults];
+
+        if (allReviews.length === 0) {
+          track.innerHTML = '<p style="text-align: center; width: 100%; color: var(--light-texte-mute); padding: 2rem;">Aucun avis pour le moment.</p>';
+          dotsEl.innerHTML = '';
+          prevBtn.disabled = true;
+          nextBtn.disabled = true;
+          return;
+        }
+
+        track.innerHTML = allReviews.map(buildCard).join('');
+        track.style.transform = 'translateX(0)';
+        currentIndex = 0;
+
+        const visibleCount = getVisibleCount();
+        const maxIndex = Math.max(0, allReviews.length - visibleCount);
+        const dotsCount = maxIndex + 1;
+        dotsEl.innerHTML = '';
+        for (let i = 0; i < dotsCount; i++) {
+          const dot = document.createElement('button');
+          dot.className = 'testi-dot' + (i === 0 ? ' active' : '');
+          dot.addEventListener('click', () => goTo(i));
+          dotsEl.appendChild(dot);
+        }
+        updateNavCarousel();
+        attachDeleteHandlers();
+      }
+
+      function goTo(index) {
+        const visibleCount = getVisibleCount();
+        const maxIndex = Math.max(0, allReviews.length - visibleCount);
+        currentIndex = Math.max(0, Math.min(index, maxIndex));
+        const card = track.querySelector('.testi');
+        if (!card) return;
+        const cardWidth = card.offsetWidth + 24;
+        track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+        updateNavCarousel();
+      }
+
+      function updateNavCarousel() {
+        const visibleCount = getVisibleCount();
+        const maxIndex = Math.max(0, allReviews.length - visibleCount);
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex >= maxIndex;
+        dotsEl.querySelectorAll('.testi-dot').forEach((d, i) => {
+          d.classList.toggle('active', i === currentIndex);
+        });
+      }
+
+      prevBtn.addEventListener('click', () => goTo(currentIndex - 1));
+      nextBtn.addEventListener('click', () => goTo(currentIndex + 1));
+      window.addEventListener('resize', () => {
+        renderCarousel();
+      });
+
+      function attachDeleteHandlers() {
+        const buttons = track.querySelectorAll('.testi-delete');
+        console.log('[admin] attachDeleteHandlers : ' + buttons.length + ' boutons trouvés');
+        buttons.forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const id = e.currentTarget.dataset.id;
+            console.log('[admin] Clic sur supprimer, id =', id);
+            showDeleteModal(id);
+          });
+        });
+      }
+
+      function showDeleteModal(id) {
+        // Crée le modal si pas déjà présent
+        let modal = document.getElementById('delete-modal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'delete-modal';
+          modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;';
+          modal.innerHTML = `
+      <div style="background:var(--light-card);border:1px solid var(--light-bordure);border-radius:20px;padding:2rem;max-width:400px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.4);">
+        <h3 style="font-family:'Fraunces',serif;font-size:1.4rem;margin-bottom:0.75rem;color:var(--light-texte);">Supprimer cet avis ?</h3>
+        <p style="color:var(--light-texte-mute);margin-bottom:1.5rem;font-size:0.95rem;">Cette action est définitive. L'avis sera retiré de la landing.</p>
+        <div style="display:flex;gap:0.75rem;">
+          <button id="modal-cancel" class="btn btn-secondary" style="flex:1;padding:0.7rem 1rem;font-size:0.9rem;">Annuler</button>
+          <button id="modal-confirm" class="btn" style="flex:1;padding:0.7rem 1rem;font-size:0.9rem;background:rgb(220,38,38);color:white;">Supprimer</button>
+        </div>
+      </div>
+    `;
+          document.body.appendChild(modal);
+        }
+        modal.style.display = 'flex';
+
+        const cancel = () => { modal.style.display = 'none'; };
+        const confirmDelete = () => {
+          console.log('[admin] Confirmation de suppression, id =', id);
+          const stored = JSON.parse(localStorage.getItem('juju_reviews') || '[]');
+          const inStored = stored.find((r) => r.id === id);
+          if (inStored) {
+            localStorage.setItem('juju_reviews', JSON.stringify(stored.filter((r) => r.id !== id)));
+          } else {
+            const deleted = JSON.parse(localStorage.getItem('juju_reviews_deleted') || '[]');
+            deleted.push(id);
+            localStorage.setItem('juju_reviews_deleted', JSON.stringify(deleted));
+          }
+          modal.style.display = 'none';
+          renderCarousel();
+        };
+
+        // Remplace les listeners pour éviter empilement
+        const cancelBtn = modal.querySelector('#modal-cancel');
+        const confirmBtn = modal.querySelector('#modal-confirm');
+        const newCancel = cancelBtn.cloneNode(true);
+        const newConfirm = confirmBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+        confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
+        newCancel.addEventListener('click', cancel);
+        newConfirm.addEventListener('click', confirmDelete);
+      }
+
+      // Formulaire d'ajout
       const showBtn = document.getElementById('show-review-form');
       const form = document.getElementById('review-form');
       const cancelBtn = document.getElementById('cancel-review');
@@ -1675,14 +1900,14 @@
       let rating = 0;
 
       showBtn.addEventListener('click', () => {
-        showBtn.style.display = 'none';
+        showBtn.parentElement.style.display = 'none';
         form.style.display = 'block';
         nameInput.focus();
       });
 
       cancelBtn.addEventListener('click', () => {
         form.style.display = 'none';
-        showBtn.style.display = 'block';
+        showBtn.parentElement.style.display = 'block';
         nameInput.value = '';
         textInput.value = '';
         rating = 0;
@@ -1709,70 +1934,51 @@
           alert('Merci de remplir ton prénom, ta note et ton avis.');
           return;
         }
-        // Stocker l'avis localement (pas de backend pour cette démo)
         const reviews = JSON.parse(localStorage.getItem('juju_reviews') || '[]');
-        reviews.unshift({ name, text, rating, date: new Date().toISOString() });
+        const newReview = {
+          id: 'user-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+          name, text, rating,
+          role: 'Avis publié à l\'instant',
+          date: new Date().toISOString(),
+        };
+        reviews.unshift(newReview);
         localStorage.setItem('juju_reviews', JSON.stringify(reviews));
 
-        // Ajouter l'avis à la grille de témoignages
-        const grid = document.querySelector('.testimonials-grid');
-        if (grid) {
-          const card = document.createElement('div');
-          card.className = 'testi';
-          const initials = name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
-          card.innerHTML = `
-        <span class="testi-beta">Avis bêta</span>
-        <div class="testi-stars">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
-        <p class="testi-quote">"${text.replace(/</g, '&lt;')}"</p>
-        <div class="testi-author">
-          <div class="testi-avatar">${initials}</div>
-          <div>
-            <div class="testi-name">${name}</div>
-            <div class="testi-role">Avis publié à l'instant</div>
-          </div>
-        </div>
-      `;
-          grid.prepend(card);
-        }
-
-        // Reset form
         thanks.style.display = 'block';
         setTimeout(() => {
           form.style.display = 'none';
-          showBtn.style.display = 'block';
+          showBtn.parentElement.style.display = 'block';
           thanks.style.display = 'none';
           nameInput.value = '';
           textInput.value = '';
           rating = 0;
           updateStars();
-        }, 1500);
+          renderCarousel();
+        }, 1200);
       });
 
-      // Recharger les avis stockés au chargement
-      function loadStoredReviews() {
-        const reviews = JSON.parse(localStorage.getItem('juju_reviews') || '[]');
-        const grid = document.querySelector('.testimonials-grid');
-        if (!grid) return;
-        reviews.slice().reverse().forEach((r) => {
-          const card = document.createElement('div');
-          card.className = 'testi';
-          const initials = r.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
-          card.innerHTML = `
-        <span class="testi-beta">Avis bêta</span>
-        <div class="testi-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
-        <p class="testi-quote">"${r.text.replace(/</g, '&lt;')}"</p>
-        <div class="testi-author">
-          <div class="testi-avatar">${initials}</div>
-          <div>
-            <div class="testi-name">${r.name}</div>
-            <div class="testi-role">Avis utilisateur</div>
-          </div>
-        </div>
-      `;
-          grid.prepend(card);
-        });
+      // Mode admin
+      function enableAdmin() {
+        document.body.classList.add('admin-mode');
+        localStorage.setItem('juju_admin', '1');
       }
-      loadStoredReviews();
+      function disableAdmin() {
+        document.body.classList.remove('admin-mode');
+        localStorage.removeItem('juju_admin');
+      }
+      if (localStorage.getItem('juju_admin') === '1') enableAdmin();
+      if (new URLSearchParams(location.search).get('admin') === 'juju2026') enableAdmin();
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+          e.preventDefault();
+          if (document.body.classList.contains('admin-mode')) disableAdmin();
+          else enableAdmin();
+          renderCarousel();
+        }
+      });
+
+      // Démarrage
+      renderCarousel();
     })();
   </script>
 </body>
