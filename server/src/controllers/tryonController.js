@@ -1,9 +1,9 @@
 const db = require('../db');
 const { runTryOn } = require('../services/vton');
 const { mapCategoryForVTON, isVTONSupported } = require('../services/categoryMapping');
+
 const DAILY_LIMIT = 2;
 const REQUIRED_ANGLES = ['face', 'profil_droit', 'dos', 'profil_gauche'];
-
 
 async function createTryOn(req, res) {
   const { id_article } = req.body;
@@ -13,7 +13,7 @@ async function createTryOn(req, res) {
   }
 
   try {
-    // 1. Récupère l'article (et vérifie qu'il appartient au user)
+    // 1. Article
     const articleResult = await db.query(
       `SELECT a.id_article, a.nom, a.image_url, a.id_utilisateur,
               c.nom AS categorie_nom, c.type AS categorie_type
@@ -39,7 +39,7 @@ async function createTryOn(req, res) {
       });
     }
 
-    // 2. Vérifie que les 4 photos d'avatar existent
+    // 2. Photos avatar
     const photosResult = await db.query(
       `SELECT angle, image_url FROM photos_avatar
        WHERE id_utilisateur = $1 AND angle = ANY($2)`,
@@ -58,7 +58,7 @@ async function createTryOn(req, res) {
     const photosMap = {};
     photosResult.rows.forEach((p) => { photosMap[p.angle] = p.image_url; });
 
-    // 3. Rate-limit : max DAILY_LIMIT essayages par jour
+    // 3. Rate-limit
     const todayResult = await db.query(
       `SELECT COUNT(*) FROM essayages_log
        WHERE id_utilisateur = $1 AND cree_le > NOW() - INTERVAL '24 hours'`,
@@ -74,7 +74,7 @@ async function createTryOn(req, res) {
       });
     }
 
-    // 4. Lancement des 4 inférences EN PARALLÈLE
+    // 4. Inférences VTON en parallèle
     const category = mapCategoryForVTON(article.categorie_nom, article.categorie_type);
     const description = `${article.categorie_nom || 'clothing'} ${article.nom || ''}`.trim();
 
@@ -99,22 +99,36 @@ async function createTryOn(req, res) {
     const results = settled.filter((r) => r.success);
     const errors = settled.filter((r) => !r.success);
 
-    // 5. Log de l'essayage (pour le rate-limit)
+    // 5. Insert dans essayages_log avec URLs FASHN éphémères
     const statut = errors.length === 0 ? 'success' : (results.length === 0 ? 'error' : 'partial');
-    await db.query(
-      `INSERT INTO essayages_log (id_utilisateur, id_article, statut) VALUES ($1, $2, $3)`,
-      [req.user.id_utilisateur, id_article, statut]
-    );
 
-    // 6. Si tout a échoué, on renvoie une erreur 502 (problème côté Replicate)
+    const urlByAngle = {};
+    results.forEach((r) => { urlByAngle[r.angle] = r.image_url; });
+
+    const insertResult = await db.query(
+      `INSERT INTO essayages_log (
+         id_utilisateur, id_article, statut,
+         image_url_face, image_url_profil_droit, image_url_dos, image_url_profil_gauche,
+         vetement_image_url, vetement_nom, categorie_nom, saved
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, FALSE)
+       RETURNING id_essayage`,
+      [
+        req.user.id_utilisateur, id_article, statut,
+        urlByAngle.face || null,
+        urlByAngle.profil_droit || null,
+        urlByAngle.dos || null,
+        urlByAngle.profil_gauche || null,
+        article.image_url, article.nom, article.categorie_nom,
+      ]
+    );
+    const idEssayage = insertResult.rows[0].id_essayage;
+
     if (results.length === 0) {
-      return res.status(502).json({
-        error: 'Tous les angles ont échoué côté service IA.',
-        errors,
-      });
+      return res.status(502).json({ error: 'Tous les angles ont échoué côté service IA.', errors });
     }
 
     return res.json({
+      id_essayage: idEssayage,
       article: {
         id_article: article.id_article,
         nom: article.nom,
@@ -123,10 +137,7 @@ async function createTryOn(req, res) {
       },
       results: results.map((r) => ({ angle: r.angle, image_url: r.image_url })),
       errors: errors.map((e) => ({ angle: e.angle, message: e.message })),
-      stats: {
-        used_today: usedToday + 1,
-        daily_limit: DAILY_LIMIT,
-      },
+      stats: { used_today: usedToday + 1, daily_limit: DAILY_LIMIT },
     });
   } catch (err) {
     console.error('[VTON] Erreur générale:', err);
@@ -143,9 +154,7 @@ async function getQuota(req, res) {
     );
     const used = parseInt(result.rows[0].count, 10);
     return res.json({
-      used,
-      limit: DAILY_LIMIT,
-      remaining: Math.max(0, DAILY_LIMIT - used),
+      used, limit: DAILY_LIMIT, remaining: Math.max(0, DAILY_LIMIT - used),
     });
   } catch (err) {
     console.error('[VTON] getQuota error:', err);

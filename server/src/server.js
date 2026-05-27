@@ -42,7 +42,7 @@ app.use('/api/categories', categoriesRoutes);
 app.use('/api/couleurs', couleursRoutes);
 app.use('/api/matieres', matieresRoutes);
 app.use('/api/marques', marquesRoutes);
-
+app.use('/api/essayages', require('./routes/essayages'));
 
 app.listen(PORT, () => {
   console.log(`Juju API running on http://localhost:${PORT}`);
