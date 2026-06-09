@@ -9,6 +9,7 @@ import { uploadImage } from '../api/upload';
 import { useDensity } from '../hooks/useDensity';
 import { useTheme } from '../hooks/useTheme';
 import { Card, Eyebrow, SectionLabel, Button } from '../components/ui';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Profil() {
   const { user, logout } = useAuth();
@@ -18,6 +19,7 @@ export default function Profil() {
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef(null);
+  const toast = useToast();
 
   const loadStats = async () => {
     try {
@@ -42,7 +44,7 @@ export default function Profil() {
       await updateAvatar(url);
       await loadStats();
     } catch (err) {
-      alert("Impossible de mettre à jour l'avatar : " + (err.response?.data?.error || err.message));
+      toast.error("Impossible de mettre à jour l'avatar : " + (err.response?.data?.error || err.message));
     } finally {
       setUploadingAvatar(false);
       e.target.value = '';
@@ -56,7 +58,7 @@ export default function Profil() {
       await updateAvatar(null);
       await loadStats();
     } catch {
-      alert('Suppression impossible.');
+      toast.error('Suppression impossible.');
     } finally {
       setUploadingAvatar(false);
     }
@@ -260,11 +262,10 @@ function ToggleOption({ icon: Icon, label, value, current, onChange }) {
     <button
       type="button"
       onClick={() => onChange(value)}
-      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-        isActive
-          ? 'bg-gradient-violet text-white border-transparent shadow-violet-sm'
-          : 'bg-transparent text-juju-light-texte dark:text-juju-texte border-juju-light-bordure dark:border-juju-bordure hover:border-juju-violet dark:hover:border-juju-dore'
-      }`}
+      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${isActive
+        ? 'bg-gradient-violet text-white border-transparent shadow-violet-sm'
+        : 'bg-transparent text-juju-light-texte dark:text-juju-texte border-juju-light-bordure dark:border-juju-bordure hover:border-juju-violet dark:hover:border-juju-dore'
+        }`}
     >
       {Icon && <Icon size={15} />}
       {label}

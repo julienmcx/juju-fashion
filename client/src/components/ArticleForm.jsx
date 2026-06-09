@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Save, Plus, Check } from 'lucide-react';
 import { createMarque } from '../api/referentiels';
 import { Button, SectionLabel } from './ui';
+import { useToast } from '../contexts/ToastContext';
 
 const ORIGINES = [
   { value: 'neuf', label: 'Neuf' },
@@ -47,6 +48,7 @@ export default function ArticleForm({
   const [showNewBrand, setShowNewBrand] = useState(false);
   const [newBrandName, setNewBrandName] = useState('');
   const [creatingBrand, setCreatingBrand] = useState(false);
+  const toast = useToast();
 
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -83,7 +85,7 @@ export default function ArticleForm({
       setNewBrandName('');
       setShowNewBrand(false);
     } catch {
-      alert('Création de la marque impossible.');
+      toast.error('Création de la marque impossible.');
     } finally {
       setCreatingBrand(false);
     }
@@ -109,7 +111,7 @@ export default function ArticleForm({
       };
       await onSubmit(payload);
     } catch (err) {
-      setError(err.response?.data?.error || 'Enregistrement impossible.');
+      toast.error(err.response?.data?.error || 'Enregistrement impossible.');
       setSaving(false);
     }
   };
@@ -237,11 +239,10 @@ export default function ArticleForm({
                 type="button"
                 key={c.id_couleur}
                 onClick={() => toggleCouleur(c.id_couleur)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full border text-sm font-medium transition-colors ${
-                  isSelected
-                    ? 'border-juju-violet bg-juju-violet/10 text-juju-violet dark:text-juju-dore'
-                    : 'border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte hover:border-juju-violet'
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-full border text-sm font-medium transition-colors ${isSelected
+                  ? 'border-juju-violet bg-juju-violet/10 text-juju-violet dark:text-juju-dore'
+                  : 'border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte hover:border-juju-violet'
+                  }`}
               >
                 <div
                   className="w-3 h-3 rounded-full border border-juju-light-bordure dark:border-juju-bordure"
@@ -265,16 +266,14 @@ export default function ArticleForm({
             return (
               <div
                 key={mat.id_matiere}
-                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
-                  selected ? 'border-juju-violet bg-juju-violet/5' : 'border-juju-light-bordure dark:border-juju-bordure'
-                }`}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${selected ? 'border-juju-violet bg-juju-violet/5' : 'border-juju-light-bordure dark:border-juju-bordure'
+                  }`}
               >
                 <button
                   type="button"
                   onClick={() => toggleMatiere(mat.id_matiere)}
-                  className={`w-5 h-5 rounded-md border flex items-center justify-center text-white transition-colors ${
-                    selected ? 'bg-gradient-violet border-transparent' : 'border-juju-light-texte-mute dark:border-juju-texte-mute'
-                  }`}
+                  className={`w-5 h-5 rounded-md border flex items-center justify-center text-white transition-colors ${selected ? 'bg-gradient-violet border-transparent' : 'border-juju-light-texte-mute dark:border-juju-texte-mute'
+                    }`}
                 >
                   {selected && <Check size={14} />}
                 </button>

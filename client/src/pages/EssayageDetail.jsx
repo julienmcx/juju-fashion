@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, Loader2, Sparkles } from 'lucide-react';
 import { fetchEssayage, deleteEssayage } from '../api/essayages';
 import { Button } from '../components/ui';
+import { useToast } from '../contexts/ToastContext';
 
 const ANGLES = [
     { key: 'face', label: 'Face', col: 'image_url_face' },
@@ -20,6 +21,7 @@ export default function EssayageDetail() {
     const [currentAngle, setCurrentAngle] = useState('face');
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const toast = useToast();
 
     useEffect(() => {
         fetchEssayage(id)
@@ -34,7 +36,7 @@ export default function EssayageDetail() {
             await deleteEssayage(id);
             navigate('/essayages');
         } catch (err) {
-            alert('Suppression impossible : ' + (err.response?.data?.error || err.message));
+            toast.error('Suppression impossible : ' + (err.response?.data?.error || err.message));
             setDeleting(false);
             setShowConfirmDelete(false);
         }
@@ -116,8 +118,8 @@ export default function EssayageDetail() {
                             onClick={() => setCurrentAngle(angle.key)}
                             disabled={!url}
                             className={`group relative aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all ${isActive
-                                    ? 'border-juju-violet'
-                                    : 'border-transparent hover:border-juju-light-bordure dark:hover:border-juju-bordure'
+                                ? 'border-juju-violet'
+                                : 'border-transparent hover:border-juju-light-bordure dark:hover:border-juju-bordure'
                                 } ${!url ? 'opacity-30 cursor-not-allowed' : ''}`}
                         >
                             {url ? (
