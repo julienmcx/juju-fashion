@@ -11,6 +11,8 @@ import Profil from './pages/Profil';
 import ArticleDetail from './pages/ArticleDetail';
 import ArticleEdit from './pages/ArticleEdit';
 import ArticleEssai from './pages/ArticleEssai';
+import Essayages from './pages/Essayages';
+import EssayageDetail from './pages/EssayageDetail';
 
 function ProtectedLayout() {
   return (
@@ -38,6 +40,8 @@ function App() {
             <Route path="/profil" element={<Profil />} />
             <Route path="/articles/:id" element={<ArticleDetail />} />
             <Route path="/articles/:id/edit" element={<ArticleEdit />} />
+            <Route path="/essayages" element={<ProtectedRoute><Layout><Essayages /></Layout></ProtectedRoute>} />
+            <Route path="/essayages/:id" element={<ProtectedRoute><Layout><EssayageDetail /></Layout></ProtectedRoute>} />
           </Route>
 
           <Route path="/" element={<Navigate to="/garde-robe" replace />} />

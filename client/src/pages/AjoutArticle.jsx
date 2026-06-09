@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Camera, Image as ImageIcon, Loader2, Sparkles } from 'lucide-react';
 import { uploadImage, removeBackground } from '../api/upload';
 import { createArticle } from '../api/articles';
 import {
@@ -13,13 +13,15 @@ export default function AjoutArticle() {
 
   const [step, setStep] = useState('capture');
   const [imageUrl, setImageUrl] = useState('');
+  const [pendingImageUrl, setPendingImageUrl] = useState('');
+  const [showDetourChoice, setShowDetourChoice] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [detouring, setDetouring] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [categories, setCategories] = useState([]);
   const [couleurs, setCouleurs] = useState([]);
   const [matieres, setMatieres] = useState([]);
   const [marques, setMarques] = useState([]);
-  const [uploadStage, setUploadStage] = useState('');
 
   useEffect(() => {
     Promise.all([fetchCategories(), fetchCouleurs(), fetchMatieres(), fetchMarques()])
@@ -39,27 +41,36 @@ export default function AjoutArticle() {
     setUploading(true);
 
     try {
-      setUploadStage('upload');
       const { url: originalUrl } = await uploadImage(file);
-
-      setUploadStage('detour');
-      let finalUrl = originalUrl;
-      try {
-        const { url: cleanUrl } = await removeBackground(originalUrl);
-        finalUrl = cleanUrl;
-      } catch (bgErr) {
-        console.warn('Détourage échoué, on garde l\'image originale:', bgErr);
-      }
-
-      setImageUrl(finalUrl);
-      setStep('form');
+      setPendingImageUrl(originalUrl);
+      setShowDetourChoice(true);
     } catch (err) {
       setUploadError(err.response?.data?.error || "Échec de l'upload.");
     } finally {
       setUploading(false);
-      setUploadStage('');
       e.target.value = '';
     }
+  };
+
+  const handleDetour = async () => {
+    setDetouring(true);
+    try {
+      const { url: cleanUrl } = await removeBackground(pendingImageUrl);
+      setImageUrl(cleanUrl);
+    } catch (bgErr) {
+      console.warn('Détourage échoué, image originale conservée :', bgErr);
+      setImageUrl(pendingImageUrl);
+    } finally {
+      setDetouring(false);
+      setShowDetourChoice(false);
+      setStep('form');
+    }
+  };
+
+  const handleKeepAsIs = () => {
+    setImageUrl(pendingImageUrl);
+    setShowDetourChoice(false);
+    setStep('form');
   };
 
   const handleSubmit = async (payload) => {
@@ -77,7 +88,6 @@ export default function AjoutArticle() {
           </p>
 
           <div className="space-y-3 max-w-md">
-            {/* Bouton caméra : mobile-only */}
             <div className="md:hidden">
               <CaptureButton
                 icon={Camera}
@@ -89,7 +99,6 @@ export default function AjoutArticle() {
                 disabled={uploading}
               />
             </div>
-            {/* Bouton galerie / upload : partout */}
             <CaptureButton
               icon={ImageIcon}
               label="Choisir un fichier"
@@ -103,8 +112,7 @@ export default function AjoutArticle() {
           {uploading && (
             <div className="flex items-center gap-2 mt-6 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">
               <Loader2 size={16} className="animate-spin" />
-              {uploadStage === 'upload' && 'Upload de la photo…'}
-              {uploadStage === 'detour' && 'Suppression de l\'arrière-plan…'}
+              Upload de la photo…
             </div>
           )}
 
@@ -131,6 +139,56 @@ export default function AjoutArticle() {
             submitLabel="Créer l'article"
             onCancel={() => navigate('/garde-robe')}
           />
+        </div>
+      )}
+
+      {/* Modale : choix du détourage */}
+      {showDetourChoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <h3 className="text-xl font-medium mb-2">Détourer le fond&nbsp;?</h3>
+            <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-5">
+              Si ta photo a déjà un fond uni (packshot, image d'un site marchand), garde-la telle quelle. Sinon, l'IA va isoler le vêtement proprement.
+            </p>
+
+            <div className="aspect-square w-40 mx-auto mb-5 rounded-lg overflow-hidden bg-juju-light-bg dark:bg-juju-noir border border-juju-light-bordure dark:border-juju-bordure">
+              <img src={pendingImageUrl} alt="Aperçu" className="w-full h-full object-cover" />
+            </div>
+
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={handleDetour}
+                disabled={detouring}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors disabled:opacity-60"
+              >
+                {detouring ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Détourage en cours…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={16} />
+                    Détourer le fond (IA)
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleKeepAsIs}
+                disabled={detouring}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-juju-light-bordure dark:border-juju-bordure rounded-lg hover:border-juju-dore transition-colors disabled:opacity-60"
+              >
+                <ImageIcon size={16} />
+                Garder telle quelle
+              </button>
+            </div>
+
+            <p className="text-[11px] text-center text-juju-light-texte-mute dark:text-juju-texte-mute mt-4">
+              Le détourage IA consomme un crédit FASHN.
+            </p>
+          </div>
         </div>
       )}
     </div>

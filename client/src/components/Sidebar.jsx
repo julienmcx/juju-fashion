@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Shirt, Camera, UserSquare, User, LogOut } from 'lucide-react';
+import { Shirt, Camera, UserSquare, User, LogOut, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import JujuLogo from './JujuLogo';
 
@@ -7,6 +7,7 @@ const navItems = [
   { to: '/garde-robe', icon: Shirt, label: 'Garde-robe' },
   { to: '/ajout', icon: Camera, label: 'Ajouter' },
   { to: '/mannequin', icon: UserSquare, label: 'Mannequin' },
+  { to: '/essayages', icon: Sparkles, label: 'Mes essayages' },
   { to: '/profil', icon: User, label: 'Profil' },
 ];
 

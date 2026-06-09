@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchProfileStats, updateAvatar } from '../api/profile';
-import { uploadImage, removeBackground } from '../api/upload';
+import { uploadImage } from '../api/upload';
 import { useDensity } from '../hooks/useDensity';
 import { useTheme } from '../hooks/useTheme';
 
@@ -36,16 +36,9 @@ export default function Profil() {
     if (!file) return;
     setUploadingAvatar(true);
     try {
-      const { url: originalUrl } = await uploadImage(file);
-      // Tentative de détourage (cohérent avec le flow d'ajout d'article)
-      let finalUrl = originalUrl;
-      try {
-        const { url } = await removeBackground(originalUrl);
-        finalUrl = url;
-      } catch {
-        // détourage échoué, on garde l'original
-      }
-      await updateAvatar(finalUrl);
+      const { url } = await uploadImage(file);
+      // Photo de profil = on garde l'image telle quelle (pas de détourage = pas de tokens FASHN)
+      await updateAvatar(url);
       await loadStats();
     } catch (err) {
       alert("Impossible de mettre à jour l'avatar : " + (err.response?.data?.error || err.message));
@@ -301,11 +294,10 @@ function ToggleOption({ icon: Icon, label, value, current, onChange }) {
     <button
       type="button"
       onClick={() => onChange(value)}
-      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-        isActive
-          ? 'bg-juju-dore text-juju-noir border-juju-dore'
-          : 'bg-transparent text-juju-light-texte dark:text-juju-texte border-juju-light-bordure dark:border-juju-bordure hover:border-juju-texte-mute'
-      }`}
+      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${isActive
+        ? 'bg-juju-dore text-juju-noir border-juju-dore'
+        : 'bg-transparent text-juju-light-texte dark:text-juju-texte border-juju-light-bordure dark:border-juju-bordure hover:border-juju-texte-mute'
+        }`}
     >
       {Icon && <Icon size={14} />}
       {label}

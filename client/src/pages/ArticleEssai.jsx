@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import {
-  ArrowLeft, Sparkles, ChevronLeft, ChevronRight,
-  AlertCircle, Loader2, RefreshCw,
-} from 'lucide-react';
+import { ArrowLeft, Sparkles, ChevronLeft, ChevronRight, AlertCircle, Loader2, RefreshCw, BookmarkPlus, Check } from 'lucide-react';
 import { fetchArticle } from '../api/articles';
 import { fetchAvatarPhotos } from '../api/avatar';
 import { createTryOn, fetchQuota } from '../api/tryon';
+import { saveEssayage } from '../api/essayages';
 
 const REQUIRED_ANGLES = ['face', 'profil_droit', 'dos', 'profil_gauche'];
 const ANGLE_LABELS = {
@@ -150,10 +148,10 @@ function ReadyView({ article, quota, onLaunch }) {
   return (
     <div>
       <div className="flex items-center gap-3 mb-2">
-      <h2 className="text-2xl md:text-3xl font-medium">Essayage virtuel</h2>
-      <span className="px-2 py-0.5 bg-juju-violet text-white text-[10px] font-bold uppercase tracking-wider rounded-full">
-        Bêta
-      </span>
+        <h2 className="text-2xl md:text-3xl font-medium">Essayage virtuel</h2>
+        <span className="px-2 py-0.5 bg-juju-violet text-white text-[10px] font-bold uppercase tracking-wider rounded-full">
+          Bêta
+        </span>
       </div>
       <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-2">
         Voyons à quoi tu ressembles avec cet article.
@@ -215,9 +213,29 @@ function GeneratingView() {
 }
 
 function SuccessView({ tryonData, index, setIndex, onRetry }) {
+  // Tous les useState en haut (Rules of Hooks)
+  const [touchStart, setTouchStart] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
   const orderedResults = REQUIRED_ANGLES
     .map((angle) => tryonData.results.find((r) => r.angle === angle))
     .filter(Boolean);
+
+  const handleSave = async () => {
+    if (saved || saving) return;
+    setSaving(true);
+    setSaveError('');
+    try {
+      await saveEssayage(tryonData.id_essayage);
+      setSaved(true);
+    } catch (err) {
+      setSaveError(err.response?.data?.error || 'Erreur de sauvegarde');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (orderedResults.length === 0) {
     return <p className="text-red-400 text-center py-10">Aucun résultat exploitable.</p>;
@@ -227,7 +245,6 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
   const next = () => setIndex((i) => (i + 1) % orderedResults.length);
   const prev = () => setIndex((i) => (i - 1 + orderedResults.length) % orderedResults.length);
 
-  const [touchStart, setTouchStart] = useState(null);
   const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX);
   const handleTouchEnd = (e) => {
     if (touchStart === null) return;
@@ -299,8 +316,8 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
             onClick={() => setIndex(i)}
             aria-label={`Voir ${ANGLE_LABELS[r.angle]}`}
             className={`h-2 rounded-full transition-all ${i === index
-                ? 'w-8 bg-juju-dore'
-                : 'w-2 bg-juju-bordure hover:bg-juju-texte-mute'
+              ? 'w-8 bg-juju-dore'
+              : 'w-2 bg-juju-bordure hover:bg-juju-texte-mute'
               }`}
           />
         ))}
@@ -317,6 +334,46 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
             <img src={r.image_url} alt={ANGLE_LABELS[r.angle]} className="w-full h-full object-cover" />
           </button>
         ))}
+      </div>
+
+      {/* Bouton Sauvegarder dans mes essayages */}
+      <div className="mt-8 max-w-md mx-auto">
+        {!saved ? (
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors disabled:opacity-60"
+          >
+            {saving ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Sauvegarde…
+              </>
+            ) : (
+              <>
+                <BookmarkPlus size={18} />
+                Sauvegarder dans mes essayages
+              </>
+            )}
+          </button>
+        ) : (
+          <div className="text-center py-2">
+            <p className="inline-flex items-center gap-2 text-sm text-juju-dore font-medium mb-1">
+              <Check size={16} /> Sauvegardé dans tes essayages
+            </p>
+            <div>
+              <Link
+                to="/essayages"
+                className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore transition-colors underline"
+              >
+                Voir mes essayages →
+              </Link>
+            </div>
+          </div>
+        )}
+        {saveError && (
+          <p className="text-red-400 text-xs text-center mt-2">{saveError}</p>
+        )}
       </div>
     </div>
   );
