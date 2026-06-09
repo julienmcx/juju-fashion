@@ -23,3 +23,8 @@ export async function updateArticle(id, payload) {
 export async function deleteArticle(id) {
   await apiClient.delete(`/articles/${id}`);
 }
+
+export async function toggleFavori(id) {
+  const { data } = await apiClient.patch(`/articles/${id}/favori`, {});
+  return data;
+}

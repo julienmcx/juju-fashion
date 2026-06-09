@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   createArticle, listArticles,
-  getArticle, updateArticle, deleteArticle
+  getArticle, updateArticle, deleteArticle, toggleFavori
 } = require('../controllers/articlesController');
 const { authRequired } = require('../middlewares/auth');
 
@@ -13,5 +13,5 @@ router.get('/', listArticles);
 router.get('/:id', getArticle);
 router.put('/:id', updateArticle);
 router.delete('/:id', deleteArticle);
-
+router.patch('/:id/favori', toggleFavori);
 module.exports = router;

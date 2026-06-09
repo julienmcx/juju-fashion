@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit, Trash2, Sparkles, Shirt, ExternalLink } from 'lucide-react';
-import { fetchArticle, deleteArticle } from '../api/articles';
+import { ArrowLeft, Edit, Trash2, Sparkles, Shirt, ExternalLink, Heart } from 'lucide-react';
+import { fetchArticle, deleteArticle, toggleFavori } from '../api/articles';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { Button, Card, Eyebrow, SectionLabel } from '../components/ui';
 
@@ -24,6 +24,15 @@ export default function ArticleDetail() {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handleToggleFavori = async () => {
+    setArticle((prev) => ({ ...prev, favori: !prev.favori }));
+    try {
+      await toggleFavori(id);
+    } catch {
+      setArticle((prev) => ({ ...prev, favori: !prev.favori }));
+    }
+  };
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -70,8 +79,21 @@ export default function ArticleDetail() {
           {article.categorie_nom && (
             <Eyebrow className="mb-3">{article.categorie_nom}</Eyebrow>
           )}
-          <h1 className="font-display text-3xl md:text-4xl leading-[1.08] mb-2">{article.nom}</h1>
-          {article.marque_nom && (
+          <div className="flex items-start gap-3 mb-2">
+            <h1 className="font-display text-3xl md:text-4xl leading-[1.08] flex-1">{article.nom}</h1>
+            <button
+              onClick={handleToggleFavori}
+              aria-label={article.favori ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+              className="shrink-0 w-11 h-11 rounded-full border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center transition-all hover:scale-105 active:scale-95 mt-1"
+            >
+              <Heart
+                size={20}
+                className={`transition-colors ${
+                  article.favori ? 'fill-red-500 text-red-500' : 'text-juju-light-texte-mute dark:text-juju-texte-mute'
+                }`}
+              />
+            </button>
+          </div>          {article.marque_nom && (
             <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-4">par {article.marque_nom}</p>
           )}
           {prix && <p className="text-2xl font-display text-juju-dore mb-6">{prix}</p>}

@@ -1,5 +1,6 @@
 import Sidebar from './Sidebar';
 import BottomTabBar from './BottomTabBar';
+import OnboardingModal from './OnboardingModal';
 
 export default function Layout({ children }) {
   return (
@@ -14,6 +15,7 @@ export default function Layout({ children }) {
         className="app-blob top-1/2 -left-32 w-[460px] h-[460px] blur-3xl bg-juju-violet/10 dark:bg-juju-violet/20 animate-drift-rev"
       />
 
+      <OnboardingModal />
       <Sidebar />
       <main className="md:ml-64 pb-28 md:pb-0 min-h-screen relative z-[1]">
         {children}

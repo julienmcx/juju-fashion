@@ -13,6 +13,9 @@ import ArticleEdit from './pages/ArticleEdit';
 import ArticleEssai from './pages/ArticleEssai';
 import Essayages from './pages/Essayages';
 import EssayageDetail from './pages/EssayageDetail';
+import MentionsLegales from './pages/MentionsLegales';
+import Confidentialite from './pages/Confidentialite';
+import NotFound from './pages/NotFound';
 
 function ProtectedLayout() {
   return (
@@ -42,10 +45,12 @@ function App() {
             <Route path="/articles/:id/edit" element={<ArticleEdit />} />
             <Route path="/essayages" element={<ProtectedRoute><Layout><Essayages /></Layout></ProtectedRoute>} />
             <Route path="/essayages/:id" element={<ProtectedRoute><Layout><EssayageDetail /></Layout></ProtectedRoute>} />
+            <Route path="/mentions-legales" element={<MentionsLegales />} />
+            <Route path="/confidentialite" element={<Confidentialite />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/garde-robe" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

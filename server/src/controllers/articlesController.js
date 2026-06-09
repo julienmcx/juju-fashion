@@ -1,29 +1,5 @@
 const db = require('../db');
 
-/**
- * POST /api/articles
- * Body attendu :
- * {
- *   id_categorie: 6,
- *   nom: "T-shirt blanc Uniqlo",
- *   image_url: "https://...",
- *   id_marque: 3,                        // optionnel
- *   lien_achat: "https://...",           // optionnel
- *   prix: 19.90,                         // optionnel
- *   devise: "EUR",                       // optionnel, défaut EUR
- *   origine: "neuf",                     // optionnel, défaut "autre"
- *   taille: "M",                         // optionnel
- *   pointure: 42.5,                      // optionnel
- *   longueur_cm: 110,                    // optionnel
- *   matiere_bijou: "argent",             // optionnel
- *   lunettes_teintees: false,            // optionnel
- *   mensurations: { dos: 70 },           // optionnel (JSONB)
- *   notes: "...",                        // optionnel
- *   couleurs: [1, 4],                    // tableau d'id_couleur
- *   matieres: [{id_matiere: 1, pourcentage: 60},
- *              {id_matiere: 2, pourcentage: 40}]
- * }
- */
 async function createArticle(req, res) {
   const client = await db.getClient();
   try {
@@ -36,7 +12,6 @@ async function createArticle(req, res) {
       couleurs = [], matieres = []
     } = req.body;
 
-    // Validation minimale
     if (!id_categorie || !nom || !image_url) {
       return res.status(400).json({
         error: 'Champs requis : id_categorie, nom, image_url'
@@ -45,7 +20,6 @@ async function createArticle(req, res) {
 
     await client.query('BEGIN');
 
-    // 1. Insert article principal
     const articleResult = await client.query(
       `INSERT INTO articles (
          id_utilisateur, id_categorie, id_marque,
@@ -66,7 +40,6 @@ async function createArticle(req, res) {
     );
     const article = articleResult.rows[0];
 
-    // 2. Insert couleurs
     for (const id_couleur of couleurs) {
       await client.query(
         `INSERT INTO articles_couleurs (id_article, id_couleur) VALUES ($1, $2)`,
@@ -74,7 +47,6 @@ async function createArticle(req, res) {
       );
     }
 
-    // 3. Insert matières
     for (const m of matieres) {
       await client.query(
         `INSERT INTO articles_matieres (id_article, id_matiere, pourcentage)
@@ -99,20 +71,10 @@ async function createArticle(req, res) {
   }
 }
 
-/**
- * GET /api/articles
- * Query params optionnels :
- *   - id_categorie
- *   - id_marque
- *   - origine
- *   - id_couleur
- *   - search       (recherche textuelle sur nom)
- *   - limit (def 50), offset (def 0)
- */
 async function listArticles(req, res) {
   try {
     const {
-      id_categorie, id_marque, origine, id_couleur, search,
+      id_categorie, id_marque, origine, id_couleur, search, favori,
       limit = 50, offset = 0
     } = req.query;
 
@@ -123,6 +85,7 @@ async function listArticles(req, res) {
     if (id_marque)    { values.push(id_marque);    conditions.push(`a.id_marque = $${values.length}`); }
     if (origine)      { values.push(origine);      conditions.push(`a.origine = $${values.length}`); }
     if (search)       { values.push(`%${search}%`); conditions.push(`a.nom ILIKE $${values.length}`); }
+    if (favori === 'true') { conditions.push(`a.favori = TRUE`); }
     if (id_couleur) {
       values.push(id_couleur);
       conditions.push(`EXISTS (
@@ -136,7 +99,7 @@ async function listArticles(req, res) {
     const sql = `
       SELECT
         a.id_article, a.nom, a.image_url, a.prix, a.devise,
-        a.origine, a.taille, a.cree_le,
+        a.origine, a.taille, a.favori, a.cree_le,
         c.nom AS categorie,
         m.nom_marque AS marque,
         COALESCE(
@@ -162,10 +125,6 @@ async function listArticles(req, res) {
   }
 }
 
-/**
- * GET /api/articles/:id
- * Détail complet d'un article (couleurs + matières + marque + catégorie)
- */
 async function getArticle(req, res) {
   try {
     const sql = `
@@ -207,11 +166,6 @@ async function getArticle(req, res) {
   }
 }
 
-/**
- * PUT /api/articles/:id
- * Mise à jour partielle. Seuls les champs envoyés sont modifiés.
- * Si "couleurs" ou "matieres" sont présents, on remplace intégralement.
- */
 async function updateArticle(req, res) {
   const client = await db.getClient();
   try {
@@ -251,7 +205,6 @@ async function updateArticle(req, res) {
       }
       article = result.rows[0];
     } else {
-      // Aucun champ principal à modifier : on vérifie juste l'existence
       const check = await client.query(
         `SELECT * FROM articles WHERE id_article = $1 AND id_utilisateur = $2`,
         [req.params.id, req.user.id_utilisateur]
@@ -263,7 +216,6 @@ async function updateArticle(req, res) {
       article = check.rows[0];
     }
 
-    // Remplacement des couleurs si fourni
     if (Array.isArray(req.body.couleurs)) {
       await client.query(
         `DELETE FROM articles_couleurs WHERE id_article = $1`,
@@ -277,7 +229,6 @@ async function updateArticle(req, res) {
       }
     }
 
-    // Remplacement des matières si fourni
     if (Array.isArray(req.body.matieres)) {
       await client.query(
         `DELETE FROM articles_matieres WHERE id_article = $1`,
@@ -308,10 +259,6 @@ async function updateArticle(req, res) {
   }
 }
 
-/**
- * DELETE /api/articles/:id
- * Les jointures (articles_couleurs, articles_matieres) sont nettoyées en cascade.
- */
 async function deleteArticle(req, res) {
   try {
     const result = await db.query(
@@ -328,5 +275,23 @@ async function deleteArticle(req, res) {
   }
 }
 
+async function toggleFavori(req, res) {
+  try {
+    const result = await db.query(
+      `UPDATE articles
+       SET favori = NOT favori
+       WHERE id_article = $1 AND id_utilisateur = $2
+       RETURNING id_article, favori`,
+      [req.params.id, req.user.id_utilisateur]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Article introuvable' });
+    }
+    return res.json({ id_article: result.rows[0].id_article, favori: result.rows[0].favori });
+  } catch (err) {
+    console.error('toggleFavori error:', err);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+}
 
-module.exports = { createArticle, listArticles, getArticle, updateArticle, deleteArticle };
+module.exports = { createArticle, listArticles, getArticle, updateArticle, deleteArticle, toggleFavori };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal, X, Shirt, Filter, Camera } from 'lucide-react';
-import { fetchArticles } from '../api/articles';
+import { Search, SlidersHorizontal, X, Shirt, Filter, Camera, Heart } from 'lucide-react';
+import { fetchArticles, toggleFavori } from '../api/articles';
 import { useReferentiels } from '../hooks/useReferentiels';
 import { Button, Card, PageHeader, SectionLabel } from '../components/ui';
 
@@ -30,6 +30,7 @@ export default function GardeRobe() {
     id_marque: searchParams.get('id_marque') || '',
     id_couleur: searchParams.get('id_couleur') || '',
     origine: searchParams.get('origine') || '',
+    favori: searchParams.get('favori') || '',
   };
 
   const activeFiltersCount = Object.entries(filters)
@@ -68,6 +69,21 @@ export default function GardeRobe() {
     if (value) next.set(key, value);
     else next.delete(key);
     setSearchParams(next, { replace: true });
+  };
+
+  const handleToggleFavori = async (id_article) => {
+    // Mise à jour optimiste
+    setArticles((prev) =>
+      prev.map((a) => (a.id_article === id_article ? { ...a, favori: !a.favori } : a))
+    );
+    try {
+      await toggleFavori(id_article);
+    } catch {
+      // Rollback en cas d'échec
+      setArticles((prev) =>
+        prev.map((a) => (a.id_article === id_article ? { ...a, favori: !a.favori } : a))
+      );
+    }
   };
 
   const resetFilters = () => {
@@ -120,7 +136,9 @@ export default function GardeRobe() {
         <Search
           size={18}
           className="absolute left-4 top-1/2 -translate-y-1/2 text-juju-light-texte-mute dark:text-juju-texte-mute pointer-events-none"
-        />
+        >
+          {/* Note: In lucide-react, icons don't typically take children, self-closing is fine */}
+        </Search>
         <input
           type="search"
           value={searchInput}
@@ -149,7 +167,7 @@ export default function GardeRobe() {
       {!loading && !error && articles.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {articles.map((article, i) => (
-            <ArticleCard key={article.id_article} article={article} index={i} />
+            <ArticleCard key={article.id_article} article={article} index={i} onToggleFavori={handleToggleFavori} />
           ))}
         </div>
       )}
@@ -192,6 +210,14 @@ function FiltersPanel({ filters, referentiels, onUpdate, onReset, onClose, activ
               />
             </FilterSection>
           )}
+
+          <FilterSection title="Favoris">
+            <ChipGroup
+              options={[{ value: 'true', label: '❤️ Favoris uniquement' }]}
+              value={filters.favori}
+              onChange={(v) => onUpdate('favori', v)}
+            />
+          </FilterSection>
 
           {referentiels?.marques?.length > 0 && (
             <FilterSection title="Marque">
@@ -290,9 +316,15 @@ function ChipGroup({ options, value, onChange }) {
 /* ============================================================
    CARTES + ÉTATS
    ============================================================ */
-function ArticleCard({ article, index = 0 }) {
+function ArticleCard({ article, index = 0, onToggleFavori }) {
   const prix = article.prix ? `${parseFloat(article.prix).toFixed(2).replace('.', ',')} €` : null;
   const subtitle = [article.marque, article.categorie].filter(Boolean).join(' · ');
+
+  const handleHeartClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleFavori?.(article.id_article);
+  };
 
   return (
     <Card
@@ -321,6 +353,23 @@ function ArticleCard({ article, index = 0 }) {
         >
           <Shirt size={32} />
         </div>
+
+        {/* Bouton favori */}
+        <button
+          onClick={handleHeartClick}
+          aria-label={article.favori ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          className="absolute top-2.5 left-2.5 w-8 h-8 rounded-full bg-juju-light-card/85 dark:bg-juju-noir/70 backdrop-blur flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+        >
+          <Heart
+            size={16}
+            className={`transition-colors ${
+              article.favori
+                ? 'fill-red-500 text-red-500'
+                : 'text-juju-light-texte-mute dark:text-juju-texte-mute'
+            }`}
+          />
+        </button>
+
         {prix && (
           <span className="absolute top-2.5 right-2.5 text-[11px] font-bold px-2 py-1 rounded-full bg-juju-light-card/85 dark:bg-juju-noir/70 backdrop-blur text-juju-dore border border-juju-dore/25">
             {prix}

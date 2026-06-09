@@ -6,7 +6,6 @@ const { UPLOAD_DIR } = require('../middlewares/upload');
 async function getStats(req, res) {
   const userId = req.user.id_utilisateur;
   try {
-    // Photos avatar (pour savoir si mannequin complet)
     const photosResult = await db.query(
       `SELECT angle FROM photos_avatar
        WHERE id_utilisateur = $1 AND angle = ANY($2)`,
@@ -14,14 +13,12 @@ async function getStats(req, res) {
     );
     const avatarComplet = photosResult.rows.length === 4;
 
-    // User : récupère l'avatar_url custom (s'il existe)
     const userResult = await db.query(
       `SELECT avatar_url FROM utilisateurs WHERE id_utilisateur = $1`,
       [userId]
     );
     const avatarUrl = userResult.rows[0]?.avatar_url || null;
 
-    // Articles : compte + somme + répartition
     const articlesResult = await db.query(
       `SELECT
          COUNT(*)::int AS total,
@@ -40,12 +37,50 @@ async function getStats(req, res) {
       [userId]
     );
 
-    // Essayages
     const essayagesResult = await db.query(
       `SELECT
          COUNT(*)::int AS total,
          COUNT(*) FILTER (WHERE cree_le > NOW() - INTERVAL '24 hours')::int AS today
        FROM essayages_log WHERE id_utilisateur = $1`,
+      [userId]
+    );
+
+    const favorisResult = await db.query(
+      `SELECT COUNT(*)::int AS count FROM articles WHERE id_utilisateur = $1 AND favori = TRUE`,
+      [userId]
+    );
+
+    const marqueTopResult = await db.query(
+      `SELECT m.nom_marque AS nom, COUNT(*)::int AS count
+       FROM articles a
+       JOIN marques m ON m.id_marque = a.id_marque
+       WHERE a.id_utilisateur = $1
+       GROUP BY m.nom_marque
+       ORDER BY count DESC
+       LIMIT 1`,
+      [userId]
+    );
+
+    const couleurTopResult = await db.query(
+      `SELECT co.nom, co.code_hex, COUNT(*)::int AS count
+       FROM articles_couleurs ac
+       JOIN articles a ON a.id_article = ac.id_article
+       JOIN couleurs co ON co.id_couleur = ac.id_couleur
+       WHERE a.id_utilisateur = $1
+       GROUP BY co.nom, co.code_hex
+       ORDER BY count DESC
+       LIMIT 1`,
+      [userId]
+    );
+
+    const articleEssayeResult = await db.query(
+      `SELECT a.id_article, a.nom, a.image_url, COUNT(*)::int AS count
+       FROM essayages_log e
+       JOIN articles a ON a.id_article = e.id_article
+       WHERE e.id_utilisateur = $1
+       GROUP BY a.id_article, a.nom, a.image_url
+       ORDER BY count DESC
+       LIMIT 1`,
       [userId]
     );
 
@@ -67,6 +102,15 @@ async function getStats(req, res) {
         today: essayages.today,
         daily_limit: 2,
       },
+      insights: {
+        favoris_count: favorisResult.rows[0]?.count || 0,
+        marque_top: marqueTopResult.rows[0] || null,
+        couleur_top: couleurTopResult.rows[0] || null,
+        article_plus_essaye: articleEssayeResult.rows[0] || null,
+        prix_moyen: articles.total > 0
+          ? Math.round(parseFloat(articles.valeur_totale) / articles.total)
+          : 0,
+      },
     });
   } catch (err) {
     console.error('[PROFILE] getStats error:', err);
@@ -74,10 +118,6 @@ async function getStats(req, res) {
   }
 }
 
-/**
- * PUT /api/profile/avatar
- * Body: { avatar_url } (URL d'une image déjà uploadée via /api/upload)
- */
 async function updateAvatar(req, res) {
   const userId = req.user.id_utilisateur;
   const { avatar_url } = req.body;
@@ -87,20 +127,17 @@ async function updateAvatar(req, res) {
   }
 
   try {
-    // Récupère l'ancienne URL pour nettoyer le fichier
     const old = await db.query(
       `SELECT avatar_url FROM utilisateurs WHERE id_utilisateur = $1`,
       [userId]
     );
     const oldUrl = old.rows[0]?.avatar_url;
 
-    // Update
     await db.query(
       `UPDATE utilisateurs SET avatar_url = $1 WHERE id_utilisateur = $2`,
       [avatar_url, userId]
     );
 
-    // Nettoyage de l'ancien fichier (best-effort, on ignore les erreurs)
     if (oldUrl && oldUrl !== avatar_url) {
       try {
         const filename = path.basename(oldUrl);

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import {
   Mail, User as UserIcon, LogOut, Sparkles, Shirt, Wallet,
   Camera, Settings as SettingsIcon, Sun, Moon, Loader2, X,
+  Heart, Tag, Palette, TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchProfileStats, updateAvatar } from '../api/profile';
@@ -169,6 +170,53 @@ export default function Profil() {
               </Card>
             </section>
           )}
+
+          {stats.insights && stats.articles.total > 0 && (
+            <section className="mb-9">
+              <SectionLabel className="mb-4">Ton style en chiffres</SectionLabel>
+              <div className="grid grid-cols-2 gap-3">
+                {stats.insights.marque_top && (
+                  <InsightCard
+                    icon={Tag}
+                    label="Marque fétiche"
+                    value={stats.insights.marque_top.nom}
+                    detail={`${stats.insights.marque_top.count} pièce${stats.insights.marque_top.count > 1 ? 's' : ''}`}
+                  />
+                )}
+                {stats.insights.couleur_top && (
+                  <InsightCard
+                    icon={Palette}
+                    label="Couleur dominante"
+                    value={stats.insights.couleur_top.nom}
+                    detail={`${stats.insights.couleur_top.count} pièce${stats.insights.couleur_top.count > 1 ? 's' : ''}`}
+                    swatch={stats.insights.couleur_top.code_hex}
+                  />
+                )}
+                <InsightCard
+                  icon={TrendingUp}
+                  label="Prix moyen"
+                  value={`${stats.insights.prix_moyen} €`}
+                  detail="par article"
+                />
+                <InsightCard
+                  icon={Heart}
+                  label="Favoris"
+                  value={stats.insights.favoris_count}
+                  detail={stats.insights.favoris_count > 1 ? 'coups de cœur' : 'coup de cœur'}
+                />
+                {stats.insights.article_plus_essaye && (
+                  <div className="col-span-2">
+                    <InsightCardWide
+                      label="Pièce la plus essayée"
+                      nom={stats.insights.article_plus_essaye.nom}
+                      image={stats.insights.article_plus_essaye.image_url}
+                      count={stats.insights.article_plus_essaye.count}
+                    />
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
         </>
       )}
 
@@ -239,6 +287,54 @@ function CategoryBar({ nom, count, total }) {
         <span className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute w-6 text-right tabular-nums">{count}</span>
       </div>
     </div>
+  );
+}
+
+function InsightCard({ icon: Icon, label, value, detail, swatch }) {
+  return (
+    <Card className="p-4">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-8 h-8 rounded-lg bg-juju-violet/10 dark:bg-juju-dore/10 flex items-center justify-center text-juju-violet dark:text-juju-dore shrink-0">
+          <Icon size={16} />
+        </div>
+        <span className="text-[10px] uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute">{label}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        {swatch && (
+          <span
+            className="w-4 h-4 rounded-full border border-juju-light-bordure dark:border-juju-bordure shrink-0"
+            style={{ backgroundColor: swatch }}
+          />
+        )}
+        <p className="font-semibold text-lg truncate">{value}</p>
+      </div>
+      {detail && (
+        <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mt-0.5">{detail}</p>
+      )}
+    </Card>
+  );
+}
+
+function InsightCardWide({ label, nom, image, count }) {
+  return (
+    <Card className="flex items-center gap-4 p-4">
+      <div className="w-16 h-16 rounded-xl overflow-hidden bg-juju-light-bg dark:bg-juju-noir shrink-0 border border-juju-light-bordure dark:border-juju-bordure">
+        {image ? (
+          <img src={image} alt={nom} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-juju-light-texte-mute dark:text-juju-texte-mute">
+            <Sparkles size={20} />
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <span className="text-[10px] uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute">{label}</span>
+        <p className="font-semibold truncate mt-0.5">{nom}</p>
+        <p className="text-xs text-juju-violet dark:text-juju-dore mt-0.5 font-semibold">
+          {count} essayage{count > 1 ? 's' : ''}
+        </p>
+      </div>
+    </Card>
   );
 }
 
