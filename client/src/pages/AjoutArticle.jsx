@@ -7,6 +7,7 @@ import {
   fetchCategories, fetchCouleurs, fetchMatieres, fetchMarques,
 } from '../api/referentiels';
 import ArticleForm from '../components/ArticleForm';
+import { Button, PageHeader } from '../components/ui';
 
 export default function AjoutArticle() {
   const navigate = useNavigate();
@@ -81,11 +82,12 @@ export default function AjoutArticle() {
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
       {step === 'capture' && (
-        <div>
-          <h2 className="text-2xl md:text-3xl font-medium mb-2">Ajouter un article</h2>
-          <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-8">
-            Commence par une photo. Tu pourras ensuite décrire l'article.
-          </p>
+        <div className="animate-fade-up">
+          <PageHeader
+            eyebrow="Nouvel article"
+            title={<>Ajouter un <span className="accent-italic">article</span></>}
+            subtitle="Commence par une photo. Tu pourras ensuite décrire l'article."
+          />
 
           <div className="space-y-3 max-w-md">
             <div className="md:hidden">
@@ -111,24 +113,26 @@ export default function AjoutArticle() {
 
           {uploading && (
             <div className="flex items-center gap-2 mt-6 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin text-juju-violet dark:text-juju-dore" />
               Upload de la photo…
             </div>
           )}
 
           {uploadError && (
-            <p className="text-red-400 text-sm mt-4">{uploadError}</p>
+            <p className="text-red-500 text-sm mt-4">{uploadError}</p>
           )}
         </div>
       )}
 
       {step === 'form' && (
-        <div>
-          <h2 className="text-2xl md:text-3xl font-medium mb-2">Décris l'article</h2>
+        <div className="animate-fade-up">
+          <h1 className="font-display text-3xl md:text-4xl leading-[1.08] text-juju-light-texte dark:text-juju-texte mb-2.5">
+            Décris l'<span className="accent-italic">article</span>
+          </h1>
           <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">Remplis les champs principaux.</p>
 
-          <div className="aspect-square w-32 mb-6 rounded-lg overflow-hidden bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure">
-            <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+          <div className="aspect-square w-32 mb-6 rounded-2xl overflow-hidden bg-juju-light-card dark:bg-juju-bleu/40 border border-juju-light-bordure dark:border-juju-bordure shadow-card p-1.5">
+            <img src={imageUrl} alt="" className="w-full h-full object-cover rounded-xl" />
           </div>
 
           <ArticleForm
@@ -144,45 +148,38 @@ export default function AjoutArticle() {
 
       {/* Modale : choix du détourage */}
       {showDetourChoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <h3 className="text-xl font-medium mb-2">Détourer le fond&nbsp;?</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-juju-noir/50 backdrop-blur-sm">
+          <div className="rounded-2xl bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure shadow-2xl max-w-md w-full p-6 animate-scale-in">
+            <h3 className="font-display text-xl leading-snug mb-2">Détourer le fond&nbsp;?</h3>
             <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-5">
               Si ta photo a déjà un fond uni (packshot, image d'un site marchand), garde-la telle quelle. Sinon, l'IA va isoler le vêtement proprement.
             </p>
 
-            <div className="aspect-square w-40 mx-auto mb-5 rounded-lg overflow-hidden bg-juju-light-bg dark:bg-juju-noir border border-juju-light-bordure dark:border-juju-bordure">
-              <img src={pendingImageUrl} alt="Aperçu" className="w-full h-full object-cover" />
+            <div className="aspect-square w-40 mx-auto mb-5 rounded-2xl overflow-hidden bg-juju-light-bg dark:bg-juju-noir border border-juju-light-bordure dark:border-juju-bordure p-1.5">
+              <img src={pendingImageUrl} alt="Aperçu" className="w-full h-full object-cover rounded-xl" />
             </div>
 
-            <div className="space-y-2">
-              <button
+            <div className="space-y-2.5">
+              <Button
                 type="button"
+                variant="primary"
+                fullWidth
+                icon={Sparkles}
+                loading={detouring}
                 onClick={handleDetour}
-                disabled={detouring}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors disabled:opacity-60"
               >
-                {detouring ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Détourage en cours…
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={16} />
-                    Détourer le fond (IA)
-                  </>
-                )}
-              </button>
-              <button
+                {detouring ? 'Détourage en cours…' : 'Détourer le fond (IA)'}
+              </Button>
+              <Button
                 type="button"
-                onClick={handleKeepAsIs}
+                variant="secondary"
+                fullWidth
+                icon={ImageIcon}
                 disabled={detouring}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-juju-light-bordure dark:border-juju-bordure rounded-lg hover:border-juju-dore transition-colors disabled:opacity-60"
+                onClick={handleKeepAsIs}
               >
-                <ImageIcon size={16} />
                 Garder telle quelle
-              </button>
+              </Button>
             </div>
 
             <p className="text-[11px] text-center text-juju-light-texte-mute dark:text-juju-texte-mute mt-4">
@@ -198,14 +195,14 @@ export default function AjoutArticle() {
 function CaptureButton({ icon: Icon, label, hint, accept, capture, onChange, disabled }) {
   return (
     <label
-      className={`flex items-center gap-4 p-5 border border-juju-light-bordure dark:border-juju-bordure rounded-xl cursor-pointer transition-colors ${disabled ? 'opacity-50 pointer-events-none' : 'hover:border-juju-dore'
+      className={`flex items-center gap-4 p-5 rounded-2xl cursor-pointer transition-all bg-juju-light-card dark:bg-juju-bleu/40 border border-juju-light-bordure dark:border-juju-bordure shadow-card ${disabled ? 'opacity-50 pointer-events-none' : 'hover:border-juju-violet hover:-translate-y-0.5 hover:shadow-card-hover'
         }`}
     >
-      <div className="w-12 h-12 rounded-full bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center text-juju-dore">
+      <div className="w-12 h-12 rounded-xl bg-juju-violet/10 dark:bg-juju-dore/10 flex items-center justify-center text-juju-violet dark:text-juju-dore shrink-0">
         <Icon size={22} />
       </div>
       <div className="flex-1">
-        <p className="font-medium">{label}</p>
+        <p className="font-semibold">{label}</p>
         <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mt-0.5">{hint}</p>
       </div>
       <input

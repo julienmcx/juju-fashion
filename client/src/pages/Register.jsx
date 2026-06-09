@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import logoOr from '../assets/juju-logo-or.svg';
 import JujuLogo from '../components/JujuLogo';
-
+import { Button, Eyebrow, Input } from '../components/ui';
 
 export default function Register() {
   const { register } = useAuth();
@@ -30,62 +29,70 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-juju-light-bg dark:bg-juju-noir text-juju-light-texte dark:text-juju-texte px-6">
-      <div className="w-full max-w-sm">
-        <JujuLogo className="h-24 mx-auto mb-2" />
-        <p className="text-juju-light-texte-mute dark:text-juju-texte-mute text-center mb-10">Crée ton dressing virtuel.</p>
+    <div className="app-bg min-h-screen flex flex-col items-center justify-center px-5 py-12 relative overflow-hidden text-juju-light-texte dark:text-juju-texte">
+      <div aria-hidden className="app-blob -top-24 -right-16 w-80 h-80 blur-3xl bg-juju-dore/15 dark:bg-juju-dore/10 animate-drift" />
+      <div aria-hidden className="app-blob -bottom-24 -left-16 w-96 h-96 blur-3xl bg-juju-violet/15 dark:bg-juju-violet/25 animate-drift-rev" />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Pseudo</label>
-            <input
+      <div className="w-full max-w-sm relative z-[1] animate-fade-up">
+        <div className="text-center mb-7">
+          <JujuLogo className="text-5xl mb-5" />
+          <div className="mb-3 flex justify-center">
+            <Eyebrow>Bienvenue</Eyebrow>
+          </div>
+          <h1 className="font-display text-3xl mb-2">
+            Crée ton dressing <span className="accent-italic">virtuel</span>
+          </h1>
+          <p className="text-juju-light-texte-mute dark:text-juju-texte-mute">
+            Quelques secondes suffisent.
+          </p>
+        </div>
+
+        <div className="rounded-2xl bg-juju-light-card/80 dark:bg-juju-bleu/40 backdrop-blur border border-juju-light-bordure dark:border-juju-bordure shadow-card p-6 sm:p-7">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Pseudo"
               type="text"
               value={nom}
               onChange={(e) => setNom(e.target.value)}
-              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              autoComplete="nickname"
+              placeholder="Comment t'appeler ?"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Email</label>
-            <input
+            <Input
+              label="Email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              autoComplete="email"
+              placeholder="toi@exemple.com"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Mot de passe</label>
-            <input
+            <Input
+              label="Mot de passe"
               type="password"
               value={motDePasse}
               onChange={(e) => setMotDePasse(e.target.value)}
               required
               minLength={8}
-              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              hint="8 caractères minimum"
             />
-            <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mt-1">8 caractères minimum</p>
-          </div>
 
-          {error && (
-            <p className="text-red-400 text-sm">{error}</p>
-          )}
+            {error && (
+              <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {error}
+              </p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Création…' : 'Créer mon compte'}
-          </button>
-        </form>
+            <Button type="submit" size="lg" fullWidth loading={loading}>
+              {loading ? 'Création…' : 'Créer mon compte'}
+            </Button>
+          </form>
+        </div>
 
-        <p className="text-center text-juju-light-texte-mute dark:text-juju-texte-mute text-sm mt-8">
+        <p className="text-center text-juju-light-texte-mute dark:text-juju-texte-mute text-sm mt-6">
           Déjà un compte ?{' '}
-          <Link to="/login" className="text-juju-dore hover:underline">
+          <Link to="/login" className="text-juju-violet dark:text-juju-dore font-semibold hover:underline">
             Se connecter
           </Link>
         </p>

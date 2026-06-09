@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Trash2, Sparkles, Shirt, ExternalLink } from 'lucide-react';
 import { fetchArticle, deleteArticle } from '../api/articles';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { Button, Card, Eyebrow, SectionLabel } from '../components/ui';
 
 export default function ArticleDetail() {
   const { id } = useParams();
@@ -48,43 +49,41 @@ export default function ArticleDetail() {
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-5xl mx-auto">
       <button
         onClick={() => navigate('/garde-robe')}
-        className="flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-violet dark:hover:text-juju-dore transition-colors mb-6"
       >
         <ArrowLeft size={16} />
         Retour à la garde-robe
       </button>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure">
+      <div className="grid md:grid-cols-2 gap-8 animate-fade-up">
+        <Card className="aspect-square overflow-hidden shadow-card">
           {article.image_url ? (
             <img src={article.image_url} alt={article.nom} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Shirt size={64} className="text-juju-light-texte-mute dark:text-juju-texte-mute" />
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-juju-light-bg to-juju-light-bordure/50 dark:from-juju-bleu/60 dark:to-juju-noir text-juju-light-texte-mute dark:text-juju-texte-mute">
+              <Shirt size={64} />
             </div>
           )}
-        </div>
+        </Card>
 
         <div>
           {article.categorie_nom && (
-            <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute uppercase tracking-widest mb-2">
-              {article.categorie_nom}
-            </p>
+            <Eyebrow className="mb-3">{article.categorie_nom}</Eyebrow>
           )}
-          <h1 className="text-3xl md:text-4xl font-medium mb-2 leading-tight">{article.nom}</h1>
+          <h1 className="font-display text-3xl md:text-4xl leading-[1.08] mb-2">{article.nom}</h1>
           {article.marque_nom && (
             <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-4">par {article.marque_nom}</p>
           )}
-          {prix && <p className="text-2xl text-juju-dore mb-6">{prix}</p>}
+          {prix && <p className="text-2xl font-display text-juju-dore mb-6">{prix}</p>}
 
           {article.couleurs?.length > 0 && (
             <div className="mb-5">
-              <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute uppercase tracking-wider mb-2">Couleurs</p>
+              <SectionLabel className="mb-2.5">Couleurs</SectionLabel>
               <div className="flex flex-wrap gap-2">
                 {article.couleurs.map((c) => (
                   <div
                     key={c.id_couleur}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-full"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-juju-light-card dark:bg-juju-bleu/40 border border-juju-light-bordure dark:border-juju-bordure rounded-full"
                   >
                     <div
                       className="w-3 h-3 rounded-full border border-juju-light-bordure dark:border-juju-bordure"
@@ -99,12 +98,12 @@ export default function ArticleDetail() {
 
           {article.matieres?.length > 0 && (
             <div className="mb-5">
-              <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute uppercase tracking-wider mb-2">Composition</p>
+              <SectionLabel className="mb-2.5">Composition</SectionLabel>
               <div className="flex flex-wrap gap-2">
                 {article.matieres.map((m) => (
                   <span
                     key={m.id_matiere}
-                    className="text-xs px-3 py-1.5 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-full"
+                    className="text-xs px-3 py-1.5 bg-juju-light-card dark:bg-juju-bleu/40 border border-juju-light-bordure dark:border-juju-bordure rounded-full"
                   >
                     {m.nom}
                     {m.pourcentage ? ` · ${m.pourcentage}%` : ''}
@@ -114,7 +113,7 @@ export default function ArticleDetail() {
             </div>
           )}
 
-          <div className="space-y-2 text-sm mb-5 pt-3 border-t border-juju-light-bordure dark:border-juju-bordure/50">
+          <div className="space-y-2 text-sm mb-5 pt-4 border-t border-juju-light-bordure dark:border-juju-bordure/50">
             {article.origine && <Field label="Origine" value={capitalize(article.origine)} />}
             {article.taille && <Field label="Taille" value={article.taille} />}
             {article.pointure && <Field label="Pointure" value={article.pointure} />}
@@ -126,10 +125,10 @@ export default function ArticleDetail() {
           </div>
 
           {article.notes && (
-            <div className="mb-5 p-4 bg-juju-light-card dark:bg-juju-bleu/50 border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
-              <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute uppercase tracking-wider mb-1">Notes</p>
+            <Card className="p-4 mb-5">
+              <SectionLabel className="mb-1.5">Notes</SectionLabel>
               <p className="text-sm whitespace-pre-line">{article.notes}</p>
-            </div>
+            </Card>
           )}
 
           {article.lien_achat && (
@@ -137,41 +136,29 @@ export default function ArticleDetail() {
               href={article.lien_achat}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-sm text-juju-dore hover:underline mb-6"
+              className="inline-flex items-center gap-1 text-sm text-juju-violet dark:text-juju-dore hover:underline mb-6"
             >
               Voir la fiche d'achat <ExternalLink size={14} />
             </a>
           )}
 
           <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-juju-light-bordure dark:border-juju-bordure">
-            <Link
-              to={`/articles/${id}/essai`}
-              className="relative flex items-center justify-center gap-2 px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors"
-            >
-              <Sparkles size={18} />
+            <Button to={`/articles/${id}/essai`} variant="primary" icon={Sparkles} className="relative">
               Essayer
               <span className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-juju-violet text-white text-[9px] font-bold uppercase tracking-wider rounded-full border-2 border-juju-light-bg dark:border-juju-noir">
                 Bêta
               </span>
-            </Link>
-            <Link
-              to={`/articles/${id}/edit`}
-              className="flex items-center justify-center gap-2 px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte rounded-lg hover:border-juju-dore hover:text-juju-dore transition-colors"
-            >
-              <Edit size={18} />
+            </Button>
+            <Button to={`/articles/${id}/edit`} variant="secondary" icon={Edit}>
               Modifier
-            </Link>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center justify-center gap-2 px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte-mute dark:text-juju-texte-mute rounded-lg hover:border-red-500 hover:text-red-400 transition-colors"
-            >
-              <Trash2 size={18} />
+            </Button>
+            <Button variant="danger-soft" icon={Trash2} onClick={() => setShowDeleteConfirm(true)}>
               Supprimer
-            </button>
+            </Button>
           </div>
 
           {error === 'delete-error' && (
-            <p className="text-red-400 text-sm mt-3">Suppression impossible. Réessaie.</p>
+            <p className="text-red-500 text-sm mt-3">Suppression impossible. Réessaie.</p>
           )}
         </div>
       </div>
@@ -199,7 +186,7 @@ function Field({ label, value }) {
   return (
     <div className="flex justify-between gap-4">
       <span className="text-juju-light-texte-mute dark:text-juju-texte-mute">{label}</span>
-      <span className="font-medium">{value}</span>
+      <span className="font-semibold text-right">{value}</span>
     </div>
   );
 }
@@ -207,14 +194,14 @@ function Field({ label, value }) {
 function DetailSkeleton() {
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-5xl mx-auto">
-      <div className="grid md:grid-cols-2 gap-8 animate-pulse">
-        <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu/60 rounded-2xl" />
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="aspect-square skeleton bg-juju-light-card dark:bg-juju-bleu/60 rounded-2xl" />
         <div className="space-y-4">
-          <div className="h-3 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-1/4" />
-          <div className="h-8 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-3/4" />
-          <div className="h-4 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-1/2" />
-          <div className="h-6 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-1/3 mt-4" />
-          <div className="h-20 bg-juju-light-card dark:bg-juju-bleu/60 rounded mt-4" />
+          <div className="h-3 w-1/4 skeleton bg-juju-light-bordure/60 dark:bg-juju-bleu/60 rounded" />
+          <div className="h-8 w-3/4 skeleton bg-juju-light-bordure/60 dark:bg-juju-bleu/60 rounded" />
+          <div className="h-4 w-1/2 skeleton bg-juju-light-bordure/60 dark:bg-juju-bleu/60 rounded" />
+          <div className="h-6 w-1/3 mt-4 skeleton bg-juju-light-bordure/60 dark:bg-juju-bleu/60 rounded" />
+          <div className="h-20 mt-4 skeleton bg-juju-light-bordure/60 dark:bg-juju-bleu/60 rounded" />
         </div>
       </div>
     </div>
@@ -223,26 +210,32 @@ function DetailSkeleton() {
 
 function NotFound() {
   return (
-    <div className="px-4 py-20 text-center max-w-md mx-auto">
-      <Shirt size={48} className="mx-auto mb-4 text-juju-light-texte-mute dark:text-juju-texte-mute" />
-      <h2 className="text-xl font-medium mb-2">Article introuvable</h2>
+    <div className="px-4 py-20 text-center max-w-md mx-auto animate-fade-up">
+      <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-juju-violet/10 dark:bg-juju-dore/10 flex items-center justify-center text-juju-violet dark:text-juju-dore ring-1 ring-juju-violet/20 dark:ring-juju-dore/20">
+        <Shirt size={28} />
+      </div>
+      <h2 className="font-display text-xl mb-2">Article introuvable</h2>
       <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">
         Cet article n'existe pas ou ne fait pas partie de ta garde-robe.
       </p>
-      <Link to="/garde-robe" className="text-juju-dore hover:underline">
+      <Button to="/garde-robe" variant="primary" icon={ArrowLeft}>
         Retour à ma garde-robe
-      </Link>
+      </Button>
     </div>
   );
 }
 
 function ErrorBox({ message }) {
   return (
-    <div className="px-4 py-20 text-center">
-      <p className="text-red-400 mb-4">{message}</p>
-      <Link to="/garde-robe" className="text-juju-dore hover:underline">
+    <div className="px-4 py-20 text-center max-w-md mx-auto animate-fade-up">
+      <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-juju-violet/10 dark:bg-juju-dore/10 flex items-center justify-center text-juju-violet dark:text-juju-dore ring-1 ring-juju-violet/20 dark:ring-juju-dore/20">
+        <Shirt size={28} />
+      </div>
+      <h2 className="font-display text-xl mb-2">Une erreur est survenue</h2>
+      <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">{message}</p>
+      <Button to="/garde-robe" variant="primary" icon={ArrowLeft}>
         Retour à ma garde-robe
-      </Link>
+      </Button>
     </div>
   );
 }

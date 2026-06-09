@@ -1,45 +1,168 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&family=Allura&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+/* ============================================================
+   BASE
+   ============================================================ */
+@layer base {
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: #FAFAFE;
+    color: #0F0820;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html.dark body {
+    background-color: #0A0A0F;
+    color: #F5F0E8;
+  }
+
+  /* Titres display = Fraunces (axes variables) */
+  h1, h2, h3, .font-display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    font-variation-settings: 'SOFT' 50, 'WONK' 0;
+  }
+
+  :focus-visible {
+    outline: 2px solid #7C3AED;
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgba(124, 58, 237, 0.18);
+  }
 }
 
-body {
-  background-color: #FAF8F3;
-  color: #1A1A2E;
-  font-family: 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ============================================================
+   COMPONENTS — primitives partagées
+   ============================================================ */
+@layer components {
+  /* ----- Accent italique (titres) : Juju, mots clés ----- */
+  .accent-italic {
+    font-style: italic;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+    background: linear-gradient(135deg, #D4AF37 0%, #7C3AED 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* ----- Chiffres clés : dégradé violet→doré ----- */
+  .stat-gradient {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    background: linear-gradient(135deg, #7C3AED 0%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* ----- Wordmark Juju ----- */
+  .juju-wordmark {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    font-variation-settings: 'SOFT' 100, 'WONK' 0;
+  }
+
+  /* ----- Fond ambiant de l'app (dégradés radiaux doux) ----- */
+  .app-bg {
+    background:
+      radial-gradient(ellipse at top right, rgba(212, 175, 55, 0.10) 0%, transparent 48%),
+      radial-gradient(ellipse at bottom left, rgba(124, 58, 237, 0.09) 0%, transparent 50%),
+      #FAFAFE;
+  }
+  html.dark .app-bg {
+    background:
+      radial-gradient(ellipse at top right, rgba(212, 175, 55, 0.08) 0%, transparent 46%),
+      radial-gradient(ellipse at bottom left, rgba(124, 58, 237, 0.16) 0%, transparent 52%),
+      #0A0A0F;
+  }
+
+  /* Blobs flottants décoratifs (utilisés par Layout) — flou via utilitaire blur-3xl */
+  .app-blob {
+    position: fixed;
+    border-radius: 9999px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ----- Reveal au scroll ----- */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, transform;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ----- Skeleton shimmer ----- */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.08), transparent);
+    animation: shimmer 1.6s infinite;
+  }
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+
+  /* Champ de formulaire standard */
+  .field-input {
+    @apply w-full px-4 py-3 rounded-xl bg-juju-light-card dark:bg-juju-bleu/60
+      border border-juju-light-bordure dark:border-juju-bordure
+      text-juju-light-texte dark:text-juju-texte
+      placeholder:text-juju-light-texte-mute/60 dark:placeholder:text-juju-texte-mute/50
+      focus:outline-none focus:border-juju-violet focus:ring-4 focus:ring-juju-violet/15
+      transition-all duration-200;
+  }
 }
 
-html.dark body {
-  background-color: #0A0A0F;
-  color: #F5F0E8;
-}
-
-.juju-wordmark {
-  font-family: 'Playfair Display', serif;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-html[data-density="compact"] {
-  --juju-spacing-scale: 0.85;
-}
-
-html[data-density="compact"] main {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-
+/* ============================================================
+   DENSITÉ (préférence utilisateur)
+   ============================================================ */
+html[data-density="compact"] main { padding-top: 0.75rem; padding-bottom: 0.75rem; }
 html[data-density="compact"] .gap-4 { gap: 0.75rem; }
 html[data-density="compact"] .py-6 { padding-top: 1rem; padding-bottom: 1rem; }
 html[data-density="compact"] .py-10 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
 html[data-density="compact"] .mb-8 { margin-bottom: 1.25rem; }
+
+/* ============================================================
+   ACCESSIBILITÉ — mouvement réduit
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fade-in { opacity: 1 !important; transform: none !important; }
+}

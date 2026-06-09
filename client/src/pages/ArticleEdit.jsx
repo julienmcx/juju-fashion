@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { fetchArticle, updateArticle } from '../api/articles';
 import {
   fetchCategories, fetchCouleurs, fetchMatieres, fetchMarques,
 } from '../api/referentiels';
 import ArticleForm from '../components/ArticleForm';
+import { Button } from '../components/ui';
 
 export default function ArticleEdit() {
   const { id } = useParams();
@@ -63,13 +64,15 @@ export default function ArticleEdit() {
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
       <Link
         to={`/articles/${id}`}
-        className="flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-violet dark:hover:text-juju-dore transition-colors mb-6"
       >
         <ArrowLeft size={16} />
         Retour au détail
       </Link>
 
-      <h2 className="text-2xl md:text-3xl font-medium mb-8">Modifier l'article</h2>
+      <h1 className="font-display text-3xl md:text-4xl mb-8">
+        Modifier l'<span className="accent-italic">article</span>
+      </h1>
 
       <ArticleForm
         initialValues={initialValues}
@@ -84,27 +87,32 @@ export default function ArticleEdit() {
 }
 
 function Loading() {
-  return <div className="px-4 py-20 text-center text-juju-light-texte-mute dark:text-juju-texte-mute">Chargement…</div>;
+  return (
+    <div className="px-4 py-24 flex flex-col items-center justify-center gap-3 text-juju-light-texte-mute dark:text-juju-texte-mute">
+      <Loader2 size={26} className="animate-spin text-juju-violet dark:text-juju-dore" />
+      Chargement…
+    </div>
+  );
 }
 
 function NotFound() {
   return (
-    <div className="px-4 py-20 text-center max-w-md mx-auto">
-      <h2 className="text-xl font-medium mb-2">Article introuvable</h2>
-      <Link to="/garde-robe" className="text-juju-dore hover:underline">
+    <div className="px-4 py-20 text-center max-w-md mx-auto animate-fade-up">
+      <h2 className="font-display text-xl mb-3">Article introuvable</h2>
+      <Button to="/garde-robe" variant="primary" icon={ArrowLeft}>
         Retour à ma garde-robe
-      </Link>
+      </Button>
     </div>
   );
 }
 
 function ErrorBox() {
   return (
-    <div className="px-4 py-20 text-center">
-      <p className="text-red-400 mb-4">Erreur de chargement.</p>
-      <Link to="/garde-robe" className="text-juju-dore hover:underline">
+    <div className="px-4 py-20 text-center max-w-md mx-auto animate-fade-up">
+      <p className="text-red-500 mb-4 font-medium">Erreur de chargement.</p>
+      <Button to="/garde-robe" variant="primary" icon={ArrowLeft}>
         Retour à ma garde-robe
-      </Link>
+      </Button>
     </div>
   );
 }

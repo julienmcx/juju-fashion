@@ -8,6 +8,7 @@ import { fetchProfileStats, updateAvatar } from '../api/profile';
 import { uploadImage } from '../api/upload';
 import { useDensity } from '../hooks/useDensity';
 import { useTheme } from '../hooks/useTheme';
+import { Card, Eyebrow, SectionLabel, Button } from '../components/ui';
 
 export default function Profil() {
   const { user, logout } = useAuth();
@@ -66,44 +67,44 @@ export default function Profil() {
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
       {/* Header avec avatar uploadable */}
-      <header className="flex items-center gap-4 mb-8">
-        <div className="relative group">
+      <header className="flex items-center gap-5 mb-9">
+        <div className="relative group shrink-0">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingAvatar}
             aria-label="Changer la photo de profil"
-            className="block w-20 h-20 rounded-full overflow-hidden border-2 border-juju-dore bg-juju-light-card dark:bg-juju-bleu dark:bg-juju-bleu hover:opacity-80 transition-opacity"
+            className="block w-24 h-24 rounded-full overflow-hidden p-[3px] bg-gradient-violet-gold hover:opacity-90 transition-opacity"
           >
-            {uploadingAvatar ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <Loader2 size={20} className="animate-spin text-juju-dore" />
-              </div>
-            ) : avatarSrc ? (
-              <img src={avatarSrc} alt="Photo de profil" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <UserIcon size={32} className="text-juju-light-texte-mute dark:text-juju-texte-mute" />
-              </div>
-            )}
+            <span className="block w-full h-full rounded-full overflow-hidden bg-juju-light-card dark:bg-juju-bleu">
+              {uploadingAvatar ? (
+                <span className="w-full h-full flex items-center justify-center">
+                  <Loader2 size={22} className="animate-spin text-juju-violet dark:text-juju-dore" />
+                </span>
+              ) : avatarSrc ? (
+                <img src={avatarSrc} alt="Photo de profil" className="w-full h-full object-cover" />
+              ) : (
+                <span className="w-full h-full flex items-center justify-center">
+                  <UserIcon size={34} className="text-juju-light-texte-mute dark:text-juju-texte-mute" />
+                </span>
+              )}
+            </span>
           </button>
-          {/* Mini caméra en bas à droite */}
           {!uploadingAvatar && (
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-juju-dore text-juju-noir flex items-center justify-center hover:bg-juju-dore-clair transition-colors"
+              className="absolute -bottom-0.5 -right-0.5 w-8 h-8 rounded-full bg-gradient-violet text-white flex items-center justify-center shadow-violet-sm hover:-translate-y-0.5 transition-transform"
               title="Changer la photo"
             >
-              <Camera size={14} />
+              <Camera size={15} />
             </button>
           )}
-          {/* Bouton retirer (visible si avatar existant) */}
           {avatarSrc && !uploadingAvatar && (
             <button
               type="button"
               onClick={handleRemoveAvatar}
-              className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-juju-light-bg dark:bg-juju-noir/70 hover:bg-red-500 text-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+              className="absolute -top-0.5 -right-0.5 w-6 h-6 rounded-full bg-juju-light-card dark:bg-juju-noir border border-juju-light-bordure dark:border-juju-bordure hover:bg-red-500 hover:text-white hover:border-red-500 text-juju-light-texte-mute dark:text-juju-texte-mute flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
               title="Retirer la photo"
             >
               <X size={12} />
@@ -118,10 +119,11 @@ export default function Profil() {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl md:text-3xl font-medium truncate">
+          <Eyebrow>Mon profil</Eyebrow>
+          <h1 className="font-display text-3xl md:text-4xl truncate mt-1.5">
             {user?.nom || user?.email?.split('@')[0]}
           </h1>
-          <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute dark:text-juju-light-texte-mute dark:text-juju-texte-mute truncate">
+          <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute truncate">
             {user?.email}
           </p>
         </div>
@@ -131,7 +133,7 @@ export default function Profil() {
       {loading && <SkeletonStats />}
       {!loading && stats && (
         <>
-          <div className="grid grid-cols-3 gap-3 mb-8">
+          <div className="grid grid-cols-3 gap-3 mb-9">
             <StatCard
               icon={Shirt}
               value={stats.articles.total}
@@ -147,16 +149,13 @@ export default function Profil() {
               icon={Wallet}
               value={`${Math.round(stats.articles.valeur_totale)} €`}
               label="garde-robe"
-              valueClass="text-xl md:text-2xl"
             />
           </div>
 
           {stats.articles.par_categorie.length > 0 && (
-            <section className="mb-8">
-              <h2 className="text-xs uppercase tracking-widest text-juju-light-texte-mute dark:text-juju-texte-mute mb-3">
-                Répartition par catégorie
-              </h2>
-              <div className="space-y-2">
+            <section className="mb-9">
+              <SectionLabel className="mb-4">Répartition par catégorie</SectionLabel>
+              <Card className="p-5 space-y-3.5">
                 {stats.articles.par_categorie.map((cat) => (
                   <CategoryBar
                     key={cat.categorie}
@@ -165,96 +164,61 @@ export default function Profil() {
                     total={stats.articles.total}
                   />
                 ))}
-              </div>
+              </Card>
             </section>
           )}
         </>
       )}
 
       {/* Compte */}
-      <section className="mb-6">
-        <h2 className="text-xs uppercase tracking-widest text-juju-light-texte-mute dark:text-juju-texte-mute mb-3">
-          Mon compte
-        </h2>
-        <div className="space-y-1">
+      <section className="mb-7">
+        <SectionLabel className="mb-4">Mon compte</SectionLabel>
+        <div className="space-y-2.5">
           <InfoRow icon={UserIcon} label="Pseudo" value={user?.nom || '—'} />
           <InfoRow icon={Mail} label="Email" value={user?.email} />
         </div>
       </section>
 
       {/* Paramètres */}
-      <section className="mb-6">
-        <h2 className="text-xs uppercase tracking-widest text-juju-light-texte-mute dark:text-juju-texte-mute mb-3">
-          <SettingsIcon size={12} className="inline mr-1" />
-          Paramètres
-        </h2>
+      <section className="mb-7">
+        <SectionLabel icon={SettingsIcon} className="mb-4">Paramètres</SectionLabel>
 
         <div className="space-y-3">
-          {/* Thème */}
-          <div className="p-4 bg-juju-light-card dark:bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
-            <p className="text-sm font-medium mb-3">Apparence</p>
-            <div className="grid grid-cols-2 gap-2">
-              <ToggleOption
-                icon={Sun}
-                label="Clair"
-                value="light"
-                current={theme}
-                onChange={setTheme}
-              />
-              <ToggleOption
-                icon={Moon}
-                label="Sombre"
-                value="dark"
-                current={theme}
-                onChange={setTheme}
-              />
+          <Card className="p-5">
+            <p className="text-sm font-semibold mb-3">Apparence</p>
+            <div className="grid grid-cols-2 gap-2.5">
+              <ToggleOption icon={Sun} label="Clair" value="light" current={theme} onChange={setTheme} />
+              <ToggleOption icon={Moon} label="Sombre" value="dark" current={theme} onChange={setTheme} />
             </div>
-          </div>
+          </Card>
 
-          {/* Densité */}
-          <div className="p-4 bg-juju-light-card dark:bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
-            <p className="text-sm font-medium mb-3">Densité d'affichage</p>
-            <div className="grid grid-cols-2 gap-2">
-              <ToggleOption
-                label="Confortable"
-                value="comfortable"
-                current={density}
-                onChange={setDensity}
-              />
-              <ToggleOption
-                label="Compact"
-                value="compact"
-                current={density}
-                onChange={setDensity}
-              />
+          <Card className="p-5">
+            <p className="text-sm font-semibold mb-3">Densité d'affichage</p>
+            <div className="grid grid-cols-2 gap-2.5">
+              <ToggleOption label="Confortable" value="comfortable" current={density} onChange={setDensity} />
+              <ToggleOption label="Compact" value="compact" current={density} onChange={setDensity} />
             </div>
-          </div>
+          </Card>
         </div>
       </section>
 
       {/* Déconnexion */}
-      <section>
-        <button
-          onClick={logout}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte-mute dark:text-juju-texte-mute rounded-lg hover:border-red-500 hover:text-red-400 transition-colors"
-        >
-          <LogOut size={18} />
-          Se déconnecter
-        </button>
-      </section>
+      <Button variant="danger-soft" size="lg" fullWidth icon={LogOut} onClick={logout}>
+        Se déconnecter
+      </Button>
     </div>
   );
 }
 
 
-function StatCard({ icon: Icon, value, label, sublabel, valueClass }) {
+function StatCard({ icon: Icon, value, label, sublabel }) {
   return (
-    <div className="p-4 bg-juju-light-card dark:bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-center">
+    <Card className="p-4 text-center">
       <Icon size={18} className="mx-auto mb-2 text-juju-dore" />
-      <p className={`font-medium ${valueClass || 'text-2xl md:text-3xl'}`}>{value}</p>
-      <p className="text-[10px] uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute mt-1">{label}</p>
-      {sublabel && <p className="text-[10px] text-juju-dore mt-1">{sublabel}</p>}
-    </div>
+      <p className="stat-gradient text-2xl md:text-3xl leading-none">{value}</p>
+      <p className="text-[10px] uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute mt-2">{label}</p>
+      {sublabel && <p className="text-[10px] text-juju-violet dark:text-juju-dore mt-1 font-semibold">{sublabel}</p>}
+    </Card>
   );
 }
 
@@ -263,14 +227,14 @@ function CategoryBar({ nom, count, total }) {
   return (
     <div className="flex items-center gap-3">
       <span className="text-sm flex-1 truncate">{nom || 'Sans catégorie'}</span>
-      <div className="flex items-center gap-2 w-32">
-        <div className="flex-1 h-1.5 bg-juju-bordure rounded-full overflow-hidden">
+      <div className="flex items-center gap-2.5 w-36">
+        <div className="flex-1 h-2 bg-juju-light-bordure/70 dark:bg-juju-bordure rounded-full overflow-hidden">
           <div
-            className="h-full bg-juju-dore transition-all duration-500"
+            className="h-full rounded-full bg-gradient-to-r from-juju-violet to-juju-dore transition-all duration-700"
             style={{ width: `${pct}%` }}
           />
         </div>
-        <span className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute w-6 text-right">{count}</span>
+        <span className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute w-6 text-right tabular-nums">{count}</span>
       </div>
     </div>
   );
@@ -278,13 +242,15 @@ function CategoryBar({ nom, count, total }) {
 
 function InfoRow({ icon: Icon, label, value }) {
   return (
-    <div className="flex items-center gap-3 p-4 bg-juju-light-card dark:bg-juju-bleu/10 dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg">
-      <Icon size={18} className="text-juju-dore" />
+    <Card className="flex items-center gap-3.5 p-4">
+      <div className="w-10 h-10 rounded-xl bg-juju-violet/10 dark:bg-juju-dore/10 flex items-center justify-center text-juju-violet dark:text-juju-dore shrink-0">
+        <Icon size={18} />
+      </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute">{label}</p>
-        <p className="font-medium truncate">{value}</p>
+        <p className="font-semibold truncate">{value}</p>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -294,12 +260,13 @@ function ToggleOption({ icon: Icon, label, value, current, onChange }) {
     <button
       type="button"
       onClick={() => onChange(value)}
-      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${isActive
-        ? 'bg-juju-dore text-juju-noir border-juju-dore'
-        : 'bg-transparent text-juju-light-texte dark:text-juju-texte border-juju-light-bordure dark:border-juju-bordure hover:border-juju-texte-mute'
-        }`}
+      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+        isActive
+          ? 'bg-gradient-violet text-white border-transparent shadow-violet-sm'
+          : 'bg-transparent text-juju-light-texte dark:text-juju-texte border-juju-light-bordure dark:border-juju-bordure hover:border-juju-violet dark:hover:border-juju-dore'
+      }`}
     >
-      {Icon && <Icon size={14} />}
+      {Icon && <Icon size={15} />}
       {label}
     </button>
   );
@@ -307,9 +274,9 @@ function ToggleOption({ icon: Icon, label, value, current, onChange }) {
 
 function SkeletonStats() {
   return (
-    <div className="grid grid-cols-3 gap-3 mb-8 animate-pulse">
+    <div className="grid grid-cols-3 gap-3 mb-9">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="aspect-square bg-juju-light-card dark:bg-juju-bleu/30 dark:bg-juju-bleu/60 rounded-lg" />
+        <div key={i} className="aspect-square skeleton bg-juju-light-card dark:bg-juju-bleu/40 border border-juju-light-bordure dark:border-juju-bordure rounded-2xl" />
       ))}
     </div>
   );

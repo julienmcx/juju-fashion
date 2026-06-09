@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles, ChevronLeft, ChevronRight, AlertCircle, Loader2, RefreshCw, BookmarkPlus, Check } from 'lucide-react';
 import { fetchArticle } from '../api/articles';
 import { fetchAvatarPhotos } from '../api/avatar';
 import { createTryOn, fetchQuota } from '../api/tryon';
 import { saveEssayage } from '../api/essayages';
+import { Button, Eyebrow } from '../components/ui';
+
+const BACK_LINK =
+  'inline-flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-violet dark:hover:text-juju-dore transition-colors mb-6';
 
 const REQUIRED_ANGLES = ['face', 'profil_droit', 'dos', 'profil_gauche'];
 const ANGLE_LABELS = {
@@ -16,7 +20,6 @@ const ANGLE_LABELS = {
 
 export default function ArticleEssai() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   // Données de pré-vol
   const [article, setArticle] = useState(null);
@@ -65,16 +68,26 @@ export default function ArticleEssai() {
 
 
   if (loadingPrechecks) {
-    return <CenteredMessage>Chargement…</CenteredMessage>;
+    return (
+      <CenteredMessage
+        spinner
+        title="Préparation…"
+        message="On vérifie ton mannequin et tes essayages disponibles."
+      />
+    );
   }
 
   if (preErr) {
     return (
-      <CenteredMessage error>
-        <p className="mb-4">{preErr}</p>
-        <Link to="/garde-robe" className="text-juju-dore hover:underline">
+      <CenteredMessage
+        icon={AlertCircle}
+        accent="danger"
+        title="Oups…"
+        message={preErr}
+      >
+        <Button to="/garde-robe" variant="secondary">
           Retour à ma garde-robe
-        </Link>
+        </Button>
       </CenteredMessage>
     );
   }
@@ -105,10 +118,7 @@ export default function ArticleEssai() {
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-4xl mx-auto">
-      <Link
-        to={`/articles/${id}`}
-        className="flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore transition-colors mb-6"
-      >
+      <Link to={`/articles/${id}`} className={BACK_LINK}>
         <ArrowLeft size={16} />
         Retour au détail
       </Link>
@@ -147,47 +157,54 @@ export default function ArticleEssai() {
 function ReadyView({ article, quota, onLaunch }) {
   return (
     <div>
-      <div className="flex items-center gap-3 mb-2">
-        <h2 className="text-2xl md:text-3xl font-medium">Essayage virtuel</h2>
-        <span className="px-2 py-0.5 bg-juju-violet text-white text-[10px] font-bold uppercase tracking-wider rounded-full">
+      <div className="mb-3">
+        <Eyebrow>Essayage · Bêta</Eyebrow>
+      </div>
+      <div className="flex items-center gap-3 mb-2.5">
+        <h1 className="font-display text-3xl md:text-4xl leading-[1.08] text-juju-light-texte dark:text-juju-texte">
+          Essayage <span className="accent-italic">virtuel</span>
+        </h1>
+        <span className="px-2 py-0.5 bg-gradient-violet text-white text-[10px] font-bold uppercase tracking-wider rounded-full shadow-violet-sm">
           Bêta
         </span>
       </div>
-      <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-2">
+      <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-5 max-w-xl">
         Voyons à quoi tu ressembles avec cet article.
       </p>
-      <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mb-8 italic">
-        ⚠️ Fonctionnalité expérimentale. Le rendu IA peut être approximatif selon les angles et morphologies.
-      </p>
+
+      <div className="flex items-start gap-2.5 mb-8 rounded-2xl border border-amber-400/30 dark:border-juju-dore/25 bg-amber-50/60 dark:bg-juju-dore/5 px-4 py-3 max-w-xl">
+        <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-500 dark:text-juju-dore" />
+        <p className="text-xs leading-relaxed text-juju-light-texte-mute dark:text-juju-texte-mute">
+          Fonctionnalité expérimentale. Le rendu IA peut être approximatif selon les angles et morphologies.
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 gap-4 mb-8 max-w-md mx-auto">
         <div>
           <p className="text-xs uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute mb-2 text-center">
             Article
           </p>
-          <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu rounded-xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure">
+          <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu/40 rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure shadow-card">
             <img src={article.image_url} alt={article.nom} className="w-full h-full object-cover" />
           </div>
-          <p className="text-sm font-medium mt-2 text-center truncate">{article.nom}</p>
+          <p className="text-sm font-semibold mt-2 text-center truncate">{article.nom}</p>
         </div>
 
         <div>
           <p className="text-xs uppercase tracking-wider text-juju-light-texte-mute dark:text-juju-texte-mute mb-2 text-center">
             Sur toi
           </p>
-          <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu rounded-xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center">
-            <Sparkles size={36} className="text-juju-dore" />
+          <div className="aspect-square bg-gradient-to-br from-juju-violet/10 to-juju-dore/10 dark:from-juju-bleu/60 dark:to-juju-noir rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure shadow-card flex items-center justify-center">
+            <Sparkles size={36} className="text-juju-violet dark:text-juju-dore" />
           </div>
           <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mt-2 text-center">4 angles · ~25 s</p>
         </div>
       </div>
+
       <div className="text-center">
-        <button
-          onClick={onLaunch}
-          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors"
-        >
-          <Sparkles size={20} />
+        <Button variant="primary" size="lg" icon={Sparkles} onClick={onLaunch}>
           Lancer l'essayage
-        </button>
+        </Button>
         <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mt-3">
           Il te reste {quota.remaining} essayage{quota.remaining > 1 ? 's' : ''} aujourd'hui
         </p>
@@ -201,10 +218,12 @@ function GeneratingView() {
     <div className="text-center py-20">
       <div className="relative inline-block mb-6">
         <div className="w-20 h-20 rounded-full border-2 border-juju-light-bordure dark:border-juju-bordure" />
-        <div className="absolute inset-0 w-20 h-20 rounded-full border-2 border-juju-dore border-t-transparent animate-spin" />
-        <Sparkles className="absolute inset-0 m-auto text-juju-dore" size={28} />
+        <div className="absolute inset-0 w-20 h-20 rounded-full border-2 border-juju-violet border-t-transparent animate-spin" />
+        <Sparkles className="absolute inset-0 m-auto text-juju-violet dark:text-juju-dore" size={28} />
       </div>
-      <h3 className="text-xl font-medium mb-2">Génération en cours…</h3>
+      <h3 className="font-display text-2xl md:text-3xl mb-2 text-juju-light-texte dark:text-juju-texte">
+        Génération en cours…
+      </h3>
       <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute max-w-sm mx-auto">
         Le modèle IA s'occupe de ton look. Cette opération prend généralement entre 20 et 40 secondes.
       </p>
@@ -238,7 +257,7 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
   };
 
   if (orderedResults.length === 0) {
-    return <p className="text-red-400 text-center py-10">Aucun résultat exploitable.</p>;
+    return <p className="text-red-500 text-center py-10">Aucun résultat exploitable.</p>;
   }
 
   const current = orderedResults[index] || orderedResults[0];
@@ -257,18 +276,19 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-medium">Essayage généré</h2>
-          <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mt-1">Fais défiler pour tourner autour</p>
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="min-w-0">
+          <div className="mb-2">
+            <Eyebrow>Essayage · Bêta</Eyebrow>
+          </div>
+          <h1 className="font-display text-3xl md:text-4xl leading-[1.08] text-juju-light-texte dark:text-juju-texte">
+            Essayage <span className="accent-italic">généré</span>
+          </h1>
+          <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mt-2">Fais défiler pour tourner autour</p>
         </div>
-        <button
-          onClick={onRetry}
-          className="flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore transition-colors"
-        >
-          <RefreshCw size={16} />
+        <Button variant="ghost" size="sm" icon={RefreshCw} onClick={onRetry} className="shrink-0">
           Refaire
-        </button>
+        </Button>
       </div>
 
       {partialWarning && (
@@ -291,19 +311,19 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
         <button
           onClick={prev}
           aria-label="Angle précédent"
-          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-bg dark:bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-dore transition-colors"
+          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-card/80 dark:bg-juju-noir/70 backdrop-blur border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-violet dark:hover:text-juju-dore hover:border-juju-violet dark:hover:border-juju-dore transition-colors"
         >
           <ChevronLeft size={20} />
         </button>
         <button
           onClick={next}
           aria-label="Angle suivant"
-          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-bg dark:bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-dore transition-colors"
+          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-card/80 dark:bg-juju-noir/70 backdrop-blur border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-violet dark:hover:text-juju-dore hover:border-juju-violet dark:hover:border-juju-dore transition-colors"
         >
           <ChevronRight size={20} />
         </button>
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
-          <p className="text-center text-sm font-medium uppercase tracking-widest">
+          <p className="text-center text-sm font-medium uppercase tracking-widest text-white">
             {ANGLE_LABELS[current.angle]}
           </p>
         </div>
@@ -316,8 +336,8 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
             onClick={() => setIndex(i)}
             aria-label={`Voir ${ANGLE_LABELS[r.angle]}`}
             className={`h-2 rounded-full transition-all ${i === index
-              ? 'w-8 bg-juju-dore'
-              : 'w-2 bg-juju-bordure hover:bg-juju-texte-mute'
+              ? 'w-8 bg-gradient-violet'
+              : 'w-2 bg-juju-light-bordure dark:bg-juju-bordure hover:bg-juju-light-texte-mute dark:hover:bg-juju-texte-mute'
               }`}
           />
         ))}
@@ -328,7 +348,7 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
           <button
             key={r.angle}
             onClick={() => setIndex(i)}
-            className={`aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${i === index ? 'border-juju-dore' : 'border-juju-light-bordure dark:border-juju-bordure opacity-60 hover:opacity-100'
+            className={`aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all ${i === index ? 'border-juju-violet' : 'border-juju-light-bordure dark:border-juju-bordure opacity-60 hover:opacity-100'
               }`}
           >
             <img src={r.image_url} alt={ANGLE_LABELS[r.angle]} className="w-full h-full object-cover" />
@@ -339,32 +359,27 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
       {/* Bouton Sauvegarder dans mes essayages */}
       <div className="mt-8 max-w-md mx-auto">
         {!saved ? (
-          <button
+          <Button
+            variant="primary"
+            fullWidth
+            icon={BookmarkPlus}
+            loading={saving}
             onClick={handleSave}
-            disabled={saving}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors disabled:opacity-60"
           >
-            {saving ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                Sauvegarde…
-              </>
-            ) : (
-              <>
-                <BookmarkPlus size={18} />
-                Sauvegarder dans mes essayages
-              </>
-            )}
-          </button>
+            {saving ? 'Sauvegarde…' : 'Sauvegarder dans mes essayages'}
+          </Button>
         ) : (
           <div className="text-center py-2">
-            <p className="inline-flex items-center gap-2 text-sm text-juju-dore font-medium mb-1">
-              <Check size={16} /> Sauvegardé dans tes essayages
+            <p className="inline-flex items-center gap-2 text-sm font-semibold text-juju-violet dark:text-juju-dore mb-1.5">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-juju-violet/10 dark:bg-juju-dore/10 text-juju-violet dark:text-juju-dore">
+                <Check size={13} />
+              </span>
+              Sauvegardé dans tes essayages
             </p>
             <div>
               <Link
                 to="/essayages"
-                className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore transition-colors underline"
+                className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-violet dark:hover:text-juju-dore transition-colors underline"
               >
                 Voir mes essayages →
               </Link>
@@ -372,7 +387,7 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
           </div>
         )}
         {saveError && (
-          <p className="text-red-400 text-xs text-center mt-2">{saveError}</p>
+          <p className="text-red-500 text-xs text-center mt-2">{saveError}</p>
         )}
       </div>
     </div>
@@ -381,23 +396,21 @@ function SuccessView({ tryonData, index, setIndex, onRetry }) {
 
 function ErrorView({ message, onRetry, articleId }) {
   return (
-    <div className="text-center py-16 max-w-md mx-auto">
-      <AlertCircle size={40} className="mx-auto mb-4 text-red-400" />
-      <h3 className="text-xl font-medium mb-2">Essayage impossible</h3>
+    <div className="text-center py-16 max-w-md mx-auto animate-fade-up">
+      <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 ring-1 ring-red-500/20">
+        <AlertCircle size={28} />
+      </div>
+      <h3 className="font-display text-2xl mb-2 text-juju-light-texte dark:text-juju-texte">
+        Essayage impossible
+      </h3>
       <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">{message}</p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <button
-          onClick={onRetry}
-          className="px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors"
-        >
+        <Button variant="primary" icon={RefreshCw} onClick={onRetry}>
           Réessayer
-        </button>
-        <Link
-          to={`/articles/${articleId}`}
-          className="px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte rounded-lg hover:bg-juju-light-card dark:bg-juju-bleu-clair transition-colors"
-        >
+        </Button>
+        <Button variant="secondary" to={`/articles/${articleId}`}>
           Retour au détail
-        </Link>
+        </Button>
       </div>
     </div>
   );
@@ -406,35 +419,57 @@ function ErrorView({ message, onRetry, articleId }) {
 function PreFlightBlock({ icon: Icon, title, message, ctaLabel, ctaTo, articleId }) {
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-2xl mx-auto">
-      <Link
-        to={`/articles/${articleId}`}
-        className="flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore transition-colors mb-6"
-      >
+      <Link to={`/articles/${articleId}`} className={BACK_LINK}>
         <ArrowLeft size={16} />
         Retour au détail
       </Link>
 
-      <div className="text-center py-16">
-        <Icon size={40} className="mx-auto mb-4 text-juju-dore" />
-        <h3 className="text-xl font-medium mb-2">{title}</h3>
-        <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-6 max-w-md mx-auto">{message}</p>
+      <div className="text-center py-16 max-w-sm mx-auto animate-fade-up">
+        <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-juju-violet/10 dark:bg-juju-dore/10 flex items-center justify-center text-juju-violet dark:text-juju-dore ring-1 ring-juju-violet/20 dark:ring-juju-dore/20">
+          <Icon size={28} />
+        </div>
+        <h3 className="font-display text-2xl mb-2 text-juju-light-texte dark:text-juju-texte">{title}</h3>
+        <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">{message}</p>
         {ctaLabel && ctaTo && (
-          <Link
-            to={ctaTo}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors"
-          >
+          <Button variant="primary" to={ctaTo}>
             {ctaLabel}
-          </Link>
+          </Button>
         )}
       </div>
     </div>
   );
 }
 
-function CenteredMessage({ children, error }) {
+function CenteredMessage({ spinner, icon: Icon, accent, title, message, children }) {
+  const isDanger = accent === 'danger';
   return (
-    <div className={`px-4 py-20 text-center ${error ? 'text-red-400' : 'text-juju-light-texte-mute dark:text-juju-texte-mute'}`}>
-      {children}
+    <div className="px-4 py-6 md:px-8 md:py-10 max-w-2xl mx-auto">
+      <div className="text-center py-16 max-w-sm mx-auto animate-fade-up">
+        {spinner ? (
+          <div className="w-16 h-16 mx-auto mb-5 flex items-center justify-center">
+            <Loader2 size={36} className="animate-spin text-juju-violet dark:text-juju-dore" />
+          </div>
+        ) : (
+          Icon && (
+            <div
+              className={`w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center ring-1 ${
+                isDanger
+                  ? 'bg-red-500/10 text-red-500 ring-red-500/20'
+                  : 'bg-juju-violet/10 dark:bg-juju-dore/10 text-juju-violet dark:text-juju-dore ring-juju-violet/20 dark:ring-juju-dore/20'
+              }`}
+            >
+              <Icon size={28} />
+            </div>
+          )
+        )}
+        {title && (
+          <h3 className="font-display text-2xl mb-2 text-juju-light-texte dark:text-juju-texte">{title}</h3>
+        )}
+        {message && (
+          <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">{message}</p>
+        )}
+        {children}
+      </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ const STORAGE_KEY = 'juju_theme';
 
 export function useTheme() {
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem(STORAGE_KEY) || 'dark';
+    return localStorage.getItem(STORAGE_KEY) || 'light';
   });
 
   useEffect(() => {

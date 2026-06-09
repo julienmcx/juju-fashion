@@ -8,6 +8,7 @@ import {
   uploadAvatarPhoto,
   deleteAvatarPhoto,
 } from '../api/avatar';
+import { Button, Card, Eyebrow } from '../components/ui';
 
 const ANGLES = [
   { key: 'face', label: 'Face', instruction: 'Place-toi face à la caméra, bras le long du corps' },
@@ -90,22 +91,23 @@ function MannequinViewer({ photos, onEdit }) {
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-medium">Mon mannequin</h2>
-          <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mt-1">Fais défiler pour tourner autour</p>
+      <header className="flex items-start justify-between gap-4 mb-8">
+        <div className="min-w-0">
+          <Eyebrow>Mon avatar</Eyebrow>
+          <h1 className="font-display text-3xl md:text-4xl leading-[1.08] mt-1.5">
+            Mon <span className="accent-italic">mannequin</span>
+          </h1>
+          <p className="mt-2.5 text-juju-light-texte-mute dark:text-juju-texte-mute">
+            Fais défiler pour tourner autour
+          </p>
         </div>
-        <button
-          onClick={onEdit}
-          className="flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore transition-colors"
-        >
-          <Edit3 size={16} />
+        <Button variant="ghost" size="sm" icon={Edit3} onClick={onEdit} className="shrink-0">
           Modifier
-        </button>
-      </div>
+        </Button>
+      </header>
 
       <div
-        className="relative aspect-[3/4] max-w-md mx-auto bg-juju-light-card dark:bg-juju-bleu rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure mb-4"
+        className="relative aspect-[3/4] max-w-md mx-auto bg-juju-light-card dark:bg-juju-bleu rounded-2xl overflow-hidden border border-juju-light-bordure dark:border-juju-bordure shadow-card mb-5"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -118,14 +120,14 @@ function MannequinViewer({ photos, onEdit }) {
         <button
           onClick={prev}
           aria-label="Angle précédent"
-          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-bg/80 dark:bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-dore transition-colors"
+          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-card/80 dark:bg-juju-noir/70 backdrop-blur border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:border-juju-violet hover:text-juju-violet dark:hover:border-juju-dore dark:hover:text-juju-dore transition-colors"
         >
           <ChevronLeft size={20} />
         </button>
         <button
           onClick={next}
           aria-label="Angle suivant"
-          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-bg/80 dark:bg-juju-noir/70 backdrop-blur-sm border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:text-juju-dore transition-colors"
+          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-juju-light-card/80 dark:bg-juju-noir/70 backdrop-blur border border-juju-light-bordure dark:border-juju-bordure items-center justify-center text-juju-light-texte dark:text-juju-texte hover:border-juju-violet hover:text-juju-violet dark:hover:border-juju-dore dark:hover:text-juju-dore transition-colors"
         >
           <ChevronRight size={20} />
         </button>
@@ -136,14 +138,14 @@ function MannequinViewer({ photos, onEdit }) {
         </div>
       </div>
 
-      <div className="flex justify-center gap-2 mb-6">
+      <div className="flex justify-center gap-2 mb-7">
         {ANGLES.map((a, i) => (
           <button
             key={a.key}
             onClick={() => setIndex(i)}
             aria-label={`Voir ${a.label}`}
             className={`h-2 rounded-full transition-all ${i === index
-              ? 'w-8 bg-juju-dore'
+              ? 'w-8 bg-gradient-violet'
               : 'w-2 bg-juju-light-bordure dark:bg-juju-bordure hover:bg-juju-light-texte-mute dark:hover:bg-juju-texte-mute'
               }`}
           />
@@ -155,7 +157,7 @@ function MannequinViewer({ photos, onEdit }) {
           <button
             key={a.key}
             onClick={() => setIndex(i)}
-            className={`aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${i === index ? 'border-juju-dore' : 'border-juju-light-bordure dark:border-juju-bordure opacity-60 hover:opacity-100'
+            className={`aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all ${i === index ? 'border-juju-violet' : 'border-juju-light-bordure dark:border-juju-bordure opacity-60 hover:opacity-100'
               }`}
           >
             <img src={photos[a.key].image_url} alt={a.label} className="w-full h-full object-cover" />
@@ -210,14 +212,19 @@ function CaptureView({
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-2xl md:text-3xl font-medium">Mon mannequin</h2>
+      <header className="flex items-start justify-between gap-4 mb-3">
+        <div className="min-w-0">
+          <Eyebrow>Mon avatar</Eyebrow>
+          <h1 className="font-display text-3xl md:text-4xl leading-[1.08] mt-1.5">
+            Mon <span className="accent-italic">mannequin</span>
+          </h1>
+        </div>
         {isEditing && (
-          <button onClick={onCancel} className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore">
+          <Button variant="ghost" size="sm" onClick={onCancel} className="shrink-0">
             Terminer
-          </button>
+          </Button>
         )}
-      </div>
+      </header>
       <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">
         {isEditing
           ? 'Modifie tes 4 photos d\'angle.'
@@ -227,11 +234,11 @@ function CaptureView({
       <div className="mb-6">
         <div className="flex items-center justify-between text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mb-2">
           <span>Progression</span>
-          <span>{completed} / {ANGLES.length}</span>
+          <span className="font-semibold text-juju-violet dark:text-juju-dore tabular-nums">{completed} / {ANGLES.length}</span>
         </div>
-        <div className="h-2 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-full overflow-hidden">
+        <div className="h-2 bg-juju-light-bordure/70 dark:bg-juju-bordure rounded-full overflow-hidden">
           <div
-            className="h-full bg-juju-dore transition-all duration-300"
+            className="h-full rounded-full bg-gradient-to-r from-juju-violet to-juju-dore transition-all duration-500"
             style={{ width: `${(completed / ANGLES.length) * 100}%` }}
           />
         </div>
@@ -251,11 +258,11 @@ function CaptureView({
       </div>
 
       {!photos[activeAngle] && (
-        <div className="p-5 border border-juju-dore/40 bg-juju-dore/5 rounded-xl mb-4 max-w-md">
-          <p className="text-xs uppercase tracking-wider text-juju-dore mb-2">
+        <Card className="p-5 border-juju-violet/30 bg-juju-violet/5 dark:bg-juju-violet/10 mb-4 max-w-md">
+          <p className="text-xs font-semibold uppercase tracking-wider text-juju-violet dark:text-juju-dore mb-2">
             Étape {ANGLES.findIndex((a) => a.key === activeAngle) + 1} / {ANGLES.length}
           </p>
-          <p className="font-medium mb-1">
+          <p className="font-semibold mb-1">
             {ANGLES.find((a) => a.key === activeAngle)?.label}
           </p>
           <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-4">
@@ -286,15 +293,15 @@ function CaptureView({
 
           {uploadingAngle === activeAngle && (
             <div className="flex items-center gap-2 mt-4 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin text-juju-violet dark:text-juju-dore" />
               Upload en cours…
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {error && (
-        <p className="text-red-400 text-sm mt-4">{error}</p>
+        <p className="text-red-500 text-sm mt-4 font-medium">{error}</p>
       )}
     </div>
   );
@@ -309,9 +316,9 @@ function AngleCard({ angle, photo, isActive, onSelect, onDelete }) {
       type="button"
       onClick={onSelect}
       className={`relative aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all ${photo
-        ? 'border-juju-dore/60'
+        ? 'border-juju-light-bordure dark:border-juju-bordure'
         : isActive
-          ? 'border-juju-dore'
+          ? 'border-juju-violet'
           : 'border-juju-light-bordure dark:border-juju-bordure hover:border-juju-light-texte-mute dark:hover:border-juju-texte-mute'
         }`}
     >
@@ -319,13 +326,13 @@ function AngleCard({ angle, photo, isActive, onSelect, onDelete }) {
         <>
           <img src={photo.image_url} alt={angle.label} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-juju-dore text-juju-noir flex items-center justify-center">
+          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gradient-gold text-juju-noir flex items-center justify-center shadow-gold">
             <Check size={14} />
           </div>
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="absolute top-2 left-2 w-6 h-6 rounded-full bg-black/60 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
+            className="absolute top-2 left-2 w-6 h-6 rounded-full bg-juju-noir/60 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
             aria-label={`Supprimer ${angle.label}`}
           >
             <X size={14} />
@@ -336,10 +343,10 @@ function AngleCard({ angle, photo, isActive, onSelect, onDelete }) {
         </>
       ) : (
         <div className="w-full h-full flex flex-col items-center justify-center bg-juju-light-card dark:bg-juju-bleu/40 p-3">
-          <Camera size={28} className={`mb-2 ${isActive ? 'text-juju-dore' : 'text-juju-light-texte-mute dark:text-juju-texte-mute'}`} />
+          <Camera size={28} className={`mb-2 ${isActive ? 'text-juju-violet dark:text-juju-dore' : 'text-juju-light-texte-mute dark:text-juju-texte-mute'}`} />
           <p className="text-xs text-center font-medium">{angle.label}</p>
           {isActive && (
-            <p className="text-[10px] text-juju-dore mt-1 uppercase tracking-wider">À capturer</p>
+            <p className="text-[10px] text-juju-violet dark:text-juju-dore mt-1 uppercase tracking-wider font-semibold">À capturer</p>
           )}
         </div>
       )}
@@ -350,10 +357,10 @@ function AngleCard({ angle, photo, isActive, onSelect, onDelete }) {
 function CaptureButton({ icon: Icon, label, accept, capture, onChange, disabled }) {
   return (
     <label
-      className={`flex items-center gap-3 p-3 border border-juju-light-bordure dark:border-juju-bordure rounded-lg bg-juju-light-card dark:bg-juju-noir cursor-pointer transition-colors ${disabled ? 'opacity-50 pointer-events-none' : 'hover:border-juju-dore'
+      className={`flex items-center gap-3 p-3 border border-juju-light-bordure dark:border-juju-bordure rounded-xl bg-juju-light-card dark:bg-juju-noir cursor-pointer transition-colors ${disabled ? 'opacity-50 pointer-events-none' : 'hover:border-juju-violet'
         }`}
     >
-      <Icon size={18} className="text-juju-dore" />
+      <Icon size={18} className="text-juju-violet dark:text-juju-dore" />
       <span className="text-sm font-medium">{label}</span>
       <input
         type="file"

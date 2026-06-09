@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, Loader2, Sparkles } from 'lucide-react';
 import { fetchEssayage, deleteEssayage } from '../api/essayages';
+import { Button } from '../components/ui';
 
 const ANGLES = [
     { key: 'face', label: 'Face', col: 'image_url_face' },
@@ -39,11 +40,14 @@ export default function EssayageDetail() {
         }
     };
 
+    const backLinkClass =
+        'inline-flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-violet dark:hover:text-juju-dore transition-colors';
+
     if (loading) {
         return (
             <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
                 <div className="flex items-center justify-center py-20">
-                    <Loader2 size={32} className="animate-spin text-juju-dore" />
+                    <Loader2 size={32} className="animate-spin text-juju-violet dark:text-juju-dore" />
                 </div>
             </div>
         );
@@ -52,10 +56,10 @@ export default function EssayageDetail() {
     if (error || !essayage) {
         return (
             <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
-                <Link to="/essayages" className="inline-flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore mb-6">
+                <Link to="/essayages" className={`${backLinkClass} mb-6`}>
                     <ArrowLeft size={16} /> Retour
                 </Link>
-                <p className="text-red-400 text-sm">{error || 'Essayage introuvable'}</p>
+                <p className="text-red-500 text-sm font-medium">{error || 'Essayage introuvable'}</p>
             </div>
         );
     }
@@ -68,24 +72,29 @@ export default function EssayageDetail() {
     return (
         <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
             <div className="flex items-center justify-between mb-6">
-                <Link to="/essayages" className="inline-flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-dore transition-colors">
+                <Link to="/essayages" className={backLinkClass}>
                     <ArrowLeft size={16} /> Retour
                 </Link>
-                <button
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={Trash2}
                     onClick={() => setShowConfirmDelete(true)}
-                    className="inline-flex items-center gap-2 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-red-400 transition-colors"
+                    className="hover:!text-red-500 dark:hover:!text-red-500 hover:!bg-red-500/5"
                 >
-                    <Trash2 size={16} /> Supprimer
-                </button>
+                    Supprimer
+                </Button>
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-medium mb-1">{essayage.vetement_nom || 'Essayage'}</h1>
+            <h1 className="font-display text-3xl md:text-4xl leading-[1.08] text-juju-light-texte dark:text-juju-texte mb-1.5">
+                {essayage.vetement_nom || 'Essayage'}
+            </h1>
             <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">
                 {essayage.categorie_nom || '—'} · {dateFr}
             </p>
 
             {/* Image principale */}
-            <div className="aspect-[3/4] max-w-md mx-auto bg-juju-light-bg dark:bg-juju-noir border border-juju-light-bordure dark:border-juju-bordure rounded-xl overflow-hidden mb-4">
+            <div className="aspect-[3/4] max-w-md mx-auto rounded-2xl border border-juju-light-bordure dark:border-juju-bordure shadow-card overflow-hidden mb-4 bg-gradient-to-br from-juju-light-bg to-juju-light-bordure/50 dark:from-juju-bleu/60 dark:to-juju-noir">
                 {currentUrl ? (
                     <img src={currentUrl} alt={`Angle ${currentAngle}`} className="w-full h-full object-cover" />
                 ) : (
@@ -106,8 +115,8 @@ export default function EssayageDetail() {
                             key={angle.key}
                             onClick={() => setCurrentAngle(angle.key)}
                             disabled={!url}
-                            className={`group relative aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${isActive
-                                    ? 'border-juju-dore'
+                            className={`group relative aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all ${isActive
+                                    ? 'border-juju-violet'
                                     : 'border-transparent hover:border-juju-light-bordure dark:hover:border-juju-bordure'
                                 } ${!url ? 'opacity-30 cursor-not-allowed' : ''}`}
                         >
@@ -116,7 +125,7 @@ export default function EssayageDetail() {
                             ) : (
                                 <div className="w-full h-full bg-juju-light-card dark:bg-juju-bleu/30" />
                             )}
-                            <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[10px] py-1 text-center font-medium uppercase tracking-wider">
+                            <span className="absolute bottom-0 inset-x-0 bg-juju-noir/60 text-white text-[10px] py-1 text-center font-medium uppercase tracking-wider">
                                 {angle.label}
                             </span>
                         </button>
@@ -126,28 +135,32 @@ export default function EssayageDetail() {
 
             {/* Modale de confirmation */}
             {showConfirmDelete && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-2xl max-w-md w-full p-6 shadow-2xl">
-                        <h3 className="text-xl font-medium mb-2">Supprimer cet essayage ?</h3>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-juju-noir/50 backdrop-blur-sm">
+                    <div className="bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-2xl max-w-md w-full p-6 shadow-2xl animate-scale-in">
+                        <h3 className="font-display text-xl mb-2">Supprimer cet essayage ?</h3>
                         <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-5">
                             Les 4 images de cet essayage seront définitivement supprimées. Cette action est irréversible.
                         </p>
                         <div className="flex gap-2">
-                            <button
-                                onClick={() => setShowConfirmDelete(false)}
+                            <Button
+                                variant="secondary"
+                                size="md"
+                                fullWidth
                                 disabled={deleting}
-                                className="flex-1 px-4 py-2.5 border border-juju-light-bordure dark:border-juju-bordure rounded-lg hover:border-juju-dore transition-colors disabled:opacity-60"
+                                onClick={() => setShowConfirmDelete(false)}
                             >
                                 Annuler
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="danger"
+                                size="md"
+                                fullWidth
+                                icon={Trash2}
+                                loading={deleting}
                                 onClick={handleDelete}
-                                disabled={deleting}
-                                className="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
                             >
-                                {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                                 Supprimer
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
