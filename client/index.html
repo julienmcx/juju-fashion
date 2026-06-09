@@ -3,17 +3,20 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="apple-touch-icon" href="/favicon.svg" />
-  <meta name="theme-color" content="#0A0A0F" />
+  <meta name="theme-color" content="#FAFAFE" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0A0A0F" media="(prefers-color-scheme: dark)" />
   <title>Juju · Garde-robe virtuelle</title>
   <meta name="description"
     content="Numérise ta garde-robe et essaye n'importe quel look en 30 secondes grâce à l'IA." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <script>
-    // Charger le thème avant React pour éviter le flash blanc en mode sombre
+    // Charger le thème avant React pour éviter le flash de couleur
     (function () {
-      var t = localStorage.getItem('juju_theme') || 'dark';
+      var t = localStorage.getItem('juju_theme') || 'light';
       if (t === 'dark') document.documentElement.classList.add('dark');
     })();
   </script>

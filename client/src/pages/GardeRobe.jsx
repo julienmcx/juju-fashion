@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal, X, Shirt, Filter } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, SlidersHorizontal, X, Shirt, Filter, Camera } from 'lucide-react';
 import { fetchArticles } from '../api/articles';
 import { useReferentiels } from '../hooks/useReferentiels';
+import { Button, Card, PageHeader, SectionLabel } from '../components/ui';
 
 const ORIGINES = [
   { value: 'neuf', label: 'Neuf' },
@@ -77,55 +78,57 @@ export default function GardeRobe() {
   const totalActive = activeFiltersCount + (filters.search ? 1 : 0);
 
   return (
-    <div className="px-4 py-6 md:px-8 md:py-10 max-w-6xl mx-auto pb-24 md:pb-10">
-      <header className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-medium">Ma garde-robe</h2>
-            {!loading && !error && (
-              <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mt-1">
-                {articles.length} article{articles.length > 1 ? 's' : ''}
-                {totalActive > 0 && (
-                  <button
-                    onClick={resetFilters}
-                    className="ml-2 text-juju-dore hover:underline"
-                  >
-                    · Réinitialiser
-                  </button>
-                )}
-              </p>
-            )}
-          </div>
-          <button
+    <div className="px-4 py-6 md:px-8 md:py-10 max-w-6xl mx-auto">
+      <PageHeader
+        eyebrow="Ta garde-robe"
+        title="Ma garde-robe"
+        subtitle={
+          !loading && !error
+            ? `${articles.length} article${articles.length > 1 ? 's' : ''} numérisé${articles.length > 1 ? 's' : ''}`
+            : undefined
+        }
+        actions={
+          <Button
+            variant="secondary"
+            size="md"
+            icon={SlidersHorizontal}
             onClick={() => setFiltersOpen(true)}
-            aria-label="Filtres"
-            className="relative flex items-center gap-2 px-3 py-2 rounded-lg border border-juju-light-bordure dark:border-juju-bordure hover:border-juju-dore hover:text-juju-dore transition-colors text-sm"
+            className="relative"
           >
-            <SlidersHorizontal size={16} />
             <span className="hidden sm:inline">Filtres</span>
             {activeFiltersCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-juju-dore text-juju-noir text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-violet text-white text-[10px] font-bold flex items-center justify-center shadow-violet-sm">
                 {activeFiltersCount}
               </span>
             )}
-          </button>
-        </div>
+          </Button>
+        }
+        className="mb-5"
+      />
 
-        {/* Barre de recherche */}
-        <div className="relative">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-juju-light-texte-mute dark:text-juju-texte-mute pointer-events-none"
-          />
-          <input
-            type="search"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Rechercher un article..."
-            className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-juju-light-card dark:bg-juju-bleu/40 border border-juju-light-bordure dark:border-juju-bordure focus:border-juju-dore focus:outline-none text-sm"
-          />
-        </div>
-      </header>
+      {totalActive > 0 && !loading && !error && (
+        <button
+          onClick={resetFilters}
+          className="text-sm text-juju-violet dark:text-juju-dore hover:underline mb-4 -mt-3 inline-block"
+        >
+          Réinitialiser les filtres
+        </button>
+      )}
+
+      {/* Barre de recherche */}
+      <div className="relative mb-6">
+        <Search
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-juju-light-texte-mute dark:text-juju-texte-mute pointer-events-none"
+        />
+        <input
+          type="search"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Rechercher un article…"
+          className="field-input pl-11"
+        />
+      </div>
 
       {filtersOpen && (
         <FiltersPanel
@@ -145,8 +148,8 @@ export default function GardeRobe() {
       )}
       {!loading && !error && articles.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {articles.map((article) => (
-            <ArticleCard key={article.id_article} article={article} />
+          {articles.map((article, i) => (
+            <ArticleCard key={article.id_article} article={article} index={i} />
           ))}
         </div>
       )}
@@ -161,23 +164,22 @@ function FiltersPanel({ filters, referentiels, onUpdate, onReset, onClose, activ
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
+        className="fixed inset-0 bg-juju-noir/50 backdrop-blur-sm z-30 animate-fade-up"
         onClick={onClose}
       />
-      <div className="fixed inset-x-0 bottom-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-xl md:w-full md:rounded-xl rounded-t-2xl bg-juju-light-bg dark:bg-juju-bleu border-t md:border border-juju-light-bordure dark:border-juju-bordure z-40 max-h-[85vh] flex flex-col">
+      <div className="fixed inset-x-0 bottom-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-xl md:w-full md:rounded-2xl rounded-t-3xl bg-juju-light-bg dark:bg-juju-bleu border-t md:border border-juju-light-bordure dark:border-juju-bordure z-40 max-h-[85vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-juju-light-bordure dark:border-juju-bordure">
-          <h3 className="text-lg font-medium">Filtres</h3>
+          <h3 className="font-display text-xl">Filtres</h3>
           <button
             onClick={onClose}
             aria-label="Fermer"
-            className="p-1 rounded hover:text-juju-dore transition-colors"
+            className="p-1.5 rounded-lg text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-violet dark:hover:text-juju-dore hover:bg-juju-light-bordure/50 dark:hover:bg-juju-bordure/50 transition-colors"
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
-          {/* Catégorie */}
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
           {referentiels?.categories?.length > 0 && (
             <FilterSection title="Catégorie">
               <ChipGroup
@@ -191,13 +193,12 @@ function FiltersPanel({ filters, referentiels, onUpdate, onReset, onClose, activ
             </FilterSection>
           )}
 
-          {/* Marque */}
           {referentiels?.marques?.length > 0 && (
             <FilterSection title="Marque">
               <select
                 value={filters.id_marque}
                 onChange={(e) => onUpdate('id_marque', e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg bg-juju-light-card dark:bg-juju-bleu-clair border border-juju-light-bordure dark:border-juju-bordure focus:border-juju-dore focus:outline-none text-sm"
+                className="field-input appearance-none cursor-pointer"
               >
                 <option value="">Toutes les marques</option>
                 {referentiels.marques.map((m) => (
@@ -207,10 +208,9 @@ function FiltersPanel({ filters, referentiels, onUpdate, onReset, onClose, activ
             </FilterSection>
           )}
 
-          {/* Couleur */}
           {referentiels?.couleurs?.length > 0 && (
             <FilterSection title="Couleur">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2.5">
                 {referentiels.couleurs.map((c) => {
                   const isActive = filters.id_couleur === String(c.id_couleur);
                   return (
@@ -218,10 +218,10 @@ function FiltersPanel({ filters, referentiels, onUpdate, onReset, onClose, activ
                       key={c.id_couleur}
                       onClick={() => onUpdate('id_couleur', isActive ? '' : String(c.id_couleur))}
                       title={c.nom}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
+                      className={`w-10 h-10 rounded-full transition-all ${
                         isActive
-                          ? 'border-juju-dore scale-110'
-                          : 'border-juju-light-bordure dark:border-juju-bordure hover:border-juju-light-texte-mute dark:hover:border-juju-texte-mute'
+                          ? 'ring-2 ring-offset-2 ring-juju-violet ring-offset-juju-light-bg dark:ring-offset-juju-bleu scale-110'
+                          : 'ring-1 ring-juju-light-bordure dark:ring-juju-bordure hover:scale-105'
                       }`}
                       style={{ backgroundColor: c.code_hex || '#888' }}
                     />
@@ -231,7 +231,6 @@ function FiltersPanel({ filters, referentiels, onUpdate, onReset, onClose, activ
             </FilterSection>
           )}
 
-          {/* Origine */}
           <FilterSection title="Origine">
             <ChipGroup
               options={ORIGINES}
@@ -243,19 +242,13 @@ function FiltersPanel({ filters, referentiels, onUpdate, onReset, onClose, activ
 
         <div className="px-5 py-4 border-t border-juju-light-bordure dark:border-juju-bordure flex gap-3">
           {activeCount > 0 && (
-            <button
-              onClick={onReset}
-              className="flex-1 px-4 py-2.5 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte-mute dark:text-juju-texte-mute rounded-lg hover:border-red-400 hover:text-red-400 transition-colors text-sm"
-            >
+            <Button variant="danger-soft" size="md" fullWidth onClick={onReset}>
               Réinitialiser
-            </button>
+            </Button>
           )}
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2.5 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors text-sm"
-          >
+          <Button size="md" fullWidth onClick={onClose}>
             Voir {activeCount > 0 ? 'les résultats' : 'tout'}
-          </button>
+          </Button>
         </div>
       </div>
     </>
@@ -265,9 +258,7 @@ function FiltersPanel({ filters, referentiels, onUpdate, onReset, onClose, activ
 function FilterSection({ title, children }) {
   return (
     <div>
-      <h4 className="text-xs uppercase tracking-widest text-juju-light-texte-mute dark:text-juju-texte-mute mb-2">
-        {title}
-      </h4>
+      <SectionLabel className="mb-2.5">{title}</SectionLabel>
       {children}
     </div>
   );
@@ -282,10 +273,10 @@ function ChipGroup({ options, value, onChange }) {
           <button
             key={opt.value}
             onClick={() => onChange(isActive ? '' : opt.value)}
-            className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${
+            className={`px-3.5 py-1.5 rounded-full border text-sm font-medium transition-all ${
               isActive
-                ? 'bg-juju-dore text-juju-noir border-juju-dore'
-                : 'border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte hover:border-juju-dore'
+                ? 'bg-gradient-violet text-white border-transparent shadow-violet-sm'
+                : 'border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte hover:border-juju-violet hover:text-juju-violet dark:hover:text-white'
             }`}
           >
             {opt.label}
@@ -299,18 +290,25 @@ function ChipGroup({ options, value, onChange }) {
 /* ============================================================
    CARTES + ÉTATS
    ============================================================ */
-function ArticleCard({ article }) {
+function ArticleCard({ article, index = 0 }) {
   const prix = article.prix ? `${parseFloat(article.prix).toFixed(2).replace('.', ',')} €` : null;
-  const subtitle = [article.marque, article.categorie, prix].filter(Boolean).join(' · ');
+  const subtitle = [article.marque, article.categorie].filter(Boolean).join(' · ');
 
   return (
-    <Link to={`/articles/${article.id_article}`} className="group block">
-      <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu rounded-lg overflow-hidden border border-juju-light-bordure dark:border-juju-bordure group-hover:border-juju-dore transition-colors">
+    <Card
+      hover
+      accent="violet"
+      to={`/articles/${article.id_article}`}
+      className="overflow-hidden group animate-fade-up opacity-0"
+      style={{ animationDelay: `${Math.min(index, 10) * 45}ms` }}
+    >
+      <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-juju-light-bg to-juju-light-bordure/50 dark:from-juju-bleu/60 dark:to-juju-noir">
         {article.image_url ? (
           <img
             src={article.image_url}
             alt={article.nom}
-            className="w-full h-full object-cover"
+            loading="lazy"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
               e.target.style.display = 'none';
               e.target.nextSibling.style.display = 'flex';
@@ -323,16 +321,21 @@ function ArticleCard({ article }) {
         >
           <Shirt size={32} />
         </div>
+        {prix && (
+          <span className="absolute top-2.5 right-2.5 text-[11px] font-bold px-2 py-1 rounded-full bg-juju-light-card/85 dark:bg-juju-noir/70 backdrop-blur text-juju-dore border border-juju-dore/25">
+            {prix}
+          </span>
+        )}
       </div>
-      <div className="mt-2 px-0.5">
-        <p className="font-medium text-sm leading-tight truncate">{article.nom}</p>
+      <div className="p-3">
+        <p className="font-semibold text-sm leading-tight truncate">{article.nom}</p>
         {subtitle && (
           <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mt-0.5 truncate">
             {subtitle}
           </p>
         )}
       </div>
-    </Link>
+    </Card>
   );
 }
 
@@ -340,11 +343,11 @@ function SkeletonGrid() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {[...Array(8)].map((_, i) => (
-        <div key={i}>
-          <div className="aspect-square bg-juju-light-card dark:bg-juju-bleu/60 rounded-lg animate-pulse" />
-          <div className="mt-2 space-y-2">
-            <div className="h-3 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-3/4 animate-pulse" />
-            <div className="h-2.5 bg-juju-light-card dark:bg-juju-bleu/60 rounded w-1/2 animate-pulse" />
+        <div key={i} className="rounded-2xl border border-juju-light-bordure dark:border-juju-bordure overflow-hidden">
+          <div className="aspect-square skeleton bg-juju-light-card dark:bg-juju-bleu/60" />
+          <div className="p-3 space-y-2">
+            <div className="h-3 skeleton bg-juju-light-bordure/60 dark:bg-juju-bleu/60 rounded w-3/4" />
+            <div className="h-2.5 skeleton bg-juju-light-bordure/60 dark:bg-juju-bleu/60 rounded w-1/2" />
           </div>
         </div>
       ))}
@@ -352,44 +355,44 @@ function SkeletonGrid() {
   );
 }
 
+function StateWrapper({ icon: Icon, title, children }) {
+  return (
+    <div className="text-center py-20 max-w-sm mx-auto animate-fade-up">
+      <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-juju-violet/10 dark:bg-juju-dore/10 flex items-center justify-center text-juju-violet dark:text-juju-dore ring-1 ring-juju-violet/20 dark:ring-juju-dore/20">
+        <Icon size={28} />
+      </div>
+      <h3 className="font-display text-xl mb-2">{title}</h3>
+      {children}
+    </div>
+  );
+}
+
 function EmptyState() {
   return (
-    <div className="text-center py-20 max-w-sm mx-auto">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center">
-        <Shirt size={28} className="text-juju-dore" />
-      </div>
-      <h3 className="text-lg font-medium mb-2">Ta garde-robe est vide</h3>
-      <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">
-        Numérise ton premier article depuis l'app mobile pour démarrer.
+    <StateWrapper icon={Shirt} title="Ta garde-robe est vide">
+      <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">
+        Numérise ton premier article : prends-le en photo, l'IA s'occupe du reste.
       </p>
-    </div>
+      <Button to="/ajout" icon={Camera}>Ajouter un article</Button>
+    </StateWrapper>
   );
 }
 
 function NoMatchState({ onReset }) {
   return (
-    <div className="text-center py-20 max-w-sm mx-auto">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure flex items-center justify-center">
-        <Filter size={28} className="text-juju-dore" />
-      </div>
-      <h3 className="text-lg font-medium mb-2">Aucun résultat</h3>
-      <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-4">
+    <StateWrapper icon={Filter} title="Aucun résultat">
+      <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">
         Aucun article ne correspond à tes filtres.
       </p>
-      <button
-        onClick={onReset}
-        className="px-4 py-2 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors text-sm"
-      >
-        Réinitialiser
-      </button>
-    </div>
+      <Button variant="secondary" onClick={onReset}>Réinitialiser</Button>
+    </StateWrapper>
   );
 }
 
 function ErrorState({ message }) {
   return (
     <div className="text-center py-20">
-      <p className="text-red-400 mb-2">{message}</p>
+      <p className="text-red-500 mb-2 font-medium">{message}</p>
       <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">
         Vérifie que le serveur backend tourne sur le port 3001.
       </p>

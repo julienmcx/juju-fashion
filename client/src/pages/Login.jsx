@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import logoOr from '../assets/juju-logo-or.svg';
 import JujuLogo from '../components/JujuLogo';
-
+import { Button, Eyebrow, Input } from '../components/ui';
 
 export default function Login() {
   const { login } = useAuth();
@@ -29,50 +28,60 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-juju-light-bg dark:bg-juju-noir text-juju-light-texte dark:text-juju-texte px-6">
-      <div className="w-full max-w-sm">
-        <JujuLogo className="h-24 mx-auto mb-2" />
-        <p className="text-juju-light-texte-mute dark:text-juju-texte-mute text-center mb-10">Heureux de te revoir.</p>
+    <div className="app-bg min-h-screen flex flex-col items-center justify-center px-5 py-12 relative overflow-hidden text-juju-light-texte dark:text-juju-texte">
+      <div aria-hidden className="app-blob -top-24 -right-16 w-80 h-80 blur-3xl bg-juju-dore/15 dark:bg-juju-dore/10 animate-drift" />
+      <div aria-hidden className="app-blob -bottom-24 -left-16 w-96 h-96 blur-3xl bg-juju-violet/15 dark:bg-juju-violet/25 animate-drift-rev" />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Email</label>
-            <input
+      <div className="w-full max-w-sm relative z-[1] animate-fade-up">
+        <div className="text-center mb-7">
+          <JujuLogo className="text-5xl mb-5" />
+          <div className="mb-3 flex justify-center">
+            <Eyebrow>Bon retour</Eyebrow>
+          </div>
+          <h1 className="font-display text-3xl mb-2">
+            Ravie de te <span className="accent-italic">revoir</span>
+          </h1>
+          <p className="text-juju-light-texte-mute dark:text-juju-texte-mute">
+            Connecte-toi à ton dressing.
+          </p>
+        </div>
+
+        <div className="rounded-2xl bg-juju-light-card/80 dark:bg-juju-bleu/40 backdrop-blur border border-juju-light-bordure dark:border-juju-bordure shadow-card p-6 sm:p-7">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              autoComplete="email"
+              placeholder="toi@exemple.com"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Mot de passe</label>
-            <input
+            <Input
+              label="Mot de passe"
               type="password"
               value={motDePasse}
               onChange={(e) => setMotDePasse(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+              autoComplete="current-password"
+              placeholder="••••••••"
             />
-          </div>
 
-          {error && (
-            <p className="text-red-400 text-sm">{error}</p>
-          )}
+            {error && (
+              <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {error}
+              </p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Connexion…' : 'Se connecter'}
-          </button>
-        </form>
+            <Button type="submit" size="lg" fullWidth loading={loading}>
+              {loading ? 'Connexion…' : 'Se connecter'}
+            </Button>
+          </form>
+        </div>
 
-        <p className="text-center text-juju-light-texte-mute dark:text-juju-texte-mute text-sm mt-8">
+        <p className="text-center text-juju-light-texte-mute dark:text-juju-texte-mute text-sm mt-6">
           Pas encore de compte ?{' '}
-          <Link to="/register" className="text-juju-dore hover:underline">
+          <Link to="/register" className="text-juju-violet dark:text-juju-dore font-semibold hover:underline">
             Créer un compte
           </Link>
         </p>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Save, Plus, Check } from 'lucide-react';
 import { createMarque } from '../api/referentiels';
+import { Button, SectionLabel } from './ui';
 
 const ORIGINES = [
   { value: 'neuf', label: 'Neuf' },
@@ -143,14 +144,14 @@ export default function ArticleForm({
         />
 
         <div>
-          <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">Marque</label>
+          <label className="block text-sm font-medium text-juju-light-texte-mute dark:text-juju-texte-mute mb-1.5">Marque</label>
           <div className="flex gap-2">
             <select
               value={form.id_marque}
               onChange={(e) =>
                 setField('id_marque', e.target.value ? Number(e.target.value) : '')
               }
-              className="flex-1 px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore"
+              className="field-input appearance-none cursor-pointer flex-1"
             >
               <option value="">— Aucune —</option>
               {referentiels.marques.map((m) => (
@@ -162,7 +163,7 @@ export default function ArticleForm({
             <button
               type="button"
               onClick={() => setShowNewBrand((s) => !s)}
-              className="px-4 py-3 border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte-mute dark:text-juju-texte-mute hover:border-juju-dore hover:text-juju-dore transition-colors"
+              className="shrink-0 w-12 rounded-xl border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte-mute dark:text-juju-texte-mute hover:border-juju-violet hover:text-juju-violet dark:hover:text-juju-dore transition-colors flex items-center justify-center"
               title="Nouvelle marque"
             >
               <Plus size={18} />
@@ -175,16 +176,17 @@ export default function ArticleForm({
                 value={newBrandName}
                 onChange={(e) => setNewBrandName(e.target.value)}
                 placeholder="Nom de la nouvelle marque"
-                className="flex-1 px-4 py-2 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-sm focus:outline-none focus:border-juju-dore"
+                className="field-input flex-1 py-2 text-sm"
               />
-              <button
+              <Button
                 type="button"
+                size="sm"
                 onClick={handleCreateBrand}
+                loading={creatingBrand}
                 disabled={creatingBrand || !newBrandName.trim()}
-                className="px-4 py-2 bg-juju-dore text-juju-noir text-sm font-medium rounded-lg hover:bg-juju-dore-clair disabled:opacity-50"
               >
-                {creatingBrand ? '…' : 'Créer'}
-              </button>
+                Créer
+              </Button>
             </div>
           )}
         </div>
@@ -235,10 +237,10 @@ export default function ArticleForm({
                 type="button"
                 key={c.id_couleur}
                 onClick={() => toggleCouleur(c.id_couleur)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full border text-sm transition-colors ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-full border text-sm font-medium transition-colors ${
                   isSelected
-                    ? 'border-juju-dore bg-juju-dore/10 text-juju-dore'
-                    : 'border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte hover:border-juju-texte-mute'
+                    ? 'border-juju-violet bg-juju-violet/10 text-juju-violet dark:text-juju-dore'
+                    : 'border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte hover:border-juju-violet'
                 }`}
               >
                 <div
@@ -263,18 +265,18 @@ export default function ArticleForm({
             return (
               <div
                 key={mat.id_matiere}
-                className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                  selected ? 'border-juju-dore bg-juju-dore/5' : 'border-juju-light-bordure dark:border-juju-bordure'
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
+                  selected ? 'border-juju-violet bg-juju-violet/5' : 'border-juju-light-bordure dark:border-juju-bordure'
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => toggleMatiere(mat.id_matiere)}
-                  className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                    selected ? 'bg-juju-dore border-juju-dore' : 'border-juju-texte-mute'
+                  className={`w-5 h-5 rounded-md border flex items-center justify-center text-white transition-colors ${
+                    selected ? 'bg-gradient-violet border-transparent' : 'border-juju-light-texte-mute dark:border-juju-texte-mute'
                   }`}
                 >
-                  {selected && <Check size={14} className="text-juju-noir" />}
+                  {selected && <Check size={14} />}
                 </button>
                 <span className="flex-1 text-sm">{mat.nom}</span>
                 {selected && (
@@ -289,7 +291,7 @@ export default function ArticleForm({
                         setMatierePourcentage(mat.id_matiere, e.target.value)
                       }
                       placeholder="%"
-                      className="w-20 px-2 py-1 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded text-sm text-right focus:outline-none focus:border-juju-dore"
+                      className="field-input w-20 py-1.5 text-sm text-right"
                     />
                     <span className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">%</span>
                   </div>
@@ -335,7 +337,7 @@ export default function ArticleForm({
             onChange={(e) =>
               setField('lunettes_teintees', e.target.checked ? true : null)
             }
-            className="w-4 h-4 accent-juju-dore"
+            className="w-4 h-4 accent-juju-violet"
           />
           Verres teintés (pour des lunettes)
         </label>
@@ -356,32 +358,27 @@ export default function ArticleForm({
             value={form.notes}
             onChange={(e) => setField('notes', e.target.value)}
             rows={4}
-            className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore resize-none"
+            className="field-input resize-none"
             placeholder="Anecdote, taille qui taille petit, conseils d'entretien…"
           />
         </div>
       </Section>
 
-      {error && <p className="text-red-400 text-sm">{error}</p>}
+      {error && (
+        <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+          {error}
+        </p>
+      )}
 
-      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-4 border-t border-juju-light-bordure dark:border-juju-bordure">
+      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-5 border-t border-juju-light-bordure dark:border-juju-bordure">
         {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="text-center px-6 py-3 border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte dark:text-juju-texte rounded-lg hover:bg-juju-light-card dark:bg-juju-bleu-clair transition-colors"
-          >
+          <Button type="button" variant="secondary" onClick={onCancel}>
             Annuler
-          </button>
+          </Button>
         )}
-        <button
-          type="submit"
-          disabled={saving}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-juju-dore text-juju-noir font-medium rounded-lg hover:bg-juju-dore-clair transition-colors disabled:opacity-50"
-        >
-          <Save size={18} />
+        <Button type="submit" variant="primary" icon={Save} loading={saving}>
           {saving ? 'Enregistrement…' : submitLabel}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -392,9 +389,7 @@ export default function ArticleForm({
 function Section({ title, children }) {
   return (
     <section>
-      <h3 className="text-xs uppercase tracking-widest text-juju-light-texte-mute dark:text-juju-texte-mute mb-4">
-        {title}
-      </h3>
+      <SectionLabel className="mb-4">{title}</SectionLabel>
       <div className="space-y-3">{children}</div>
     </section>
   );
@@ -403,9 +398,9 @@ function Section({ title, children }) {
 function Input({ label, value, onChange, type = 'text', required, placeholder, step }) {
   return (
     <div>
-      <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">
+      <label className="block text-sm font-medium text-juju-light-texte-mute dark:text-juju-texte-mute mb-1.5">
         {label}
-        {required && <span className="text-juju-dore ml-1">*</span>}
+        {required && <span className="text-juju-violet dark:text-juju-dore ml-1">*</span>}
       </label>
       <input
         type={type}
@@ -414,7 +409,7 @@ function Input({ label, value, onChange, type = 'text', required, placeholder, s
         required={required}
         placeholder={placeholder}
         step={step}
-        className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore transition-colors"
+        className="field-input"
       />
     </div>
   );
@@ -423,15 +418,15 @@ function Input({ label, value, onChange, type = 'text', required, placeholder, s
 function Select({ label, value, onChange, options, required }) {
   return (
     <div>
-      <label className="block text-sm text-juju-light-texte-mute dark:text-juju-texte-mute mb-1">
+      <label className="block text-sm font-medium text-juju-light-texte-mute dark:text-juju-texte-mute mb-1.5">
         {label}
-        {required && <span className="text-juju-dore ml-1">*</span>}
+        {required && <span className="text-juju-violet dark:text-juju-dore ml-1">*</span>}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full px-4 py-3 bg-juju-light-card dark:bg-juju-bleu border border-juju-light-bordure dark:border-juju-bordure rounded-lg text-juju-light-texte dark:text-juju-texte focus:outline-none focus:border-juju-dore"
+        className="field-input appearance-none cursor-pointer"
       >
         <option value="">— Choisir —</option>
         {options.map((opt) => (
