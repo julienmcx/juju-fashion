@@ -11,6 +11,7 @@ import { useDensity } from '../hooks/useDensity';
 import { useTheme } from '../hooks/useTheme';
 import { Card, Eyebrow, SectionLabel, Button } from '../components/ui';
 import { useToast } from '../contexts/ToastContext';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function Profil() {
   const { user, logout } = useAuth();
@@ -21,6 +22,7 @@ export default function Profil() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef(null);
   const toast = useToast();
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
   const loadStats = async () => {
     try {
@@ -52,12 +54,13 @@ export default function Profil() {
     }
   };
 
-  const handleRemoveAvatar = async () => {
-    if (!confirm('Retirer la photo de profil ?')) return;
+const handleRemoveAvatar = async () => {
+    setShowRemoveConfirm(false);
     setUploadingAvatar(true);
     try {
       await updateAvatar(null);
       await loadStats();
+      toast.success('Photo de profil retirée');
     } catch {
       toast.error('Suppression impossible.');
     } finally {
@@ -106,7 +109,7 @@ export default function Profil() {
           {avatarSrc && !uploadingAvatar && (
             <button
               type="button"
-              onClick={handleRemoveAvatar}
+              onClick={() => setShowRemoveConfirm(true)}
               className="absolute -top-0.5 -right-0.5 w-6 h-6 rounded-full bg-juju-light-card dark:bg-juju-noir border border-juju-light-bordure dark:border-juju-bordure hover:bg-red-500 hover:text-white hover:border-red-500 text-juju-light-texte-mute dark:text-juju-texte-mute flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
               title="Retirer la photo"
             >
@@ -256,6 +259,19 @@ export default function Profil() {
       <Button variant="danger-soft" size="lg" fullWidth icon={LogOut} onClick={logout}>
         Se déconnecter
       </Button>
+
+      {showRemoveConfirm && (
+        <ConfirmDialog
+          title="Retirer la photo de profil ?"
+          message="Ta photo de profil sera supprimée. Tu pourras en remettre une à tout moment."
+          confirmText="Retirer"
+          confirmVariant="danger"
+          loading={uploadingAvatar}
+          onConfirm={handleRemoveAvatar}
+          onCancel={() => setShowRemoveConfirm(false)}
+        />
+      )}
+      
     </div>
   );
 }
