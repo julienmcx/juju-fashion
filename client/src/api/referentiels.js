@@ -24,3 +24,7 @@ export async function createMarque(nom_marque) {
   const { data } = await apiClient.post('/marques', { nom_marque });
   return data.marque;
 }
+
+export async function deleteMarque(id) {
+  await apiClient.delete(`/marques/${id}`);
+}

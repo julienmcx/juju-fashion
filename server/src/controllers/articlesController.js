@@ -20,6 +20,18 @@ async function createArticle(req, res) {
 
     await client.query('BEGIN');
 
+    // Sécurité : la marque fournie doit appartenir à l'utilisateur connecté
+    if (id_marque) {
+      const owns = await client.query(
+        'SELECT 1 FROM marques WHERE id_marque = $1 AND id_utilisateur = $2',
+        [id_marque, req.user.id_utilisateur]
+      );
+      if (owns.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Marque invalide' });
+      }
+    }
+
     const articleResult = await client.query(
       `INSERT INTO articles (
          id_utilisateur, id_categorie, id_marque,
@@ -82,9 +94,9 @@ async function listArticles(req, res) {
     const values = [req.user.id_utilisateur];
 
     if (id_categorie) { values.push(id_categorie); conditions.push(`a.id_categorie = $${values.length}`); }
-    if (id_marque)    { values.push(id_marque);    conditions.push(`a.id_marque = $${values.length}`); }
-    if (origine)      { values.push(origine);      conditions.push(`a.origine = $${values.length}`); }
-    if (search)       { values.push(`%${search}%`); conditions.push(`a.nom ILIKE $${values.length}`); }
+    if (id_marque) { values.push(id_marque); conditions.push(`a.id_marque = $${values.length}`); }
+    if (origine) { values.push(origine); conditions.push(`a.origine = $${values.length}`); }
+    if (search) { values.push(`%${search}%`); conditions.push(`a.nom ILIKE $${values.length}`); }
     if (favori === 'true') { conditions.push(`a.favori = TRUE`); }
     if (id_couleur) {
       values.push(id_couleur);
@@ -188,6 +200,18 @@ async function updateArticle(req, res) {
     }
 
     await client.query('BEGIN');
+
+    // Sécurité : si on change la marque, elle doit appartenir à l'utilisateur
+    if (req.body.id_marque) {
+      const owns = await client.query(
+        'SELECT 1 FROM marques WHERE id_marque = $1 AND id_utilisateur = $2',
+        [req.body.id_marque, req.user.id_utilisateur]
+      );
+      if (owns.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Marque invalide' });
+      }
+    }
 
     let article;
     if (sets.length > 0) {

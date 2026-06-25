@@ -17,9 +17,10 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 flex-col z-20 px-4 py-7 bg-juju-light-bg/80 dark:bg-juju-noir/70 backdrop-blur-xl border-r border-juju-light-bordure dark:border-juju-bordure">
       <div className="px-2 mb-8">
-        <JujuLogo className="text-[2rem]" />
+        <a href="/" aria-label="Retour à l'accueil" className="inline-block">
+          <JujuLogo className="text-[2rem]" />
+        </a>
       </div>
-
       <Button to="/ajout" icon={Camera} fullWidth className="mb-6">
         Ajouter un article
       </Button>
@@ -30,10 +31,9 @@ export default function Sidebar() {
             key={to}
             to={to}
             className={({ isActive }) =>
-              `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                isActive
-                  ? 'bg-juju-violet/10 dark:bg-juju-dore/10 text-juju-violet dark:text-juju-dore font-semibold'
-                  : 'text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-light-texte dark:hover:text-juju-texte hover:bg-juju-light-bordure/50 dark:hover:bg-juju-bleu-clair/40'
+              `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${isActive
+                ? 'bg-juju-violet/10 dark:bg-juju-dore/10 text-juju-violet dark:text-juju-dore font-semibold'
+                : 'text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-light-texte dark:hover:text-juju-texte hover:bg-juju-light-bordure/50 dark:hover:bg-juju-bleu-clair/40'
               }`
             }
           >

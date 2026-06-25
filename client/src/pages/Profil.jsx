@@ -54,7 +54,7 @@ export default function Profil() {
     }
   };
 
-const handleRemoveAvatar = async () => {
+  const handleRemoveAvatar = async () => {
     setShowRemoveConfirm(false);
     setUploadingAvatar(true);
     try {
@@ -255,24 +255,45 @@ const handleRemoveAvatar = async () => {
         </div>
       </section>
 
+      {/* Présentation de soutenance */}
+      <section className="mb-7">
+        <SectionLabel className="mb-4">Présentation</SectionLabel>
+        <a
+          href="/soutenance.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-semibold text-white bg-gradient-violet-gold shadow-violet-sm hover:-translate-y-0.5 transition-transform"
+        >
+          <Sparkles size={16} />
+          Ouvrir ma présentation
+        </a>
+      </section>
+
       {/* Déconnexion */}
       <Button variant="danger-soft" size="lg" fullWidth icon={LogOut} onClick={logout}>
         Se déconnecter
       </Button>
 
-      {showRemoveConfirm && (
-        <ConfirmDialog
-          title="Retirer la photo de profil ?"
-          message="Ta photo de profil sera supprimée. Tu pourras en remettre une à tout moment."
-          confirmText="Retirer"
-          confirmVariant="danger"
-          loading={uploadingAvatar}
-          onConfirm={handleRemoveAvatar}
-          onCancel={() => setShowRemoveConfirm(false)}
-        />
-      )}
-      
-    </div>
+      {/* Déconnexion */}
+      <Button variant="danger-soft" size="lg" fullWidth icon={LogOut} onClick={logout}>
+        Se déconnecter
+      </Button>
+
+      {
+        showRemoveConfirm && (
+          <ConfirmDialog
+            title="Retirer la photo de profil ?"
+            message="Ta photo de profil sera supprimée. Tu pourras en remettre une à tout moment."
+            confirmText="Retirer"
+            confirmVariant="danger"
+            loading={uploadingAvatar}
+            onConfirm={handleRemoveAvatar}
+            onCancel={() => setShowRemoveConfirm(false)}
+          />
+        )
+      }
+
+    </div >
   );
 }
 

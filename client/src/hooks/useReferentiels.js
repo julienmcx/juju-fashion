@@ -10,6 +10,7 @@ export function useReferentiels() {
   const [loading, setLoading] = useState(!cachedData);
 
   useEffect(() => {
+    let mounted = true;
     if (cachedData) return;
     if (!cachedPromise) {
       cachedPromise = Promise.all([
@@ -22,10 +23,22 @@ export function useReferentiels() {
       });
     }
     cachedPromise.then((d) => {
+      if (!mounted) return;
       setData(d);
       setLoading(false);
     });
+    return () => { mounted = false; };
   }, []);
 
-  return { data, loading };
+  // Met à jour les marques DANS le cache module ET dans l'état local.
+  // Accepte soit un tableau, soit une fonction (prev) => next (comme un setState).
+  const setMarques = (updater) => {
+    if (!cachedData) return;
+    const nextMarques =
+      typeof updater === 'function' ? updater(cachedData.marques) : updater;
+    cachedData = { ...cachedData, marques: nextMarques };
+    setData(cachedData);
+  };
+
+  return { data, loading, setMarques };
 }

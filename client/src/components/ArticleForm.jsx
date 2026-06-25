@@ -3,6 +3,9 @@ import { Save, Plus, Check } from 'lucide-react';
 import { createMarque } from '../api/referentiels';
 import { Button, SectionLabel } from './ui';
 import { useToast } from '../contexts/ToastContext';
+import { Save, Plus, Check, Trash2 } from 'lucide-react';
+import { createMarque, deleteMarque } from '../api/referentiels';
+import ConfirmDialog from './ConfirmDialog';
 
 const ORIGINES = [
   { value: 'neuf', label: 'Neuf' },
@@ -91,6 +94,52 @@ export default function ArticleForm({
     }
   };
 
+  const [deletingBrand, setDeletingBrand] = useState(false);
+  const [brandToDelete, setBrandToDelete] = useState(null); // { id_marque, nom_marque } | null
+
+  const handleDeleteBrand = async () => {
+    if (!form.id_marque) return;
+    const marque = referentiels.marques.find((m) => m.id_marque === form.id_marque);
+    const nom = marque?.nom_marque || 'cette marque';
+    if (!window.confirm(
+      `Supprimer la marque « ${nom} » ?\nLes articles qui l'utilisaient n'auront plus de marque.`
+    )) return;
+    setDeletingBrand(true);
+    try {
+      await deleteMarque(form.id_marque);
+      setMarques((prev) => prev.filter((m) => m.id_marque !== form.id_marque));
+      setField('id_marque', '');
+      toast.success('Marque supprimée.');
+    } catch {
+      toast.error('Suppression de la marque impossible.');
+    } finally {
+      setDeletingBrand(false);
+    }
+  };
+
+  const askDeleteBrand = () => {
+    if (!form.id_marque) return;
+    const marque = referentiels.marques.find((m) => m.id_marque === form.id_marque);
+    if (marque) setBrandToDelete(marque);
+  };
+
+  const confirmDeleteBrand = async () => {
+    if (!brandToDelete) return;
+    setDeletingBrand(true);
+    try {
+      await deleteMarque(brandToDelete.id_marque);
+      setMarques((prev) => prev.filter((m) => m.id_marque !== brandToDelete.id_marque));
+      setField('id_marque', '');
+      toast.success('Marque supprimée.');
+      setBrandToDelete(null);
+    } catch {
+      toast.error('Suppression de la marque impossible.');
+    } finally {
+      setDeletingBrand(false);
+    }
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -115,6 +164,8 @@ export default function ArticleForm({
       setSaving(false);
     }
   };
+
+  const [deletingBrand, setDeletingBrand] = useState(false);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -162,6 +213,16 @@ export default function ArticleForm({
                 </option>
               ))}
             </select>
+            {form.id_marque && (
+              <button
+                type="button"
+                onClick={askDeleteBrand}
+                className="shrink-0 w-12 rounded-xl border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte-mute dark:text-juju-texte-mute hover:border-red-500 hover:text-red-500 transition-colors flex items-center justify-center"
+                title="Supprimer cette marque"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setShowNewBrand((s) => !s)}
@@ -171,6 +232,7 @@ export default function ArticleForm({
               <Plus size={18} />
             </button>
           </div>
+
           {showNewBrand && (
             <div className="flex gap-2 mt-2">
               <input
@@ -379,6 +441,20 @@ export default function ArticleForm({
           {saving ? 'Enregistrement…' : submitLabel}
         </Button>
       </div>
+
+      {brandToDelete && (
+        <ConfirmDialog
+          title="Supprimer la marque"
+          message={`Supprimer « ${brandToDelete.nom_marque} » ? Les articles qui l'utilisaient ne seront pas supprimés, ils n'auront simplement plus de marque.`}
+          confirmText="Supprimer"
+          cancelText="Annuler"
+          confirmVariant="danger"
+          loading={deletingBrand}
+          onConfirm={confirmDeleteBrand}
+          onCancel={() => !deletingBrand && setBrandToDelete(null)}
+        />
+      )}
+
     </form>
   );
 }

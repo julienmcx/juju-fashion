@@ -6,5 +6,6 @@ const { authRequired } = require('../middlewares/auth');
 router.use(authRequired);
 router.get('/', listMarques);
 router.post('/', createMarque);
+router.delete('/:id', deleteMarque);
 
 module.exports = router;

@@ -2,21 +2,30 @@ const express = require('express');
 const router = express.Router();
 const { upload } = require('../middlewares/upload');
 const { authRequired } = require('../middlewares/auth');
+const { ensureWebFriendly } = require('../utils/convertHeic');
+const path = require('path');
 
-router.post('/', authRequired, upload.single('image'), (req, res) => {
+router.post('/', authRequired, upload.single('image'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Aucun fichier reçu (champ "image" attendu)' });
   }
+  try {
+    // Convertit en JPEG si HEIC/HEIF (sinon inchangé)
+    const finalPath = await ensureWebFriendly(req.file.path);
+    const finalFilename = path.basename(finalPath);
 
-  const baseUrl = process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3001}`;
-  const url = `${baseUrl}/uploads/${req.file.filename}`;
-
-  return res.status(201).json({
-    url,
-    filename: req.file.filename,
-    size: req.file.size,
-    mimetype: req.file.mimetype,
-  });
+    const baseUrl = process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3001}`;
+    const url = `${baseUrl}/uploads/${finalFilename}`;
+    return res.status(201).json({
+      url,
+      filename: finalFilename,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+    });
+  } catch (err) {
+    console.error('upload conversion error:', err);
+    return res.status(500).json({ error: 'Erreur lors du traitement de l\'image' });
+  }
 });
 
 // Gestion des erreurs Multer

@@ -39,7 +39,7 @@ export default function Login() {
             <Eyebrow>Bon retour</Eyebrow>
           </div>
           <h1 className="font-display text-3xl mb-2">
-            Ravie de te <span className="accent-italic">revoir</span>
+            Ravi de te <span className="accent-italic">revoir</span>
           </h1>
           <p className="text-juju-light-texte-mute dark:text-juju-texte-mute">
             Connecte-toi à ton dressing.
