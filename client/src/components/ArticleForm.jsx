@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { Save, Plus, Check } from 'lucide-react';
-import { createMarque } from '../api/referentiels';
 import { Button, SectionLabel } from './ui';
 import { useToast } from '../contexts/ToastContext';
 import { Save, Plus, Check, Trash2 } from 'lucide-react';
@@ -164,8 +162,6 @@ export default function ArticleForm({
       setSaving(false);
     }
   };
-
-  const [deletingBrand, setDeletingBrand] = useState(false);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">

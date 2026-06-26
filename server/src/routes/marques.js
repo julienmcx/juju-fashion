@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { listMarques, createMarque } = require('../controllers/marquesController');
+const { listMarques, createMarque, deleteMarque } = require('../controllers/marquesController');
 const { authRequired } = require('../middlewares/auth');
 
 router.use(authRequired);
