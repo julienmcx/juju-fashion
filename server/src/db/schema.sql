@@ -117,6 +117,9 @@ CREATE TABLE articles (
     mensurations    JSONB,               -- mesures de l'article si utiles (longueur dos, largeur épaules...)
     notes           TEXT,
 
+    -- Ordre personnalisé dans la garde-robe (drag & drop)
+    position        INT,
+
     cree_le         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     modifie_le      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

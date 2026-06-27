@@ -1,7 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, X, Shirt, Filter, Camera, Heart } from 'lucide-react';
-import { fetchArticles, toggleFavori } from '../api/articles';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { fetchArticles, toggleFavori, reorderArticles } from '../api/articles';
 import { useReferentiels } from '../hooks/useReferentiels';
 import { Button, Card, PageHeader, SectionLabel } from '../components/ui';
 
@@ -20,8 +35,15 @@ export default function GardeRobe() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [activeId, setActiveId] = useState(null);
 
   const { data: referentiels } = useReferentiels();
+
+  // Drag & drop : on déclenche après un appui maintenu (~220ms) pour
+  // distinguer le glisser-déposer d'un simple tap qui ouvre l'article.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { delay: 220, tolerance: 8 } })
+  );
 
   // Source de vérité : query params
   const filters = {
@@ -91,7 +113,33 @@ export default function GardeRobe() {
     setSearchParams({}, { replace: true });
   };
 
+  const handleDragEnd = (event) => {
+    setActiveId(null);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setArticles((prev) => {
+      const oldIndex = prev.findIndex((a) => a.id_article === active.id);
+      const newIndex = prev.findIndex((a) => a.id_article === over.id);
+      if (oldIndex === -1 || newIndex === -1) return prev;
+
+      const next = arrayMove(prev, oldIndex, newIndex);
+      // Persistance optimiste : on garde le nouvel ordre à l'écran et on
+      // restaure l'ancien seulement si l'enregistrement échoue.
+      reorderArticles(next.map((a) => a.id_article)).catch(() => {
+        setArticles(prev);
+      });
+      return next;
+    });
+  };
+
   const totalActive = activeFiltersCount + (filters.search ? 1 : 0);
+  // Le glisser-déposer réordonne la liste complète : on le désactive
+  // quand un filtre ou une recherche n'affiche qu'un sous-ensemble.
+  const canReorder = totalActive === 0;
+  const activeArticle = activeId
+    ? articles.find((a) => a.id_article === activeId)
+    : null;
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-6xl mx-auto">
@@ -159,18 +207,83 @@ export default function GardeRobe() {
         />
       )}
 
+      {!loading && !error && canReorder && articles.length > 1 && (
+        <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mb-3 -mt-2">
+          Astuce : maintiens un article appuyé pour le déplacer où tu veux.
+        </p>
+      )}
+
       {loading && <SkeletonGrid />}
       {error && <ErrorState message={error} />}
       {!loading && !error && articles.length === 0 && (
         totalActive > 0 ? <NoMatchState onReset={resetFilters} /> : <EmptyState />
       )}
       {!loading && !error && articles.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {articles.map((article, i) => (
-            <ArticleCard key={article.id_article} article={article} index={i} onToggleFavori={handleToggleFavori} />
-          ))}
-        </div>
+        canReorder ? (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={(e) => setActiveId(e.active.id)}
+            onDragEnd={handleDragEnd}
+            onDragCancel={() => setActiveId(null)}
+          >
+            <SortableContext
+              items={articles.map((a) => a.id_article)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {articles.map((article, i) => (
+                  <SortableArticleCard
+                    key={article.id_article}
+                    article={article}
+                    index={i}
+                    onToggleFavori={handleToggleFavori}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+            <DragOverlay>
+              {activeArticle ? (
+                <ArticleCard article={activeArticle} overlay onToggleFavori={handleToggleFavori} />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {articles.map((article, i) => (
+              <ArticleCard key={article.id_article} article={article} index={i} onToggleFavori={handleToggleFavori} />
+            ))}
+          </div>
+        )
       )}
+    </div>
+  );
+}
+
+/* ============================================================
+   CARTE TRIABLE (drag & drop)
+   ============================================================ */
+function SortableArticleCard({ article, index, onToggleFavori }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: article.id_article });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    // L'élément glissé est rendu par le DragOverlay : on masque l'original.
+    opacity: isDragging ? 0 : 1,
+    touchAction: 'manipulation',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <ArticleCard article={article} index={index} onToggleFavori={onToggleFavori} />
     </div>
   );
 }
@@ -316,7 +429,7 @@ function ChipGroup({ options, value, onChange }) {
 /* ============================================================
    CARTES + ÉTATS
    ============================================================ */
-function ArticleCard({ article, index = 0, onToggleFavori }) {
+function ArticleCard({ article, index = 0, onToggleFavori, overlay = false }) {
   const prix = article.prix ? `${parseFloat(article.prix).toFixed(2).replace('.', ',')} €` : null;
   const subtitle = [article.marque, article.categorie].filter(Boolean).join(' · ');
 
@@ -330,9 +443,13 @@ function ArticleCard({ article, index = 0, onToggleFavori }) {
     <Card
       hover
       accent="violet"
-      to={`/articles/${article.id_article}`}
-      className="overflow-hidden group animate-fade-up opacity-0"
-      style={{ animationDelay: `${Math.min(index, 10) * 45}ms` }}
+      to={overlay ? undefined : `/articles/${article.id_article}`}
+      className={`overflow-hidden group ${
+        overlay
+          ? 'shadow-card-hover cursor-grabbing rotate-2 scale-105'
+          : 'animate-fade-up opacity-0'
+      }`}
+      style={overlay ? undefined : { animationDelay: `${Math.min(index, 10) * 45}ms` }}
     >
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-juju-light-bg to-juju-light-bordure/50 dark:from-juju-bleu/60 dark:to-juju-noir">
         {article.image_url ? (
