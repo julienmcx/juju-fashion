@@ -38,7 +38,7 @@ async function uploadPhoto(req, res) {
       return res.status(400).json({ error: 'Aucun fichier reçu' });
     }
 
-    // Convertit en JPEG si le fichier est un HEIC/HEIF (sinon inchangé)
+    // Convertit en WebP si le fichier est un HEIC/HEIF (sinon inchangé)
     const finalPath = await ensureWebFriendly(req.file.path);
     const finalFilename = path.basename(finalPath);
 
