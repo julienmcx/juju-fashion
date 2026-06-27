@@ -2,7 +2,10 @@ const db = require('../db');
 const { runTryOn } = require('../services/vton');
 const { mapCategoryForVTON, isVTONSupported } = require('../services/categoryMapping');
 
-const DAILY_LIMIT = 2;
+// Quota d'essayages virtuels par utilisateur, sur toute la durée de vie du
+// compte (en attendant une formule payante). Les tentatives entièrement
+// échouées (statut 'error') ne sont pas décomptées.
+const LIFETIME_LIMIT = 2;
 const REQUIRED_ANGLES = ['face', 'profil_droit', 'dos', 'profil_gauche'];
 
 async function createTryOn(req, res) {
@@ -58,19 +61,19 @@ async function createTryOn(req, res) {
     const photosMap = {};
     photosResult.rows.forEach((p) => { photosMap[p.angle] = p.image_url; });
 
-    // 3. Rate-limit
-    const todayResult = await db.query(
+    // 3. Quota à vie
+    const usageResult = await db.query(
       `SELECT COUNT(*) FROM essayages_log
-       WHERE id_utilisateur = $1 AND cree_le > NOW() - INTERVAL '24 hours'`,
+       WHERE id_utilisateur = $1 AND statut <> 'error'`,
       [req.user.id_utilisateur]
     );
-    const usedToday = parseInt(todayResult.rows[0].count, 10);
+    const usedTotal = parseInt(usageResult.rows[0].count, 10);
 
-    if (usedToday >= DAILY_LIMIT) {
+    if (usedTotal >= LIFETIME_LIMIT) {
       return res.status(429).json({
-        error: `Limite quotidienne atteinte (${DAILY_LIMIT} essayages / 24h). Réessaie plus tard.`,
-        used: usedToday,
-        limit: DAILY_LIMIT,
+        error: `Tu as utilisé tes ${LIFETIME_LIMIT} essayages gratuits. Une formule pour en profiter davantage arrivera bientôt.`,
+        used: usedTotal,
+        limit: LIFETIME_LIMIT,
       });
     }
 
@@ -137,7 +140,7 @@ async function createTryOn(req, res) {
       },
       results: results.map((r) => ({ angle: r.angle, image_url: r.image_url })),
       errors: errors.map((e) => ({ angle: e.angle, message: e.message })),
-      stats: { used_today: usedToday + 1, daily_limit: DAILY_LIMIT },
+      stats: { used: usedTotal + 1, limit: LIFETIME_LIMIT },
     });
   } catch (err) {
     console.error('[VTON] Erreur générale:', err);
@@ -149,12 +152,12 @@ async function getQuota(req, res) {
   try {
     const result = await db.query(
       `SELECT COUNT(*) FROM essayages_log
-       WHERE id_utilisateur = $1 AND cree_le > NOW() - INTERVAL '24 hours'`,
+       WHERE id_utilisateur = $1 AND statut <> 'error'`,
       [req.user.id_utilisateur]
     );
     const used = parseInt(result.rows[0].count, 10);
     return res.json({
-      used, limit: DAILY_LIMIT, remaining: Math.max(0, DAILY_LIMIT - used),
+      used, limit: LIFETIME_LIMIT, remaining: Math.max(0, LIFETIME_LIMIT - used),
     });
   } catch (err) {
     console.error('[VTON] getQuota error:', err);

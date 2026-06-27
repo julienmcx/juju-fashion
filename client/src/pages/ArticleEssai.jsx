@@ -109,8 +109,8 @@ export default function ArticleEssai() {
     return (
       <PreFlightBlock
         icon={AlertCircle}
-        title="Limite quotidienne atteinte"
-        message={`Tu as utilisé tes ${quota.limit} essayages des dernières 24 heures. Réessaie plus tard.`}
+        title="Essayages épuisés"
+        message={`Tu as utilisé tes ${quota.limit} essayages gratuits. Une formule pour en profiter davantage arrivera bientôt.`}
         articleId={id}
       />
     );
@@ -206,7 +206,7 @@ function ReadyView({ article, quota, onLaunch }) {
           Lancer l'essayage
         </Button>
         <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute mt-3">
-          Il te reste {quota.remaining} essayage{quota.remaining > 1 ? 's' : ''} aujourd'hui
+          Il te reste {quota.remaining} essayage{quota.remaining > 1 ? 's' : ''} gratuit{quota.remaining > 1 ? 's' : ''}
         </p>
       </div>
     </div>

@@ -37,10 +37,10 @@ async function getStats(req, res) {
       [userId]
     );
 
+    // Quota d'essayages à vie (aligné sur tryonController.LIFETIME_LIMIT).
+    const ESSAYAGE_LIFETIME_LIMIT = 2;
     const essayagesResult = await db.query(
-      `SELECT
-         COUNT(*)::int AS total,
-         COUNT(*) FILTER (WHERE cree_le > NOW() - INTERVAL '24 hours')::int AS today
+      `SELECT COUNT(*) FILTER (WHERE statut <> 'error')::int AS used
        FROM essayages_log WHERE id_utilisateur = $1`,
       [userId]
     );
@@ -98,9 +98,9 @@ async function getStats(req, res) {
         par_categorie: parCategorieResult.rows,
       },
       essayages: {
-        total: essayages.total,
-        today: essayages.today,
-        daily_limit: 2,
+        total: essayages.used,
+        limit: ESSAYAGE_LIFETIME_LIMIT,
+        remaining: Math.max(0, ESSAYAGE_LIFETIME_LIMIT - essayages.used),
       },
       insights: {
         favoris_count: favorisResult.rows[0]?.count || 0,
