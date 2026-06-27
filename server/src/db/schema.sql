@@ -145,6 +145,23 @@ CREATE TABLE articles_matieres (
 );
 
 -- =====================================================================
+-- 5 bis. AVIS (témoignages landing, partagés entre tous les visiteurs)
+-- =====================================================================
+
+CREATE TABLE avis (
+    id_avis     SERIAL PRIMARY KEY,
+    nom         VARCHAR(40) NOT NULL,
+    role        VARCHAR(80),
+    texte       VARCHAR(280) NOT NULL,
+    note        SMALLINT NOT NULL CHECK (note BETWEEN 1 AND 5),
+    est_defaut  BOOLEAN NOT NULL DEFAULT FALSE,
+    masque      BOOLEAN NOT NULL DEFAULT FALSE,
+    cree_le     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_avis_visibles ON avis (masque, cree_le DESC);
+
+-- =====================================================================
 -- 6. INDEX pour les filtres
 -- =====================================================================
 
@@ -152,6 +169,7 @@ CREATE INDEX idx_articles_utilisateur ON articles(id_utilisateur);
 CREATE INDEX idx_articles_categorie   ON articles(id_categorie);
 CREATE INDEX idx_articles_marque      ON articles(id_marque);
 CREATE INDEX idx_articles_origine     ON articles(origine);
+CREATE INDEX idx_articles_position    ON articles(id_utilisateur, position);
 
 -- =====================================================================
 -- 7. TRIGGER : maintien automatique de modifie_le
@@ -237,3 +255,9 @@ INSERT INTO matieres (nom) VALUES
     ('Élasthanne'),
     ('Cachemire'),
     ('Nylon');
+
+-- Avis « bêta » par défaut affichés sur la landing
+INSERT INTO avis (nom, role, texte, note, est_defaut) VALUES
+    ('Alex M.', 'Moniteur d''auto-école, 19 ans', 'Je n''achète plus une pièce sans la tester sur mon mannequin d''abord. Économie de temps et d''argent.', 5, TRUE),
+    ('Romain C.', 'Administrateur réseau, 19 ans', 'Le rendu IA est bluffant. J''ai essayé 20 looks en 10 minutes pour préparer ma semaine.', 5, TRUE),
+    ('Mathilde L.', 'Créatrice de contenu, 67 ans', 'Enfin une app qui valorise vraiment ma garde-robe. Le mode 360° est addictif.', 5, TRUE);
