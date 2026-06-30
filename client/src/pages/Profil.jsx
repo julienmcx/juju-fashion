@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Mail, User as UserIcon, LogOut, Sparkles, Shirt, Wallet,
-  Camera, Settings as SettingsIcon, Sun, Moon, Loader2, X,
+  Camera, Settings as SettingsIcon, Sun, Moon, Loader2, X, Crown,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchProfileStats, updateAvatar } from '../api/profile';
 import { uploadImage } from '../api/upload';
+import { startCheckout, openBillingPortal } from '../api/billing';
 import { useDensity } from '../hooks/useDensity';
 import { useTheme } from '../hooks/useTheme';
 import { Card, Eyebrow, SectionLabel, Button } from '../components/ui';
@@ -63,6 +65,30 @@ export default function Profil() {
   };
 
   const avatarSrc = stats?.avatar?.custom_url;
+
+  // ----- Premium / Stripe -----
+  const [searchParams] = useSearchParams();
+  const upgradeStatus = searchParams.get('upgrade'); // 'success' | 'cancel' | null
+  const [billingLoading, setBillingLoading] = useState(false);
+
+  // Au retour de Stripe, laisse au webhook le temps d'activer l'abonnement
+  useEffect(() => {
+    if (upgradeStatus === 'success') {
+      const t = setTimeout(() => loadStats(), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [upgradeStatus]);
+
+  const redirectToBilling = async (action) => {
+    setBillingLoading(true);
+    try {
+      const { url } = await action();
+      window.location.href = url;
+    } catch (err) {
+      setBillingLoading(false);
+      alert(err.response?.data?.error || 'Paiement indisponible pour le moment.');
+    }
+  };
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-10 max-w-3xl mx-auto">
@@ -129,6 +155,20 @@ export default function Profil() {
         </div>
       </header>
 
+      {upgradeStatus === 'success' && (
+        <div className="mb-6 rounded-xl border border-juju-dore/40 bg-juju-dore/10 px-4 py-3 text-sm flex items-center gap-2 animate-fade-up">
+          <Sparkles size={16} className="text-juju-dore shrink-0" />
+          {stats?.premium?.is_premium
+            ? 'Bienvenue dans Premium ✨ Essayages illimités activés !'
+            : 'Paiement reçu — ton accès Premium s’active dans quelques secondes…'}
+        </div>
+      )}
+      {upgradeStatus === 'cancel' && (
+        <div className="mb-6 rounded-xl border border-juju-light-bordure dark:border-juju-bordure px-4 py-3 text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">
+          Paiement annulé — tu peux réessayer quand tu veux.
+        </div>
+      )}
+
       {/* Stats */}
       {loading && <SkeletonStats />}
       {!loading && stats && (
@@ -168,6 +208,18 @@ export default function Profil() {
             </section>
           )}
         </>
+      )}
+
+      {/* Premium */}
+      {!loading && stats && (
+        <section className="mb-7">
+          <PremiumCard
+            premium={stats.premium}
+            onUpgrade={() => redirectToBilling(startCheckout)}
+            onManage={() => redirectToBilling(openBillingPortal)}
+            loading={billingLoading}
+          />
+        </section>
       )}
 
       {/* Compte */}
@@ -210,6 +262,47 @@ export default function Profil() {
   );
 }
 
+
+function PremiumCard({ premium, onUpgrade, onManage, loading }) {
+  if (premium?.is_premium) {
+    return (
+      <Card className="p-5 flex items-center gap-4 border-juju-dore/40">
+        <div className="w-12 h-12 rounded-xl bg-gradient-gold text-juju-noir flex items-center justify-center shrink-0 shadow-gold">
+          <Crown size={22} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-display text-lg leading-tight">Membre Premium</p>
+          <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute">Essayages illimités ✨</p>
+        </div>
+        <Button variant="secondary" size="sm" onClick={onManage} loading={loading}>
+          Gérer
+        </Button>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl p-6 text-white bg-gradient-violet shadow-violet">
+      <div aria-hidden className="absolute -top-10 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+      <div aria-hidden className="absolute -bottom-12 -left-6 w-40 h-40 rounded-full bg-juju-dore/20 blur-2xl" />
+      <div className="relative">
+        <div className="flex items-center gap-1.5 mb-2">
+          <Crown size={16} className="text-juju-dore" />
+          <span className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-white/90">Premium</span>
+        </div>
+        <h3 className="font-display text-2xl mb-1.5 text-white">
+          Essayages <span className="italic">illimités</span>
+        </h3>
+        <p className="text-sm text-white/80 mb-4 max-w-md">
+          Essaie autant de tenues que tu veux, sans la limite de 2 par jour. 9,99 €/mois, résiliable à tout moment.
+        </p>
+        <Button variant="gold" size="md" icon={Sparkles} onClick={onUpgrade} loading={loading}>
+          Passer Premium
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function StatCard({ icon: Icon, value, label, sublabel }) {
   return (

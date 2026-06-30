@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../db');
+const { getPremiumState } = require('../services/premium');
 
 const SALT_ROUNDS = 12;
 const JWT_EXPIRES_IN = '7d';
@@ -108,7 +109,10 @@ async function me(req, res) {
       return res.status(404).json({ error: 'Utilisateur introuvable' });
     }
 
-    return res.json({ user: result.rows[0] });
+    const premium = await getPremiumState(req.user.id_utilisateur);
+    return res.json({
+      user: { ...result.rows[0], is_premium: premium.is_premium, premium_until: premium.premium_until },
+    });
   } catch (err) {
     console.error('Me error:', err);
     return res.status(500).json({ error: 'Erreur serveur' });

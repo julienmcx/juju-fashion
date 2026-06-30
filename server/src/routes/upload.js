@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { upload } = require('../middlewares/upload');
+const { webpConvert } = require('../services/imageProcessing');
 const { authRequired } = require('../middlewares/auth');
 
-router.post('/', authRequired, upload.single('image'), (req, res) => {
+router.post('/', authRequired, upload.single('image'), webpConvert, (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Aucun fichier reçu (champ "image" attendu)' });
   }

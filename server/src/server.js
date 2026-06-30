@@ -7,6 +7,15 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
+
+// Webhook Stripe : doit recevoir le corps BRUT (avant express.json) pour
+// vérifier la signature.
+app.post(
+  '/api/billing/webhook',
+  express.raw({ type: 'application/json' }),
+  require('./controllers/billingController').webhook
+);
+
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
@@ -24,6 +33,9 @@ app.use('/api/background-remove', backgroundRemoveRoutes);
 
 const profileRoutes = require('./routes/profile');
 app.use('/api/profile', profileRoutes);
+
+const billingRoutes = require('./routes/billing');
+app.use('/api/billing', billingRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'juju-api' });

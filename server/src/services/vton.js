@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const sharp = require('sharp');
 const { UPLOAD_DIR } = require('../middlewares/upload');
 
 const FASHN_BASE_URL = 'https://api.fashn.ai/v1';
@@ -9,15 +10,26 @@ const MAX_POLL_ATTEMPTS = 40;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function localUrlToBase64(url) {
+async function localUrlToBase64(url) {
   const filename = path.basename(url);
   const filepath = path.join(UPLOAD_DIR, filename);
   if (!fs.existsSync(filepath)) {
     throw new Error(`Fichier introuvable: ${filename}`);
   }
-  const buffer = fs.readFileSync(filepath);
+  let buffer = fs.readFileSync(filepath);
   const ext = path.extname(filename).slice(1).toLowerCase();
-  const mime = (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : `image/${ext}`;
+
+  let mime;
+  if (ext === 'jpg' || ext === 'jpeg') {
+    mime = 'image/jpeg';
+  } else if (ext === 'png') {
+    mime = 'image/png';
+  } else {
+    // FASHN n'accepte de façon fiable que JPEG/PNG. Nos uploads sont en WebP :
+    // on transcode en PNG (conserve une éventuelle transparence).
+    buffer = await sharp(buffer).png().toBuffer();
+    mime = 'image/png';
+  }
   return `data:${mime};base64,${buffer.toString('base64')}`;
 }
 
@@ -34,7 +46,7 @@ function isLocalUrl(url) {
   return localPatterns.some((p) => url.includes(p));
 }
 
-function maybeBase64(url) {
+async function maybeBase64(url) {
   return isLocalUrl(url) ? localUrlToBase64(url) : url;
 }
 
@@ -97,11 +109,15 @@ async function submitAndPoll({ modelName, inputs }) {
 }
 
 async function runTryOn({ humanImageUrl, garmentImageUrl, category }) {
+  const [model_image, garment_image] = await Promise.all([
+    maybeBase64(humanImageUrl),
+    maybeBase64(garmentImageUrl),
+  ]);
   return submitAndPoll({
     modelName: 'tryon-v1.6',
     inputs: {
-      model_image: maybeBase64(humanImageUrl),
-      garment_image: maybeBase64(garmentImageUrl),
+      model_image,
+      garment_image,
       category: category || 'auto',
     },
   });
@@ -115,7 +131,7 @@ async function removeBackgroundAndStore(imageUrl) {
   // 1. Appel FASHN background-remove
   const fashnUrl = await submitAndPoll({
     modelName: 'background-remove',
-    inputs: { image: maybeBase64(imageUrl) },
+    inputs: { image: await maybeBase64(imageUrl) },
   });
 
   // 2. Téléchargement de l'image FASHN (PNG transparent)
