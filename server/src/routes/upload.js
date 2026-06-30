@@ -10,7 +10,7 @@ router.post('/', authRequired, upload.single('image'), async (req, res) => {
     return res.status(400).json({ error: 'Aucun fichier reçu (champ "image" attendu)' });
   }
   try {
-    // Convertit en JPEG si HEIC/HEIF (sinon inchangé)
+    // Convertit en WebP si HEIC/HEIF (sinon inchangé)
     const finalPath = await ensureWebFriendly(req.file.path);
     const finalFilename = path.basename(finalPath);
 

@@ -149,7 +149,11 @@ export default function Profil() {
               icon={Sparkles}
               value={stats.essayages.total}
               label={stats.essayages.total > 1 ? 'essayages' : 'essayage'}
-              sublabel={stats.essayages.today > 0 ? `+${stats.essayages.today} aujourd'hui` : null}
+              sublabel={
+                stats.essayages.remaining > 0
+                  ? `${stats.essayages.remaining} gratuit${stats.essayages.remaining > 1 ? 's' : ''} restant${stats.essayages.remaining > 1 ? 's' : ''}`
+                  : 'quota atteint'
+              }
             />
             <StatCard
               icon={Wallet}

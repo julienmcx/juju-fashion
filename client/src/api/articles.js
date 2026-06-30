@@ -28,3 +28,10 @@ export async function toggleFavori(id) {
   const { data } = await apiClient.patch(`/articles/${id}/favori`, {});
   return data;
 }
+
+// Persiste l'ordre personnalisé des articles (drag & drop).
+// `order` est un tableau d'id_article dans l'ordre souhaité.
+export async function reorderArticles(order) {
+  const { data } = await apiClient.patch('/articles/reorder', { order });
+  return data;
+}

@@ -1717,10 +1717,21 @@
 
     // ============ SYSTÈME D'AVIS + CAROUSEL + ADMIN ============
     (function () {
+      // ⚙️ URL de l'API Juju. En local on tape le serveur Express (port 3001).
+      // En production, renseigne l'URL de ton API déployée AVANT ce script via
+      //   <script>window.JUJU_API_BASE = 'https://ton-api.exemple.com/api';</script>
+      // sinon on retombe sur /api (même domaine que la landing).
+      const API_BASE =
+        (typeof window !== 'undefined' && window.JUJU_API_BASE) ||
+        ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+          ? 'http://localhost:3001/api'
+          : '/api');
+
+      // Avis de secours, affichés uniquement si l'API n'est pas joignable.
       const DEFAULT_REVIEWS = [
-        { id: 'default-1', name: 'Alex M.', role: "Moniteur d'auto-école, 19 ans", text: "Je n'achète plus une pièce sans la tester sur mon mannequin d'abord. Économie de temps et d'argent.", rating: 5, default: true },
-        { id: 'default-2', name: 'Romain C.', role: 'Administrateur réseau, 19 ans', text: "Le rendu IA est bluffant. J'ai essayé 20 looks en 10 minutes pour préparer ma semaine.", rating: 5, default: true },
-        { id: 'default-3', name: 'Mathilde L.', role: 'Créatrice de contenu, 67 ans', text: "Enfin une app qui valorise vraiment ma garde-robe. Le mode 360° est addictif.", rating: 5, default: true },
+        { id_avis: 'default-1', nom: 'Alex M.', role: "Moniteur d'auto-école, 19 ans", texte: "Je n'achète plus une pièce sans la tester sur mon mannequin d'abord. Économie de temps et d'argent.", note: 5, est_defaut: true },
+        { id_avis: 'default-2', nom: 'Romain C.', role: 'Administrateur réseau, 19 ans', texte: "Le rendu IA est bluffant. J'ai essayé 20 looks en 10 minutes pour préparer ma semaine.", note: 5, est_defaut: true },
+        { id_avis: 'default-3', nom: 'Mathilde L.', role: 'Créatrice de contenu, 67 ans', texte: "Enfin une app qui valorise vraiment ma garde-robe. Le mode 360° est addictif.", note: 5, est_defaut: true },
       ];
 
       const track = document.getElementById('testi-track');
@@ -1731,29 +1742,56 @@
       let allReviews = [];
       let currentIndex = 0;
 
-      function getStoredReviews() {
-        const stored = JSON.parse(localStorage.getItem('juju_reviews') || '[]');
-        const deleted = JSON.parse(localStorage.getItem('juju_reviews_deleted') || '[]');
-        return stored.filter((r) => !deleted.includes(r.id));
+      function escapeHtml(str) {
+        return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
       }
 
-      function getActiveDefaults() {
-        const deleted = JSON.parse(localStorage.getItem('juju_reviews_deleted') || '[]');
-        return DEFAULT_REVIEWS.filter((r) => !deleted.includes(r.id));
+      // Clé admin (modération) : mémorisée quand la page est ouverte avec
+      // ?admin=LA_CLE, puis renvoyée à l'API lors d'une suppression.
+      function getAdminKey() {
+        return localStorage.getItem('juju_admin_key') || '';
+      }
+
+      // Récupère les avis partagés depuis l'API ; repli sur les avis par
+      // défaut si l'API n'est pas (encore) joignable.
+      async function fetchReviews() {
+        try {
+          const res = await fetch(`${API_BASE}/avis`, { headers: { Accept: 'application/json' } });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          return Array.isArray(data.avis) ? data.avis : [];
+        } catch (err) {
+          console.warn('[avis] API injoignable, repli sur les avis par défaut :', err.message);
+          return DEFAULT_REVIEWS;
+        }
+      }
+
+      async function loadReviews() {
+        allReviews = await fetchReviews();
+        renderCarousel();
       }
 
       function buildCard(review) {
-        const initials = review.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+        const note = Math.max(0, Math.min(5, parseInt(review.note, 10) || 0));
+        const nom = escapeHtml(review.nom);
+        const role = escapeHtml(review.role || 'Avis utilisateur');
+        const texte = escapeHtml(review.texte);
+        const initials = String(review.nom || '').split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
         return `
-          <div class="testi" data-review-id="${review.id}">
-            <span class="testi-beta">${review.default ? 'Bêta' : 'Avis utilisateur'}</span>
-              <button class="testi-delete" aria-label="Supprimer cet avis" data-id="${review.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>            <div class="testi-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
-            <p class="testi-quote">"${review.text.replace(/</g, '&lt;')}"</p>
+          <div class="testi" data-review-id="${review.id_avis}">
+            <span class="testi-beta">${review.est_defaut ? 'Bêta' : 'Avis utilisateur'}</span>
+              <button class="testi-delete" aria-label="Supprimer cet avis" data-id="${review.id_avis}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>            <div class="testi-stars">${'★'.repeat(note)}${'☆'.repeat(5 - note)}</div>
+            <p class="testi-quote">"${texte}"</p>
             <div class="testi-author">
               <div class="testi-avatar">${initials}</div>
               <div>
-                <div class="testi-name">${review.name}</div>
-                <div class="testi-role">${review.role || 'Avis utilisateur'}</div>
+                <div class="testi-name">${nom}</div>
+                <div class="testi-role">${role}</div>
               </div>
             </div>
           </div>
@@ -1768,10 +1806,6 @@
       }
 
       function renderCarousel() {
-        const stored = getStoredReviews();
-        const defaults = getActiveDefaults();
-        allReviews = [...stored, ...defaults];
-
         if (allReviews.length === 0) {
           track.innerHTML = '<p style="text-align: center; width: 100%; color: var(--light-texte-mute); padding: 2rem;">Aucun avis pour le moment.</p>';
           dotsEl.innerHTML = '';
@@ -1861,19 +1895,25 @@
         modal.style.display = 'flex';
 
         const cancel = () => { modal.style.display = 'none'; };
-        const confirmDelete = () => {
-          console.log('[admin] Confirmation de suppression, id =', id);
-          const stored = JSON.parse(localStorage.getItem('juju_reviews') || '[]');
-          const inStored = stored.find((r) => r.id === id);
-          if (inStored) {
-            localStorage.setItem('juju_reviews', JSON.stringify(stored.filter((r) => r.id !== id)));
-          } else {
-            const deleted = JSON.parse(localStorage.getItem('juju_reviews_deleted') || '[]');
-            deleted.push(id);
-            localStorage.setItem('juju_reviews_deleted', JSON.stringify(deleted));
+        const confirmDelete = async () => {
+          try {
+            const res = await fetch(`${API_BASE}/avis/${id}`, {
+              method: 'DELETE',
+              headers: { 'X-Admin-Key': getAdminKey() },
+            });
+            if (res.status === 401) {
+              alert('Action réservée à l\'administration (clé invalide).');
+              return;
+            }
+            if (!res.ok && res.status !== 204) throw new Error('HTTP ' + res.status);
+          } catch (err) {
+            console.error('[avis] suppression échouée :', err);
+            alert('Suppression impossible pour le moment.');
+            return;
+          } finally {
+            modal.style.display = 'none';
           }
-          modal.style.display = 'none';
-          renderCarousel();
+          await loadReviews();
         };
 
         // Remplace les listeners pour éviter empilement
@@ -1926,23 +1966,30 @@
         });
       }
 
-      submitBtn.addEventListener('click', () => {
+      submitBtn.addEventListener('click', async () => {
         const name = nameInput.value.trim();
         const text = textInput.value.trim();
         if (!name || !text || !rating) {
           alert('Merci de remplir ton prénom, ta note et ton avis.');
           return;
         }
-        const reviews = JSON.parse(localStorage.getItem('juju_reviews') || '[]');
-        const newReview = {
-          id: 'user-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-          name, text, rating,
-          role: 'Avis publié à l\'instant',
-          date: new Date().toISOString(),
-        };
-        reviews.unshift(newReview);
-        localStorage.setItem('juju_reviews', JSON.stringify(reviews));
 
+        submitBtn.disabled = true;
+        try {
+          const res = await fetch(`${API_BASE}/avis`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nom: name, texte: text, note: rating }),
+          });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+        } catch (err) {
+          console.error('[avis] publication échouée :', err);
+          alert('Impossible de publier ton avis pour le moment. Réessaie plus tard.');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        await loadReviews();
         thanks.style.display = 'block';
         setTimeout(() => {
           form.style.display = 'none';
@@ -1952,7 +1999,7 @@
           textInput.value = '';
           rating = 0;
           updateStars();
-          renderCarousel();
+          submitBtn.disabled = false;
         }, 1200);
       });
 
@@ -1966,7 +2013,12 @@
         localStorage.removeItem('juju_admin');
       }
       if (localStorage.getItem('juju_admin') === '1') enableAdmin();
-      if (new URLSearchParams(location.search).get('admin') === 'juju2026') enableAdmin();
+      const adminParam = new URLSearchParams(location.search).get('admin');
+      if (adminParam) {
+        // Mémorise la clé fournie : elle sera renvoyée à l'API pour modérer.
+        localStorage.setItem('juju_admin_key', adminParam);
+        enableAdmin();
+      }
       document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
           e.preventDefault();
@@ -1977,7 +2029,7 @@
       });
 
       // Démarrage
-      renderCarousel();
+      loadReviews();
     })();
   </script>
 </body>

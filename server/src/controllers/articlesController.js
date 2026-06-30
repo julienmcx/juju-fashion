@@ -38,9 +38,10 @@ async function createArticle(req, res) {
          nom, image_url, lien_achat, prix, devise, origine,
          taille, pointure, longueur_cm,
          matiere_bijou, lunettes_teintees,
-         mensurations, notes
+         mensurations, notes, position
        )
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,
+         (SELECT COALESCE(MIN(position), 0) - 1 FROM articles WHERE id_utilisateur = $1))
        RETURNING *`,
       [
         req.user.id_utilisateur, id_categorie, id_marque,
@@ -125,7 +126,7 @@ async function listArticles(req, res) {
       LEFT JOIN categories c ON c.id_categorie = a.id_categorie
       LEFT JOIN marques m ON m.id_marque = a.id_marque
       WHERE ${conditions.join(' AND ')}
-      ORDER BY a.cree_le DESC
+      ORDER BY a.position ASC NULLS LAST, a.cree_le DESC
       LIMIT $${values.length - 1} OFFSET $${values.length}
     `;
 
@@ -318,4 +319,36 @@ async function toggleFavori(req, res) {
   }
 }
 
-module.exports = { createArticle, listArticles, getArticle, updateArticle, deleteArticle, toggleFavori };
+async function reorderArticles(req, res) {
+  try {
+    const { order } = req.body;
+    if (!Array.isArray(order) || order.length === 0) {
+      return res.status(400).json({ error: 'Champ "order" attendu (tableau d\'id_article)' });
+    }
+
+    const ids = order.map(Number);
+    if (ids.some((id) => !Number.isInteger(id))) {
+      return res.status(400).json({ error: 'Identifiants d\'article invalides' });
+    }
+
+    // Réécrit les positions selon l'ordre fourni, en se limitant aux
+    // articles appartenant à l'utilisateur (les ids inconnus sont ignorés).
+    await db.query(
+      `UPDATE articles a
+       SET position = v.ord - 1, modifie_le = NOW()
+       FROM (
+         SELECT id, ord
+         FROM unnest($1::int[]) WITH ORDINALITY AS t(id, ord)
+       ) v
+       WHERE a.id_article = v.id AND a.id_utilisateur = $2`,
+      [ids, req.user.id_utilisateur]
+    );
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('reorderArticles error:', err);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+}
+
+module.exports = { createArticle, listArticles, getArticle, updateArticle, deleteArticle, toggleFavori, reorderArticles };
