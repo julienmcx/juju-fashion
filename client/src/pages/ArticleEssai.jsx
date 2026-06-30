@@ -135,7 +135,7 @@ export default function ArticleEssai() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button variant="primary" icon={Crown} onClick={goPremium}>
-              Passer Premium · 9,99 €/mois
+              Passer Premium · 3 €/mois
             </Button>
             <Button variant="secondary" to={`/articles/${id}`}>
               Retour

@@ -294,7 +294,7 @@ function PremiumCard({ premium, onUpgrade, onManage, loading }) {
           Essayages <span className="italic">illimités</span>
         </h3>
         <p className="text-sm text-white/80 mb-4 max-w-md">
-          Essaie autant de tenues que tu veux, sans la limite de 2 par jour. 9,99 €/mois, résiliable à tout moment.
+          Essaie autant de tenues que tu veux, sans la limite de 2 par jour. 3 €/mois, résiliable à tout moment.
         </p>
         <Button variant="gold" size="md" icon={Sparkles} onClick={onUpgrade} loading={loading}>
           Passer Premium

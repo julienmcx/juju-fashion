@@ -2,7 +2,7 @@ const db = require('../db');
 const { stripe, isConfigured } = require('../services/stripe');
 const { getPremiumState } = require('../services/premium');
 
-const PREMIUM_PRICE = 9.99;
+const PREMIUM_PRICE = 3;
 const clientUrl = () => process.env.CLIENT_URL || 'http://localhost:5173';
 
 /** GET /api/billing/status — état d'abonnement de l'utilisateur courant. */
