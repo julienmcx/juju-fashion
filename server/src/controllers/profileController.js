@@ -79,6 +79,7 @@ async function getStats(req, res) {
        JOIN articles a ON a.id_article = e.id_article
        WHERE e.id_utilisateur = $1
        GROUP BY a.id_article, a.nom, a.image_url
+       HAVING COUNT(*) >= 2
        ORDER BY count DESC
        LIMIT 1`,
       [userId]
