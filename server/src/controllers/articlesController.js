@@ -20,6 +20,16 @@ async function createArticle(req, res) {
 
     await client.query('BEGIN');
 
+    // Nom unique par utilisateur (insensible à la casse)
+    const dupe = await client.query(
+      'SELECT 1 FROM articles WHERE id_utilisateur = $1 AND LOWER(nom) = LOWER($2) LIMIT 1',
+      [req.user.id_utilisateur, nom]
+    );
+    if (dupe.rows.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: `Tu as déjà un vêtement nommé « ${nom.trim()} ». Choisis un autre nom.` });
+    }
+
     // Sécurité : la marque fournie doit appartenir à l'utilisateur connecté
     if (id_marque) {
       const owns = await client.query(
@@ -107,7 +117,7 @@ async function listArticles(req, res) {
     }
 
     // Bornage des paramètres de pagination (évite un 500 sur ?limit=abc et les valeurs démesurées)
-    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 100);
+    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 500);
     const safeOffset = Math.max(parseInt(offset, 10) || 0, 0);
     values.push(safeLimit, safeOffset);
 
@@ -203,6 +213,18 @@ async function updateArticle(req, res) {
     }
 
     await client.query('BEGIN');
+
+    // Nom unique par utilisateur (si le nom change)
+    if (req.body.nom !== undefined) {
+      const dupe = await client.query(
+        'SELECT 1 FROM articles WHERE id_utilisateur = $1 AND LOWER(nom) = LOWER($2) AND id_article <> $3 LIMIT 1',
+        [req.user.id_utilisateur, req.body.nom, req.params.id]
+      );
+      if (dupe.rows.length > 0) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ error: `Tu as déjà un vêtement nommé « ${String(req.body.nom).trim()} ». Choisis un autre nom.` });
+      }
+    }
 
     // Sécurité : si on change la marque, elle doit appartenir à l'utilisateur
     if (req.body.id_marque) {

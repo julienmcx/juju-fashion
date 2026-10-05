@@ -61,7 +61,7 @@ export default function GardeRobe() {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    const params = {};
+    const params = { limit: 500 };
     Object.entries(filters).forEach(([k, v]) => { if (v) params[k] = v; });
     fetchArticles(params)
       .then((data) => {
