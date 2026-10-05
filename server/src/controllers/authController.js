@@ -14,11 +14,32 @@ async function register(req, res) {
     if (!email || !mot_de_passe) {
       return res.status(400).json({ error: 'Email et mot de passe requis' });
     }
-    if (!isValidEmail(email)) {
+
+    // Normalisation email : trim + lowercase (un espace en début/fin ne doit pas passer)
+    const emailNorm = email.trim().toLowerCase();
+
+    if (!isValidEmail(emailNorm)) {
       return res.status(400).json({ error: "Format d'email invalide" });
+    }
+    if (mot_de_passe.trim().length === 0) {
+      return res.status(400).json({ error: 'Le mot de passe ne peut pas contenir uniquement des espaces' });
     }
     if (mot_de_passe.length < 8) {
       return res.status(400).json({ error: 'Le mot de passe doit faire au moins 8 caractères' });
+    }
+
+    // Normalisation du nom : espaces uniquement -> null, et respect de la limite VARCHAR(100)
+    let nomClean = null;
+    if (typeof nom === 'string') {
+      const nomTrim = nom.trim();
+      if (nomTrim.length === 0) {
+        nomClean = null;
+      } else if (nomTrim.length > 100) {
+        console.warn(`[Register] nom trop long (${nomTrim.length} caractères), tronqué à 100`);
+        nomClean = nomTrim.slice(0, 100);
+      } else {
+        nomClean = nomTrim;
+      }
     }
 
     const hash = await bcrypt.hash(mot_de_passe, SALT_ROUNDS);
@@ -27,7 +48,7 @@ async function register(req, res) {
       `INSERT INTO utilisateurs (email, mot_de_passe_hash, nom)
        VALUES ($1, $2, $3)
        RETURNING id_utilisateur, email, nom, cree_le`,
-      [email.toLowerCase(), hash, nom || null]
+      [emailNorm, hash, nomClean]
     );
 
     const user = result.rows[0];
@@ -44,7 +65,16 @@ async function register(req, res) {
     if (err.code === '23505') {
       return res.status(409).json({ error: 'Cet email est déjà utilisé' });
     }
-    console.error('Register error:', err);
+    // Log détaillé pour diagnostiquer les 500 (mot de passe masqué)
+    const safeBody = { ...req.body };
+    if (safeBody.mot_de_passe !== undefined) safeBody.mot_de_passe = '***';
+    console.error('[Register] Échec inscription:', {
+      message: err.message,
+      code: err.code,
+      detail: err.detail,
+      constraint: err.constraint,
+      body: safeBody,
+    });
     return res.status(500).json({ error: 'Erreur serveur' });
   }
 }
