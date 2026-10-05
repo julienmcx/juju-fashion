@@ -277,11 +277,6 @@ export default function Profil() {
         Se déconnecter
       </Button>
 
-      {/* Déconnexion */}
-      <Button variant="danger-soft" size="lg" fullWidth icon={LogOut} onClick={logout}>
-        Se déconnecter
-      </Button>
-
       {
         showRemoveConfirm && (
           <ConfirmDialog
