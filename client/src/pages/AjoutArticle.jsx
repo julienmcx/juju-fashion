@@ -32,7 +32,10 @@ export default function AjoutArticle() {
         setMatieres(mats);
         setMarques(mqs);
       })
-      .catch(() => { });
+      .catch((err) => {
+        console.error('[AjoutArticle] chargement des référentiels échoué :', err);
+        setUploadError('Impossible de charger les catégories/marques. Vérifie ta connexion et recharge la page.');
+      });
   }, []);
 
   const handleFileChange = async (e) => {
@@ -132,7 +135,7 @@ export default function AjoutArticle() {
           <p className="text-juju-light-texte-mute dark:text-juju-texte-mute mb-6">Remplis les champs principaux.</p>
 
           <div className="aspect-square w-32 mb-6 rounded-2xl overflow-hidden bg-juju-light-card dark:bg-juju-bleu/40 border border-juju-light-bordure dark:border-juju-bordure shadow-card p-1.5">
-            <img src={imageUrl} alt="" className="w-full h-full object-cover rounded-xl" />
+            <img src={imageUrl} alt="Aperçu de l'article" className="w-full h-full object-cover rounded-xl" />
           </div>
 
           <ArticleForm

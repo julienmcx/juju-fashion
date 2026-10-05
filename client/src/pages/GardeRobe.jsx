@@ -37,8 +37,16 @@ export default function GardeRobe() {
     .filter(([k, v]) => k !== 'search' && v)
     .length;
 
-  // Debounce search local pour ne pas spammer l'API à chaque touche
   const [searchInput, setSearchInput] = useState(filters.search);
+
+  const updateFilter = (key, value) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setSearchParams(next, { replace: true });
+  };
+
+  // Debounce de la recherche pour ne pas spammer l'API à chaque touche
   useEffect(() => {
     const t = setTimeout(() => {
       if (searchInput !== filters.search) {
@@ -51,25 +59,21 @@ export default function GardeRobe() {
 
   // Charge les articles à chaque changement de filtres (= searchParams)
   useEffect(() => {
+    let active = true;
     setLoading(true);
     const params = {};
     Object.entries(filters).forEach(([k, v]) => { if (v) params[k] = v; });
     fetchArticles(params)
       .then((data) => {
+        if (!active) return; // réponse obsolète (filtres changés entre-temps)
         setArticles(data.articles);
         setError('');
       })
-      .catch(() => setError('Impossible de charger ta garde-robe'))
-      .finally(() => setLoading(false));
+      .catch(() => { if (active) setError('Impossible de charger ta garde-robe'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
-
-  const updateFilter = (key, value) => {
-    const next = new URLSearchParams(searchParams);
-    if (value) next.set(key, value);
-    else next.delete(key);
-    setSearchParams(next, { replace: true });
-  };
 
   const handleToggleFavori = async (id_article) => {
     // Mise à jour optimiste

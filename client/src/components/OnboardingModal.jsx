@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Shirt, SlidersHorizontal, Sparkles, X } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const STEPS = [
   {
@@ -20,17 +21,26 @@ const STEPS = [
 ];
 
 export default function OnboardingModal() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
 
+  // Clé d'onboarding scopée par utilisateur : chaque compte voit l'intro une fois,
+  // et elle se réaffiche si on change de compte sur le même navigateur.
   useEffect(() => {
-    if (!localStorage.getItem('juju_onboarding_seen')) {
+    const uid = user?.id_utilisateur;
+    if (!uid) return; // pas connecté -> pas de modale
+    if (!localStorage.getItem(`juju_onboarding_seen_${uid}`)) {
+      setStep(0);
       setOpen(true);
+    } else {
+      setOpen(false);
     }
-  }, []);
+  }, [user?.id_utilisateur]);
 
   const close = () => {
-    localStorage.setItem('juju_onboarding_seen', '1');
+    const uid = user?.id_utilisateur;
+    if (uid) localStorage.setItem(`juju_onboarding_seen_${uid}`, '1');
     setOpen(false);
   };
 

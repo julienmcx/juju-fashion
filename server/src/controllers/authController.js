@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../db');
+const { getPremiumState } = require('../services/premium');
 
 const SALT_ROUNDS = 12;
 const JWT_EXPIRES_IN = '7d';
@@ -14,11 +15,32 @@ async function register(req, res) {
     if (!email || !mot_de_passe) {
       return res.status(400).json({ error: 'Email et mot de passe requis' });
     }
-    if (!isValidEmail(email)) {
+
+    // Normalisation email : trim + lowercase (un espace en début/fin ne doit pas passer)
+    const emailNorm = email.trim().toLowerCase();
+
+    if (!isValidEmail(emailNorm)) {
       return res.status(400).json({ error: "Format d'email invalide" });
+    }
+    if (mot_de_passe.trim().length === 0) {
+      return res.status(400).json({ error: 'Le mot de passe ne peut pas contenir uniquement des espaces' });
     }
     if (mot_de_passe.length < 8) {
       return res.status(400).json({ error: 'Le mot de passe doit faire au moins 8 caractères' });
+    }
+
+    // Normalisation du nom : espaces uniquement -> null, et respect de la limite VARCHAR(100)
+    let nomClean = null;
+    if (typeof nom === 'string') {
+      const nomTrim = nom.trim();
+      if (nomTrim.length === 0) {
+        nomClean = null;
+      } else if (nomTrim.length > 100) {
+        console.warn(`[Register] nom trop long (${nomTrim.length} caractères), tronqué à 100`);
+        nomClean = nomTrim.slice(0, 100);
+      } else {
+        nomClean = nomTrim;
+      }
     }
 
     const hash = await bcrypt.hash(mot_de_passe, SALT_ROUNDS);
@@ -27,7 +49,7 @@ async function register(req, res) {
       `INSERT INTO utilisateurs (email, mot_de_passe_hash, nom)
        VALUES ($1, $2, $3)
        RETURNING id_utilisateur, email, nom, cree_le`,
-      [email.toLowerCase(), hash, nom || null]
+      [emailNorm, hash, nomClean]
     );
 
     const user = result.rows[0];
@@ -44,7 +66,16 @@ async function register(req, res) {
     if (err.code === '23505') {
       return res.status(409).json({ error: 'Cet email est déjà utilisé' });
     }
-    console.error('Register error:', err);
+    // Log détaillé pour diagnostiquer les 500 (mot de passe masqué)
+    const safeBody = { ...req.body };
+    if (safeBody.mot_de_passe !== undefined) safeBody.mot_de_passe = '***';
+    console.error('[Register] Échec inscription:', {
+      message: err.message,
+      code: err.code,
+      detail: err.detail,
+      constraint: err.constraint,
+      body: safeBody,
+    });
     return res.status(500).json({ error: 'Erreur serveur' });
   }
 }
@@ -61,7 +92,7 @@ async function login(req, res) {
       `SELECT id_utilisateur, email, mot_de_passe_hash, nom
        FROM utilisateurs
        WHERE email = $1`,
-      [email.toLowerCase()]
+      [email.trim().toLowerCase()]
     );
 
     if (result.rows.length === 0) {
@@ -108,11 +139,45 @@ async function me(req, res) {
       return res.status(404).json({ error: 'Utilisateur introuvable' });
     }
 
-    return res.json({ user: result.rows[0] });
+    const premium = await getPremiumState(req.user.id_utilisateur);
+    return res.json({
+      user: { ...result.rows[0], is_premium: premium.is_premium, premium_until: premium.premium_until },
+    });
   } catch (err) {
     console.error('Me error:', err);
     return res.status(500).json({ error: 'Erreur serveur' });
   }
 }
 
-module.exports = { register, login, me };
+async function updateProfile(req, res) {
+  try {
+    const { nom } = req.body;
+
+    if (typeof nom !== 'string' || nom.trim().length === 0) {
+      return res.status(400).json({ error: 'Le pseudo ne peut pas être vide' });
+    }
+    const nomClean = nom.trim();
+    if (nomClean.length > 100) {
+      return res.status(400).json({ error: 'Le pseudo ne peut pas dépasser 100 caractères' });
+    }
+
+    const result = await db.query(
+      `UPDATE utilisateurs
+       SET nom = $1, modifie_le = NOW()
+       WHERE id_utilisateur = $2
+       RETURNING id_utilisateur, email, nom, avatar_url, mensurations, cree_le`,
+      [nomClean, req.user.id_utilisateur]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Utilisateur introuvable' });
+    }
+
+    return res.json({ user: result.rows[0] });
+  } catch (err) {
+    console.error('[updateProfile] error:', err);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+}
+
+module.exports = { register, login, me, updateProfile };

@@ -5,6 +5,13 @@ import { fetchCategories, fetchMarques, fetchCouleurs } from '../api/referentiel
 let cachedData = null;
 let cachedPromise = null;
 
+// Vide le cache module — à appeler au logout pour ne pas fuiter les
+// référentiels (marques, propres à l'utilisateur) vers un autre compte.
+export function resetReferentiels() {
+  cachedData = null;
+  cachedPromise = null;
+}
+
 export function useReferentiels() {
   const [data, setData] = useState(cachedData);
   const [loading, setLoading] = useState(!cachedData);

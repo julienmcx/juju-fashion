@@ -1,6 +1,7 @@
 const db = require('../db');
 const { runTryOn } = require('../services/vton');
 const { mapCategoryForVTON, isVTONSupported } = require('../services/categoryMapping');
+const { isPremium } = require('../services/premium');
 
 const DAILY_LIMIT = 2;
 const REQUIRED_ANGLES = ['face', 'profil_droit', 'dos', 'profil_gauche'];
@@ -58,7 +59,8 @@ async function createTryOn(req, res) {
     const photosMap = {};
     photosResult.rows.forEach((p) => { photosMap[p.angle] = p.image_url; });
 
-    // 3. Rate-limit
+    // 3. Rate-limit (illimité pour les abonnés Premium)
+    const premium = await isPremium(req.user.id_utilisateur);
     const todayResult = await db.query(
       `SELECT COUNT(*) FROM essayages_log
        WHERE id_utilisateur = $1 AND cree_le > NOW() - INTERVAL '24 hours'`,
@@ -66,9 +68,9 @@ async function createTryOn(req, res) {
     );
     const usedToday = parseInt(todayResult.rows[0].count, 10);
 
-    if (usedToday >= DAILY_LIMIT) {
+    if (!premium && usedToday >= DAILY_LIMIT) {
       return res.status(429).json({
-        error: `Limite quotidienne atteinte (${DAILY_LIMIT} essayages / 24h). Réessaie plus tard.`,
+        error: `Limite quotidienne atteinte (${DAILY_LIMIT} essayages / 24h). Passe en Premium pour des essayages illimités.`,
         used: usedToday,
         limit: DAILY_LIMIT,
       });
@@ -99,8 +101,13 @@ async function createTryOn(req, res) {
     const results = settled.filter((r) => r.success);
     const errors = settled.filter((r) => !r.success);
 
-    // 5. Insert dans essayages_log avec URLs FASHN éphémères
-    const statut = errors.length === 0 ? 'success' : (results.length === 0 ? 'error' : 'partial');
+    // 5. Si tous les angles ont échoué : on NE consomme PAS le quota (aucune insertion).
+    if (results.length === 0) {
+      return res.status(502).json({ error: 'Tous les angles ont échoué côté service IA.', errors });
+    }
+
+    // Insert dans essayages_log avec URLs FASHN éphémères
+    const statut = errors.length === 0 ? 'success' : 'partial';
 
     const urlByAngle = {};
     results.forEach((r) => { urlByAngle[r.angle] = r.image_url; });
@@ -123,10 +130,6 @@ async function createTryOn(req, res) {
     );
     const idEssayage = insertResult.rows[0].id_essayage;
 
-    if (results.length === 0) {
-      return res.status(502).json({ error: 'Tous les angles ont échoué côté service IA.', errors });
-    }
-
     return res.json({
       id_essayage: idEssayage,
       article: {
@@ -137,7 +140,7 @@ async function createTryOn(req, res) {
       },
       results: results.map((r) => ({ angle: r.angle, image_url: r.image_url })),
       errors: errors.map((e) => ({ angle: e.angle, message: e.message })),
-      stats: { used_today: usedToday + 1, daily_limit: DAILY_LIMIT },
+      stats: { used_today: usedToday + 1, daily_limit: premium ? null : DAILY_LIMIT, unlimited: premium },
     });
   } catch (err) {
     console.error('[VTON] Erreur générale:', err);
@@ -147,14 +150,18 @@ async function createTryOn(req, res) {
 
 async function getQuota(req, res) {
   try {
+    const premium = await isPremium(req.user.id_utilisateur);
     const result = await db.query(
       `SELECT COUNT(*) FROM essayages_log
        WHERE id_utilisateur = $1 AND cree_le > NOW() - INTERVAL '24 hours'`,
       [req.user.id_utilisateur]
     );
     const used = parseInt(result.rows[0].count, 10);
+    if (premium) {
+      return res.json({ used, limit: null, remaining: null, unlimited: true });
+    }
     return res.json({
-      used, limit: DAILY_LIMIT, remaining: Math.max(0, DAILY_LIMIT - used),
+      used, limit: DAILY_LIMIT, remaining: Math.max(0, DAILY_LIMIT - used), unlimited: false,
     });
   } catch (err) {
     console.error('[VTON] getQuota error:', err);

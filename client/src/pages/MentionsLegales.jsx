@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import LegalLayout, { LegalSection } from '../components/LegalLayout';
 
 export default function MentionsLegales() {
@@ -49,7 +50,7 @@ export default function MentionsLegales() {
       <LegalSection title="Données personnelles">
         <p>
           Le traitement de tes données personnelles est détaillé dans notre{' '}
-          <a href="/confidentialite" className="text-juju-dore hover:underline">Politique de confidentialité</a>.
+          <Link to="/confidentialite" className="text-juju-dore hover:underline">Politique de confidentialité</Link>.
         </p>
       </LegalSection>
     </LegalLayout>

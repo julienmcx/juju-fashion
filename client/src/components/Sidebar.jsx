@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { Shirt, UserSquare, User, LogOut, Sparkles, Camera } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import JujuLogo from './JujuLogo';
@@ -17,9 +17,9 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 flex-col z-20 px-4 py-7 bg-juju-light-bg/80 dark:bg-juju-noir/70 backdrop-blur-xl border-r border-juju-light-bordure dark:border-juju-bordure">
       <div className="px-2 mb-8">
-        <a href="/" aria-label="Retour à l'accueil" className="inline-block">
+        <Link to="/garde-robe" aria-label="Accueil" className="inline-block">
           <JujuLogo className="text-[2rem]" />
-        </a>
+        </Link>
       </div>
       <Button to="/ajout" icon={Camera} fullWidth className="mb-6">
         Ajouter un article

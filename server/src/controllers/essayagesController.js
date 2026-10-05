@@ -90,7 +90,7 @@ async function saveEssayage(req, res) {
          image_url_dos = $3,
          image_url_profil_gauche = $4,
          saved = TRUE
-       WHERE id_essayage = $5
+       WHERE id_essayage = $5 AND id_utilisateur = $6
        RETURNING *`,
             [
                 updatedUrls.image_url_face,
@@ -98,6 +98,7 @@ async function saveEssayage(req, res) {
                 updatedUrls.image_url_dos,
                 updatedUrls.image_url_profil_gauche,
                 id,
+                req.user.id_utilisateur,
             ]
         );
 

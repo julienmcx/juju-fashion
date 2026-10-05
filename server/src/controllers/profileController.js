@@ -2,88 +2,96 @@ const db = require('../db');
 const fs = require('fs');
 const path = require('path');
 const { UPLOAD_DIR } = require('../middlewares/upload');
+const { getPremiumState } = require('../services/premium');
 
 async function getStats(req, res) {
   const userId = req.user.id_utilisateur;
   try {
-    const photosResult = await db.query(
-      `SELECT angle FROM photos_avatar
-       WHERE id_utilisateur = $1 AND angle = ANY($2)`,
-      [userId, ['face', 'profil_droit', 'dos', 'profil_gauche']]
-    );
+    const [
+      photosResult,
+      userResult,
+      articlesResult,
+      parCategorieResult,
+      essayagesResult,
+      favorisResult,
+      marqueTopResult,
+      couleurTopResult,
+      articleEssayeResult,
+      premium,
+    ] = await Promise.all([
+      db.query(
+        `SELECT angle FROM photos_avatar
+         WHERE id_utilisateur = $1 AND angle = ANY($2)`,
+        [userId, ['face', 'profil_droit', 'dos', 'profil_gauche']]
+      ),
+      db.query(
+        `SELECT avatar_url FROM utilisateurs WHERE id_utilisateur = $1`,
+        [userId]
+      ),
+      db.query(
+        `SELECT
+           COUNT(*)::int AS total,
+           COALESCE(SUM(prix), 0)::numeric AS valeur_totale
+         FROM articles WHERE id_utilisateur = $1`,
+        [userId]
+      ),
+      db.query(
+        `SELECT c.nom AS categorie, c.type AS type, COUNT(*)::int AS count
+         FROM articles a
+         LEFT JOIN categories c ON c.id_categorie = a.id_categorie
+         WHERE a.id_utilisateur = $1
+         GROUP BY c.nom, c.type
+         ORDER BY count DESC, c.nom`,
+        [userId]
+      ),
+      db.query(
+        `SELECT
+           COUNT(*)::int AS total,
+           COUNT(*) FILTER (WHERE cree_le > NOW() - INTERVAL '24 hours')::int AS today
+         FROM essayages_log WHERE id_utilisateur = $1`,
+        [userId]
+      ),
+      db.query(
+        `SELECT COUNT(*)::int AS count FROM articles WHERE id_utilisateur = $1 AND favori = TRUE`,
+        [userId]
+      ),
+      db.query(
+        `SELECT m.nom_marque AS nom, COUNT(*)::int AS count
+         FROM articles a
+         JOIN marques m ON m.id_marque = a.id_marque
+         WHERE a.id_utilisateur = $1
+         GROUP BY m.nom_marque
+         ORDER BY count DESC
+         LIMIT 1`,
+        [userId]
+      ),
+      db.query(
+        `SELECT co.nom, co.code_hex, COUNT(*)::int AS count
+         FROM articles_couleurs ac
+         JOIN articles a ON a.id_article = ac.id_article
+         JOIN couleurs co ON co.id_couleur = ac.id_couleur
+         WHERE a.id_utilisateur = $1
+         GROUP BY co.nom, co.code_hex
+         ORDER BY count DESC
+         LIMIT 1`,
+        [userId]
+      ),
+      db.query(
+        `SELECT a.id_article, a.nom, a.image_url, COUNT(*)::int AS count
+         FROM essayages_log e
+         JOIN articles a ON a.id_article = e.id_article
+         WHERE e.id_utilisateur = $1
+         GROUP BY a.id_article, a.nom, a.image_url
+         HAVING COUNT(*) >= 2
+         ORDER BY count DESC
+         LIMIT 1`,
+        [userId]
+      ),
+      getPremiumState(userId),
+    ]);
+
     const avatarComplet = photosResult.rows.length === 4;
-
-    const userResult = await db.query(
-      `SELECT avatar_url FROM utilisateurs WHERE id_utilisateur = $1`,
-      [userId]
-    );
     const avatarUrl = userResult.rows[0]?.avatar_url || null;
-
-    const articlesResult = await db.query(
-      `SELECT
-         COUNT(*)::int AS total,
-         COALESCE(SUM(prix), 0)::numeric AS valeur_totale
-       FROM articles WHERE id_utilisateur = $1`,
-      [userId]
-    );
-
-    const parCategorieResult = await db.query(
-      `SELECT c.nom AS categorie, c.type AS type, COUNT(*)::int AS count
-       FROM articles a
-       LEFT JOIN categories c ON c.id_categorie = a.id_categorie
-       WHERE a.id_utilisateur = $1
-       GROUP BY c.nom, c.type
-       ORDER BY count DESC, c.nom`,
-      [userId]
-    );
-
-    const essayagesResult = await db.query(
-      `SELECT
-         COUNT(*)::int AS total,
-         COUNT(*) FILTER (WHERE cree_le > NOW() - INTERVAL '24 hours')::int AS today
-       FROM essayages_log WHERE id_utilisateur = $1`,
-      [userId]
-    );
-
-    const favorisResult = await db.query(
-      `SELECT COUNT(*)::int AS count FROM articles WHERE id_utilisateur = $1 AND favori = TRUE`,
-      [userId]
-    );
-
-    const marqueTopResult = await db.query(
-      `SELECT m.nom_marque AS nom, COUNT(*)::int AS count
-       FROM articles a
-       JOIN marques m ON m.id_marque = a.id_marque
-       WHERE a.id_utilisateur = $1
-       GROUP BY m.nom_marque
-       ORDER BY count DESC
-       LIMIT 1`,
-      [userId]
-    );
-
-    const couleurTopResult = await db.query(
-      `SELECT co.nom, co.code_hex, COUNT(*)::int AS count
-       FROM articles_couleurs ac
-       JOIN articles a ON a.id_article = ac.id_article
-       JOIN couleurs co ON co.id_couleur = ac.id_couleur
-       WHERE a.id_utilisateur = $1
-       GROUP BY co.nom, co.code_hex
-       ORDER BY count DESC
-       LIMIT 1`,
-      [userId]
-    );
-
-    const articleEssayeResult = await db.query(
-      `SELECT a.id_article, a.nom, a.image_url, COUNT(*)::int AS count
-       FROM essayages_log e
-       JOIN articles a ON a.id_article = e.id_article
-       WHERE e.id_utilisateur = $1
-       GROUP BY a.id_article, a.nom, a.image_url
-       ORDER BY count DESC
-       LIMIT 1`,
-      [userId]
-    );
-
     const articles = articlesResult.rows[0];
     const essayages = essayagesResult.rows[0];
 
@@ -100,7 +108,12 @@ async function getStats(req, res) {
       essayages: {
         total: essayages.total,
         today: essayages.today,
-        daily_limit: 2,
+        daily_limit: premium.is_premium ? null : 2,
+        unlimited: premium.is_premium,
+      },
+      premium: {
+        is_premium: premium.is_premium,
+        premium_until: premium.premium_until,
       },
       insights: {
         favoris_count: favorisResult.rows[0]?.count || 0,

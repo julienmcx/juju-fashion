@@ -34,6 +34,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/mentions-legales" element={<MentionsLegales />} />
+          <Route path="/confidentialite" element={<Confidentialite />} />
 
           <Route element={<ProtectedLayout />}>
             <Route path="/articles/:id/essai" element={<ArticleEssai />} />
@@ -43,10 +45,8 @@ function App() {
             <Route path="/profil" element={<Profil />} />
             <Route path="/articles/:id" element={<ArticleDetail />} />
             <Route path="/articles/:id/edit" element={<ArticleEdit />} />
-            <Route path="/essayages" element={<ProtectedRoute><Layout><Essayages /></Layout></ProtectedRoute>} />
-            <Route path="/essayages/:id" element={<ProtectedRoute><Layout><EssayageDetail /></Layout></ProtectedRoute>} />
-            <Route path="/mentions-legales" element={<MentionsLegales />} />
-            <Route path="/confidentialite" element={<Confidentialite />} />
+            <Route path="/essayages" element={<Essayages />} />
+            <Route path="/essayages/:id" element={<EssayageDetail />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/garde-robe" replace />} />

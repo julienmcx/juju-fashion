@@ -106,7 +106,10 @@ async function listArticles(req, res) {
       )`);
     }
 
-    values.push(limit, offset);
+    // Bornage des paramètres de pagination (évite un 500 sur ?limit=abc et les valeurs démesurées)
+    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 100);
+    const safeOffset = Math.max(parseInt(offset, 10) || 0, 0);
+    values.push(safeLimit, safeOffset);
 
     const sql = `
       SELECT

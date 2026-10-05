@@ -16,13 +16,15 @@ export default function ArticleDetail() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
+    let active = true;
     setLoading(true);
     fetchArticle(id)
-      .then((data) => setArticle(data.article))
+      .then((data) => { if (active) setArticle(data.article); })
       .catch((err) => {
-        setError(err.response?.status === 404 ? 'not-found' : 'load-error');
+        if (active) setError(err.response?.status === 404 ? 'not-found' : 'load-error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [id]);
 
   const handleToggleFavori = async () => {
