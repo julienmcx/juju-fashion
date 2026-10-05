@@ -139,7 +139,7 @@ export default function Profil() {
         <div className="flex-1 min-w-0">
           <Eyebrow>Mon profil</Eyebrow>
           <h1 className="font-display text-3xl md:text-4xl truncate mt-1.5">
-            {user?.nom || user?.email?.split('@')[0]}
+            {user?.email?.split('@')[0]}
           </h1>
           <p className="text-sm text-juju-light-texte-mute dark:text-juju-texte-mute truncate">
             {user?.email}
