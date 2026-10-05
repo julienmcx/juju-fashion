@@ -12,6 +12,7 @@ import { useTheme } from '../hooks/useTheme';
 import { Card, Eyebrow, SectionLabel, Button } from '../components/ui';
 import { useToast } from '../contexts/ToastContext';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { ADMIN_EMAIL } from '../config/admin';
 
 export default function Profil() {
   const { user, logout } = useAuth();
@@ -255,19 +256,21 @@ export default function Profil() {
         </div>
       </section>
 
-      {/* Présentation de soutenance */}
-      <section className="mb-7">
-        <SectionLabel className="mb-4">Présentation</SectionLabel>
-        <a
-          href="/soutenance.html"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-semibold text-white bg-gradient-violet-gold shadow-violet-sm hover:-translate-y-0.5 transition-transform"
-        >
-          <Sparkles size={16} />
-          Ouvrir ma présentation
-        </a>
-      </section>
+      {/* Présentation de soutenance (réservée à l'admin) */}
+      {user?.email === ADMIN_EMAIL && (
+        <section className="mb-7">
+          <SectionLabel className="mb-4">Présentation</SectionLabel>
+          <a
+            href="/soutenance.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-semibold text-white bg-gradient-violet-gold shadow-violet-sm hover:-translate-y-0.5 transition-transform"
+          >
+            <Sparkles size={16} />
+            Ouvrir ma présentation
+          </a>
+        </section>
+      )}
 
       {/* Déconnexion */}
       <Button variant="danger-soft" size="lg" fullWidth icon={LogOut} onClick={logout}>
