@@ -21,6 +21,7 @@ export default function ArticleEdit() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let active = true;
     Promise.all([
       fetchArticle(id),
       fetchCategories(),
@@ -29,6 +30,7 @@ export default function ArticleEdit() {
       fetchMarques(),
     ])
       .then(([articleData, cats, cols, mats, mqs]) => {
+        if (!active) return;
         setArticle(articleData.article);
         setCategories(cats);
         setCouleurs(cols);
@@ -36,9 +38,10 @@ export default function ArticleEdit() {
         setMarques(mqs);
       })
       .catch((err) => {
-        setError(err.response?.status === 404 ? 'not-found' : 'load-error');
+        if (active) setError(err.response?.status === 404 ? 'not-found' : 'load-error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [id]);
 
   const handleSubmit = async (payload) => {

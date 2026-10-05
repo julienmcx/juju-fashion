@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles, ChevronLeft, ChevronRight, AlertCircle, Loader2, RefreshCw, BookmarkPlus, Check, Crown } from 'lucide-react';
 import { fetchArticle } from '../api/articles';
@@ -6,6 +6,7 @@ import { fetchAvatarPhotos } from '../api/avatar';
 import { createTryOn, fetchQuota } from '../api/tryon';
 import { saveEssayage } from '../api/essayages';
 import { startCheckout } from '../api/billing';
+import { useToast } from '../contexts/ToastContext';
 import { Button, Eyebrow } from '../components/ui';
 
 const BACK_LINK =
@@ -21,6 +22,8 @@ const ANGLE_LABELS = {
 
 export default function ArticleEssai() {
   const { id } = useParams();
+  const toast = useToast();
+  const launchingRef = useRef(false);
 
   // Données de pré-vol
   const [article, setArticle] = useState(null);
@@ -36,24 +39,29 @@ export default function ArticleEssai() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
+    let active = true;
     Promise.all([
       fetchArticle(id),
       fetchAvatarPhotos(),
       fetchQuota(),
     ])
       .then(([articleData, photosData, quotaData]) => {
+        if (!active) return;
         setArticle(articleData.article);
         const angles = photosData.photos.map((p) => p.angle);
         setAvatarReady(REQUIRED_ANGLES.every((a) => angles.includes(a)));
         setQuota(quotaData);
       })
       .catch((err) => {
-        setPreErr(err.response?.status === 404 ? 'Article introuvable.' : 'Erreur de chargement.');
+        if (active) setPreErr(err.response?.status === 404 ? 'Article introuvable.' : 'Erreur de chargement.');
       })
-      .finally(() => setLoadingPrechecks(false));
+      .finally(() => { if (active) setLoadingPrechecks(false); });
+    return () => { active = false; };
   }, [id]);
 
   const handleLaunch = async () => {
+    if (launchingRef.current) return; // anti double-clic (le path essayage consomme le quota / FASHN)
+    launchingRef.current = true;
     setStep('generating');
     setTryonError('');
     try {
@@ -64,6 +72,8 @@ export default function ArticleEssai() {
     } catch (err) {
       setTryonError(err.response?.data?.error || 'Erreur durant l\'essayage.');
       setStep('error');
+    } finally {
+      launchingRef.current = false;
     }
   };
 
@@ -111,7 +121,7 @@ export default function ArticleEssai() {
       const { url } = await startCheckout();
       window.location.href = url;
     } catch (err) {
-      alert(err.response?.data?.error || 'Paiement indisponible pour le moment.');
+      toast.error(err.response?.data?.error || 'Paiement indisponible pour le moment.');
     }
   };
 

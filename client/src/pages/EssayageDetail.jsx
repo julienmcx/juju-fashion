@@ -24,10 +24,12 @@ export default function EssayageDetail() {
     const toast = useToast();
 
     useEffect(() => {
+        let active = true;
         fetchEssayage(id)
-            .then((data) => setEssayage(data.essayage))
-            .catch((err) => setError(err.response?.data?.error || 'Essayage introuvable'))
-            .finally(() => setLoading(false));
+            .then((data) => { if (active) setEssayage(data.essayage); })
+            .catch((err) => { if (active) setError(err.response?.data?.error || 'Essayage introuvable'); })
+            .finally(() => { if (active) setLoading(false); });
+        return () => { active = false; };
     }, [id]);
 
     const handleDelete = async () => {
