@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { Button, SectionLabel } from './ui';
 import { useToast } from '../contexts/ToastContext';
 import { Save, Plus, Check, Trash2 } from 'lucide-react';
@@ -45,7 +45,6 @@ export default function ArticleForm({
     initialValues.matieres_with_pct || []
   );
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [showNewBrand, setShowNewBrand] = useState(false);
   const [newBrandName, setNewBrandName] = useState('');
   const [creatingBrand, setCreatingBrand] = useState(false);
@@ -95,26 +94,6 @@ export default function ArticleForm({
   const [deletingBrand, setDeletingBrand] = useState(false);
   const [brandToDelete, setBrandToDelete] = useState(null); // { id_marque, nom_marque } | null
 
-  const handleDeleteBrand = async () => {
-    if (!form.id_marque) return;
-    const marque = referentiels.marques.find((m) => m.id_marque === form.id_marque);
-    const nom = marque?.nom_marque || 'cette marque';
-    if (!window.confirm(
-      `Supprimer la marque « ${nom} » ?\nLes articles qui l'utilisaient n'auront plus de marque.`
-    )) return;
-    setDeletingBrand(true);
-    try {
-      await deleteMarque(form.id_marque);
-      setMarques((prev) => prev.filter((m) => m.id_marque !== form.id_marque));
-      setField('id_marque', '');
-      toast.success('Marque supprimée.');
-    } catch {
-      toast.error('Suppression de la marque impossible.');
-    } finally {
-      setDeletingBrand(false);
-    }
-  };
-
   const askDeleteBrand = () => {
     if (!form.id_marque) return;
     const marque = referentiels.marques.find((m) => m.id_marque === form.id_marque);
@@ -141,7 +120,6 @@ export default function ArticleForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
     try {
       const payload = {
         ...form,
@@ -421,12 +399,6 @@ export default function ArticleForm({
         </div>
       </Section>
 
-      {error && (
-        <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-          {error}
-        </p>
-      )}
-
       <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-5 border-t border-juju-light-bordure dark:border-juju-bordure">
         {onCancel && (
           <Button type="button" variant="secondary" onClick={onCancel}>
@@ -467,13 +439,15 @@ function Section({ title, children }) {
 }
 
 function Input({ label, value, onChange, type = 'text', required, placeholder, step }) {
+  const id = useId();
   return (
     <div>
-      <label className="block text-sm font-medium text-juju-light-texte-mute dark:text-juju-texte-mute mb-1.5">
+      <label htmlFor={id} className="block text-sm font-medium text-juju-light-texte-mute dark:text-juju-texte-mute mb-1.5">
         {label}
         {required && <span className="text-juju-violet dark:text-juju-dore ml-1">*</span>}
       </label>
       <input
+        id={id}
         type={type}
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value)}
@@ -487,13 +461,15 @@ function Input({ label, value, onChange, type = 'text', required, placeholder, s
 }
 
 function Select({ label, value, onChange, options, required }) {
+  const id = useId();
   return (
     <div>
-      <label className="block text-sm font-medium text-juju-light-texte-mute dark:text-juju-texte-mute mb-1.5">
+      <label htmlFor={id} className="block text-sm font-medium text-juju-light-texte-mute dark:text-juju-texte-mute mb-1.5">
         {label}
         {required && <span className="text-juju-violet dark:text-juju-dore ml-1">*</span>}
       </label>
       <select
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
