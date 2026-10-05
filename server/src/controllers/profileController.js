@@ -2,6 +2,7 @@ const db = require('../db');
 const fs = require('fs');
 const path = require('path');
 const { UPLOAD_DIR } = require('../middlewares/upload');
+const { getPremiumState } = require('../services/premium');
 
 async function getStats(req, res) {
   const userId = req.user.id_utilisateur;
@@ -87,6 +88,7 @@ async function getStats(req, res) {
 
     const articles = articlesResult.rows[0];
     const essayages = essayagesResult.rows[0];
+    const premium = await getPremiumState(userId);
 
     return res.json({
       avatar: {
@@ -101,7 +103,12 @@ async function getStats(req, res) {
       essayages: {
         total: essayages.total,
         today: essayages.today,
-        daily_limit: 2,
+        daily_limit: premium.is_premium ? null : 2,
+        unlimited: premium.is_premium,
+      },
+      premium: {
+        is_premium: premium.is_premium,
+        premium_until: premium.premium_until,
       },
       insights: {
         favoris_count: favorisResult.rows[0]?.count || 0,

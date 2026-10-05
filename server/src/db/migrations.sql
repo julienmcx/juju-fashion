@@ -29,3 +29,15 @@ CREATE INDEX IF NOT EXISTS idx_essayages_log_saved ON essayages_log (
 )
 WHERE
     saved = TRUE;
+
+-- =====================================================================
+-- Premium / abonnement Stripe (essayages illimités)
+-- =====================================================================
+ALTER TABLE utilisateurs
+    ADD COLUMN IF NOT EXISTS stripe_customer_id     TEXT,
+    ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT,
+    ADD COLUMN IF NOT EXISTS subscription_status    VARCHAR(30),  -- active, trialing, past_due, canceled...
+    ADD COLUMN IF NOT EXISTS premium_until          TIMESTAMPTZ;  -- fin de période payée (current_period_end)
+
+CREATE INDEX IF NOT EXISTS idx_utilisateurs_stripe_customer
+    ON utilisateurs (stripe_customer_id);
