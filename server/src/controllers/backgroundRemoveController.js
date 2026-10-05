@@ -12,9 +12,10 @@ async function removeBackground(req, res) {
     return res.json({ url: cleanUrl });
   } catch (err) {
     console.error('[BG-REMOVE] Erreur:', err.message);
-    return res.status(502).json({
-      error: 'Suppression du fond impossible.',
-      detail: err.message,
+    // Fichier source introuvable = faute client (400) ; sinon échec service IA (502).
+    const notFound = /introuvable/i.test(err.message || '');
+    return res.status(notFound ? 400 : 502).json({
+      error: notFound ? 'Image introuvable.' : 'Suppression du fond impossible. Réessaie plus tard.',
     });
   }
 }

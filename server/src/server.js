@@ -6,6 +6,16 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Fail-fast : sans JWT_SECRET, toute l'authentification est cassée/non sécurisée.
+if (!process.env.JWT_SECRET) {
+  console.error('[CONFIG] JWT_SECRET manquant — arrêt. Définis-le dans ton .env.');
+  process.exit(1);
+}
+// Avertissements non bloquants pour les variables importantes (surtout en prod).
+for (const v of ['DB_HOST', 'DB_NAME', 'PUBLIC_URL']) {
+  if (!process.env[v]) console.warn(`[CONFIG] Variable ${v} absente — valeurs par défaut (dev).`);
+}
+
 app.use(cors());
 
 // Webhook Stripe : doit recevoir le corps BRUT (avant express.json) pour
@@ -17,7 +27,13 @@ app.post(
 );
 
 app.use(express.json({ limit: '10mb' }));
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
+  setHeaders: (res) => {
+    // Empêche le navigateur d'interpréter un upload comme HTML/JS (anti content-sniffing).
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.set('Content-Disposition', 'inline');
+  },
+}));
 
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
@@ -55,6 +71,16 @@ app.use('/api/couleurs', couleursRoutes);
 app.use('/api/matieres', matieresRoutes);
 app.use('/api/marques', marquesRoutes);
 app.use('/api/essayages', require('./routes/essayages'));
+
+// Gestionnaire d'erreurs global (erreurs Multer & co.) -> JSON propre plutôt qu'une page HTML 500.
+app.use((err, req, res, next) => {
+  if (!err) return next();
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ error: 'Fichier trop volumineux (max 10 MB)' });
+  }
+  console.error('[ERROR]', err.message);
+  return res.status(400).json({ error: err.message || 'Requête invalide' });
+});
 
 app.listen(PORT, () => {
   console.log(`Juju API running on http://localhost:${PORT}`);
