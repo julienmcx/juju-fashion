@@ -8,7 +8,7 @@ async function listMarques(req, res) {
       'SELECT id_marque, nom_marque FROM marques WHERE id_utilisateur = $1 ORDER BY nom_marque ASC',
       [userId]
     );
-    res.json(result.rows);
+    res.json({ marques: result.rows });
   } catch (err) {
     console.error('listMarques:', err);
     res.status(500).json({ error: 'Erreur lors de la récupération des marques.' });
@@ -30,21 +30,21 @@ async function createMarque(req, res) {
       [userId, nom]
     );
     if (existing.rows.length > 0) {
-      return res.status(200).json(existing.rows[0]);
+      return res.status(200).json({ marque: existing.rows[0] });
     }
 
     const result = await db.query(
       'INSERT INTO marques (nom_marque, id_utilisateur) VALUES ($1, $2) RETURNING id_marque, nom_marque',
       [nom, userId]
     );
-    res.status(201).json(result.rows[0]);
+    res.status(201).json({ marque: result.rows[0] });
   } catch (err) {
     if (err.code === '23505') { // doublon (course entre 2 requêtes) -> renvoie l'existante
       const again = await db.query(
         'SELECT id_marque, nom_marque FROM marques WHERE id_utilisateur = $1 AND LOWER(nom_marque) = LOWER($2)',
         [req.user.id_utilisateur, (req.body.nom_marque || req.body.nom || '').trim()]
       );
-      if (again.rows.length > 0) return res.status(200).json(again.rows[0]);
+      if (again.rows.length > 0) return res.status(200).json({ marque: again.rows[0] });
     }
     console.error('createMarque:', err);
     res.status(500).json({ error: 'Erreur lors de la création de la marque.' });
