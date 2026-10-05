@@ -101,8 +101,13 @@ async function createTryOn(req, res) {
     const results = settled.filter((r) => r.success);
     const errors = settled.filter((r) => !r.success);
 
-    // 5. Insert dans essayages_log avec URLs FASHN éphémères
-    const statut = errors.length === 0 ? 'success' : (results.length === 0 ? 'error' : 'partial');
+    // 5. Si tous les angles ont échoué : on NE consomme PAS le quota (aucune insertion).
+    if (results.length === 0) {
+      return res.status(502).json({ error: 'Tous les angles ont échoué côté service IA.', errors });
+    }
+
+    // Insert dans essayages_log avec URLs FASHN éphémères
+    const statut = errors.length === 0 ? 'success' : 'partial';
 
     const urlByAngle = {};
     results.forEach((r) => { urlByAngle[r.angle] = r.image_url; });
@@ -124,10 +129,6 @@ async function createTryOn(req, res) {
       ]
     );
     const idEssayage = insertResult.rows[0].id_essayage;
-
-    if (results.length === 0) {
-      return res.status(502).json({ error: 'Tous les angles ont échoué côté service IA.', errors });
-    }
 
     return res.json({
       id_essayage: idEssayage,

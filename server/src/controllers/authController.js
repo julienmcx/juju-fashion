@@ -92,7 +92,7 @@ async function login(req, res) {
       `SELECT id_utilisateur, email, mot_de_passe_hash, nom
        FROM utilisateurs
        WHERE email = $1`,
-      [email.toLowerCase()]
+      [email.trim().toLowerCase()]
     );
 
     if (result.rows.length === 0) {

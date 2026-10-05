@@ -11,7 +11,7 @@ async function listMarques(req, res) {
     res.json(result.rows);
   } catch (err) {
     console.error('listMarques:', err);
-    res.status(500).json({ message: 'Erreur lors de la récupération des marques.' });
+    res.status(500).json({ error: 'Erreur lors de la récupération des marques.' });
   }
 }
 
@@ -21,7 +21,7 @@ async function createMarque(req, res) {
     const userId = req.user.id_utilisateur;
     const nom = (req.body.nom_marque || req.body.nom || '').trim();
     if (!nom) {
-      return res.status(400).json({ message: 'Le nom de la marque est requis.' });
+      return res.status(400).json({ error: 'Le nom de la marque est requis.' });
     }
 
     // Anti-doublon pour CE user (insensible à la casse) : renvoie l'existante
@@ -47,7 +47,7 @@ async function createMarque(req, res) {
       if (again.rows.length > 0) return res.status(200).json(again.rows[0]);
     }
     console.error('createMarque:', err);
-    res.status(500).json({ message: 'Erreur lors de la création de la marque.' });
+    res.status(500).json({ error: 'Erreur lors de la création de la marque.' });
   }
 }
 
@@ -62,12 +62,12 @@ async function deleteMarque(req, res) {
       [req.params.id, userId]
     );
     if (result.rowCount === 0) {
-      return res.status(404).json({ message: 'Marque introuvable.' });
+      return res.status(404).json({ error: 'Marque introuvable.' });
     }
     return res.status(204).send();
   } catch (err) {
     console.error('deleteMarque:', err);
-    return res.status(500).json({ message: 'Erreur lors de la suppression de la marque.' });
+    return res.status(500).json({ error: 'Erreur lors de la suppression de la marque.' });
   }
 }
 
