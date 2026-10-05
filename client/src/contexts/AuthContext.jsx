@@ -37,8 +37,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Met à jour le profil en mémoire (ex : après changement de pseudo)
+  const updateUser = (newUserData) => {
+    setUser((prev) => ({ ...prev, ...newUserData }));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

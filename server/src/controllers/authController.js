@@ -145,4 +145,35 @@ async function me(req, res) {
   }
 }
 
-module.exports = { register, login, me };
+async function updateProfile(req, res) {
+  try {
+    const { nom } = req.body;
+
+    if (typeof nom !== 'string' || nom.trim().length === 0) {
+      return res.status(400).json({ error: 'Le pseudo ne peut pas être vide' });
+    }
+    const nomClean = nom.trim();
+    if (nomClean.length > 100) {
+      return res.status(400).json({ error: 'Le pseudo ne peut pas dépasser 100 caractères' });
+    }
+
+    const result = await db.query(
+      `UPDATE utilisateurs
+       SET nom = $1, modifie_le = NOW()
+       WHERE id_utilisateur = $2
+       RETURNING id_utilisateur, email, nom, avatar_url, mensurations, cree_le`,
+      [nomClean, req.user.id_utilisateur]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Utilisateur introuvable' });
+    }
+
+    return res.json({ user: result.rows[0] });
+  } catch (err) {
+    console.error('[updateProfile] error:', err);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+}
+
+module.exports = { register, login, me, updateProfile };

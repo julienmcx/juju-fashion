@@ -2,10 +2,10 @@ import { useEffect, useState, useRef } from 'react';
 import {
   Mail, User as UserIcon, LogOut, Sparkles, Shirt, Wallet,
   Camera, Settings as SettingsIcon, Sun, Moon, Loader2, X,
-  Heart, Tag, Palette, TrendingUp,
+  Heart, Tag, Palette, TrendingUp, Pencil, Check,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchProfileStats, updateAvatar } from '../api/profile';
+import { fetchProfileStats, updateAvatar, updateProfile } from '../api/profile';
 import { uploadImage } from '../api/upload';
 import { useDensity } from '../hooks/useDensity';
 import { useTheme } from '../hooks/useTheme';
@@ -15,7 +15,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { ADMIN_EMAIL } from '../config/admin';
 
 export default function Profil() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [density, setDensity] = useDensity();
   const [theme, setTheme] = useTheme();
   const [stats, setStats] = useState(null);
@@ -66,6 +66,17 @@ export default function Profil() {
       toast.error('Suppression impossible.');
     } finally {
       setUploadingAvatar(false);
+    }
+  };
+
+  const handleSavePseudo = async (nom) => {
+    try {
+      const { user: updated } = await updateProfile({ nom });
+      updateUser(updated);
+      toast.success('Pseudo mis à jour');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Impossible de mettre à jour le pseudo');
+      throw err; // garde le mode édition ouvert
     }
   };
 
@@ -228,7 +239,7 @@ export default function Profil() {
       <section className="mb-7">
         <SectionLabel className="mb-4">Mon compte</SectionLabel>
         <div className="space-y-2.5">
-          <InfoRow icon={UserIcon} label="Pseudo" value={user?.nom || '—'} />
+          <PseudoRow value={user?.nom} onSave={handleSavePseudo} />
           <InfoRow icon={Mail} label="Email" value={user?.email} />
         </div>
       </section>
@@ -369,6 +380,88 @@ function InsightCardWide({ label, nom, image, count }) {
           {count} essayage{count > 1 ? 's' : ''}
         </p>
       </div>
+    </Card>
+  );
+}
+
+function PseudoRow({ value, onSave }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value || '');
+  const [saving, setSaving] = useState(false);
+
+  const start = () => { setDraft(value || ''); setEditing(true); };
+  const cancel = () => { if (!saving) setEditing(false); };
+  const submit = async () => {
+    const trimmed = draft.trim();
+    if (!trimmed || saving) return;
+    setSaving(true);
+    try {
+      await onSave(trimmed);
+      setEditing(false);
+    } catch {
+      // erreur déjà signalée via toast ; on garde le champ ouvert
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card className="flex items-center gap-3.5 p-4">
+      <div className="w-10 h-10 rounded-xl bg-juju-violet/10 dark:bg-juju-dore/10 flex items-center justify-center text-juju-violet dark:text-juju-dore shrink-0">
+        <UserIcon size={18} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-juju-light-texte-mute dark:text-juju-texte-mute">Pseudo</p>
+        {editing ? (
+          <input
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') submit();
+              else if (e.key === 'Escape') cancel();
+            }}
+            maxLength={100}
+            disabled={saving}
+            placeholder="Ton pseudo"
+            className="w-full bg-transparent border-b border-juju-violet dark:border-juju-dore outline-none font-semibold py-0.5 disabled:opacity-60"
+          />
+        ) : (
+          <p className="font-semibold truncate">{value || '—'}</p>
+        )}
+      </div>
+
+      {editing ? (
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={submit}
+            disabled={saving || !draft.trim()}
+            aria-label="Sauvegarder"
+            className="w-9 h-9 rounded-lg bg-gradient-violet text-white flex items-center justify-center shadow-violet-sm disabled:opacity-50 hover:-translate-y-0.5 transition-transform"
+          >
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+          </button>
+          <button
+            type="button"
+            onClick={cancel}
+            disabled={saving}
+            aria-label="Annuler"
+            className="w-9 h-9 rounded-lg border border-juju-light-bordure dark:border-juju-bordure text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-light-texte dark:hover:text-juju-texte flex items-center justify-center transition-colors disabled:opacity-50"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={start}
+          aria-label="Modifier le pseudo"
+          className="shrink-0 w-9 h-9 rounded-lg text-juju-light-texte-mute dark:text-juju-texte-mute hover:text-juju-violet dark:hover:text-juju-dore hover:bg-juju-light-bordure/50 dark:hover:bg-juju-bordure/50 flex items-center justify-center transition-colors"
+        >
+          <Pencil size={16} />
+        </button>
+      )}
     </Card>
   );
 }
