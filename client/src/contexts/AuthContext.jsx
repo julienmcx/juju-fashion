@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import apiClient from '../api/client';
+import { resetReferentiels } from '../hooks/useReferentiels';
 
 const AuthContext = createContext(null);
 
@@ -34,6 +35,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     localStorage.removeItem('juju_token');
+    resetReferentiels(); // évite de montrer les marques/référentiels du compte précédent
     setUser(null);
   };
 
